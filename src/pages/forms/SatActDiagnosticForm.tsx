@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { Button } from '../../components/ui/button';
@@ -6,8 +6,93 @@ import { Card, CardContent } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
+import { Loader2 } from 'lucide-react';
+import { useToast } from '../../components/ui/use-toast';
+import axios from 'axios';
 
 const SatActDiagnosticForm = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const [formData, setFormData] = useState({
+    parent_first_name: '',
+    parent_last_name: '',
+    parent_phone: '',
+    parent_email: '',
+    student_first_name: '',
+    student_last_name: '',
+    student_email: '',
+    school: '',
+    grade: '',
+    packages: '',
+    total_amount: 180,
+    payment_status: 'Success'
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
+  const handleRadioChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      packages: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await axios.post('https://zoffness.academy/api/enroll', formData);
+      
+      if (response.data.success) {
+        toast({
+          title: 'Success',
+          description: 'Registration submitted successfully!',
+        });
+        // Reset form
+        setFormData({
+          parent_first_name: '',
+          parent_last_name: '',
+          parent_phone: '',
+          parent_email: '',
+          student_first_name: '',
+          student_last_name: '',
+          student_email: '',
+          school: '',
+          grade: '',
+          packages: '',
+          total_amount: 180,
+          payment_status: 'Success'
+        });
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 422) {
+        // Handle validation errors
+        const validationErrors = error.response.data.errors;
+        const errorMessage = Object.values(validationErrors).flat().join('\n');
+        toast({
+          variant: 'destructive',
+          title: 'Validation Error',
+          description: errorMessage || 'Please check your form inputs.',
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to submit registration. Please try again.',
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -21,7 +106,7 @@ const SatActDiagnosticForm = () => {
 
             <Card>
               <CardContent className="p-6">
-                <form className="space-y-8">
+                <form className="space-y-8" onSubmit={handleSubmit}>
                   {/* Test Selection */}
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-college-blue-500">Test Selection</h2>
@@ -31,7 +116,7 @@ const SatActDiagnosticForm = () => {
                       <p className="text-sm text-gray-600 mt-2">Scores will be scaled and results analyzed to assess which test may be the better fit for each student. This essential first step allows students to become familiar with both tests and gain a decisive advantage before test prep begins.</p>
                     </div>
 
-                    <RadioGroup defaultValue="both">
+                    <RadioGroup defaultValue="both" onValueChange={handleRadioChange}>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="both-standard" id="both-standard" />
                         <Label htmlFor="both-standard">Full-Length Proctored Diagnostic SAT/ACT Assessment - $180</Label>
@@ -50,23 +135,45 @@ const SatActDiagnosticForm = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="parentFirstName">Parent First Name *</Label>
-                        <Input id="parentFirstName" required />
+                        <Input 
+                          id="parent_first_name" 
+                          value={formData.parent_first_name}
+                          onChange={handleInputChange}
+                          required 
+                        />
                       </div>
                       
                       <div className="space-y-2">
                         <Label htmlFor="parentLastName">Parent Last Name *</Label>
-                        <Input id="parentLastName" required />
+                        <Input 
+                          id="parent_last_name" 
+                          value={formData.parent_last_name}
+                          onChange={handleInputChange}
+                          required 
+                        />
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="parentPhone">Parent Phone *</Label>
-                      <Input id="parentPhone" type="tel" required />
+                      <Input 
+                        id="parent_phone" 
+                        type="tel" 
+                        value={formData.parent_phone}
+                        onChange={handleInputChange}
+                        required 
+                      />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="parentEmail">Parent Email *</Label>
-                      <Input id="parentEmail" type="email" required />
+                      <Input 
+                        id="parent_email" 
+                        type="email" 
+                        value={formData.parent_email}
+                        onChange={handleInputChange}
+                        required 
+                      />
                     </div>
                   </div>
 
@@ -77,36 +184,73 @@ const SatActDiagnosticForm = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="studentFirstName">Student First Name *</Label>
-                        <Input id="studentFirstName" required />
+                        <Input 
+                          id="student_first_name" 
+                          value={formData.student_first_name}
+                          onChange={handleInputChange}
+                          required 
+                        />
                       </div>
                       
                       <div className="space-y-2">
                         <Label htmlFor="studentLastName">Student Last Name *</Label>
-                        <Input id="studentLastName" required />
+                        <Input 
+                          id="student_last_name" 
+                          value={formData.student_last_name}
+                          onChange={handleInputChange}
+                          required 
+                        />
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="studentEmail">Student Email *</Label>
-                      <Input id="studentEmail" type="email" required />
+                      <Input 
+                        id="student_email" 
+                        type="email" 
+                        value={formData.student_email}
+                        onChange={handleInputChange}
+                        required 
+                      />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="school">School *</Label>
-                      <Input id="school" required />
+                      <Input 
+                        id="school" 
+                        value={formData.school}
+                        onChange={handleInputChange}
+                        required 
+                      />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="grade">Current Grade *</Label>
-                      <Input id="grade" required />
+                      <Input 
+                        id="grade" 
+                        value={formData.grade}
+                        onChange={handleInputChange}
+                        required 
+                      />
                     </div>
                   </div>
 
 
 
                   {/* Submit Button */}
-                  <Button type="submit" className="w-full bg-college-blue-500 hover:bg-college-blue-600">
-                    Submit Registration
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-college-blue-500 hover:bg-college-blue-600"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      'Submit Registration'
+                    )}
                   </Button>
                 </form>
               </CardContent>
