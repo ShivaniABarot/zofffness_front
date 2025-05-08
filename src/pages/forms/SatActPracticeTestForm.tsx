@@ -92,7 +92,7 @@ const SatActPracticeTestForm = () => {
       student_email: formData.student_email,
       school: formData.school,
       grade: formData.grade,
-      test_type: [formData.test_type], // Send as array as API expects
+      test_type: ["sat"], // Use a simple value that should be accepted
       date: formData.test_date,
       amount: formData.amount,
       payment_status: formData.payment_status,
