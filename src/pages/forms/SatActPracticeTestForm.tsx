@@ -94,6 +94,7 @@ const SatActPracticeTestForm = () => {
     }
 
     try {
+      // Using the correct API endpoint
       const response = await axios.post('https://zoffness.academy/api/practice_tests', submissionData);
 
       if (response.data.success) {
