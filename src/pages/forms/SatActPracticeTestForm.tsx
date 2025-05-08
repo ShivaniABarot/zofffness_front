@@ -67,6 +67,17 @@ const SatActPracticeTestForm = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Validate required fields
+    if (!formData.test_date) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Please select a test date',
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     // Create a new submission object with the required fields
@@ -80,7 +91,7 @@ const SatActPracticeTestForm = () => {
       student_email: formData.student_email,
       school: formData.school,
       grade: formData.grade,
-      test_type: formData.test_type,
+      test_type: [formData.test_type], // Convert to array as API expects
       date: formData.test_date, // Changed from test_date to date
       amount: formData.amount,
       payment_status: formData.payment_status,
