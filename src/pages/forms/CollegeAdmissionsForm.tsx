@@ -6,7 +6,6 @@ import { Card, CardContent } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 
 const CollegeAdmissionsForm = () => {
   return (
@@ -174,31 +173,6 @@ const CollegeAdmissionsForm = () => {
                     <div className="space-y-2">
                       <Label htmlFor="graduationYear">Expected Graduation Year *</Label>
                       <Input id="graduationYear" required />
-                    </div>
-                  </div>
-
-                  {/* Areas of Interest */}
-                  <div className="space-y-4">
-                    <h2 className="text-xl font-semibold text-college-blue-500">Areas of Interest</h2>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="majorInterest">Intended Major/Area of Study</Label>
-                      <Input id="majorInterest" placeholder="e.g., Engineering, Business, Liberal Arts" />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>College Type Preference</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select preference" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="private">Private Universities</SelectItem>
-                          <SelectItem value="public">Public Universities</SelectItem>
-                          <SelectItem value="both">Both Private and Public</SelectItem>
-                          <SelectItem value="undecided">Undecided</SelectItem>
-                        </SelectContent>
-                      </Select>
                     </div>
                   </div>
 
