@@ -92,26 +92,6 @@ const CollegeEssaysForm = () => {
                     </RadioGroup>
                   </div>
 
-                  {/* Essay Type */}
-                  <div className="space-y-4">
-                    <h2 className="text-xl font-semibold text-college-blue-500">Essay Type</h2>
-
-                    <RadioGroup defaultValue="common-app">
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="common-app" id="common-app" />
-                        <Label htmlFor="common-app">Common Application Essay</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="supplemental" id="supplemental" />
-                        <Label htmlFor="supplemental">Supplemental Essays</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="both" id="both" />
-                        <Label htmlFor="both">Both Common App & Supplemental Essays</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
                   {/* Parent Information */}
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-college-blue-500">Parent Information</h2>
