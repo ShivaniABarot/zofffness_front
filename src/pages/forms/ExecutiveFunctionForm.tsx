@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/button';
 import { Card, CardContent } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
+import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 
 const ExecutiveFunctionForm = () => {
@@ -35,18 +36,16 @@ const ExecutiveFunctionForm = () => {
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-college-blue-500">Executive Function Coaching Packages*</h2>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="packageType">Select Package *</Label>
-                      <Select>
-                        <SelectTrigger id="packageType">
-                          <SelectValue placeholder="Select package" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="five-sessions">Five individual 30-minute sessions package - $450</SelectItem>
-                          <SelectItem value="individual">Individualized 30 minute sessions - $90</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <RadioGroup defaultValue="five-sessions">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="five-sessions" id="five-sessions" />
+                        <Label htmlFor="five-sessions">Five individual 30-minute sessions package - $450</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="individual" id="individual" />
+                        <Label htmlFor="individual">Individualized 30 minute sessions - $90</Label>
+                      </div>
+                    </RadioGroup>
                   </div>
 
                   {/* Critical Skills */}
