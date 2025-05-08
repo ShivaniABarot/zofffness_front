@@ -81,18 +81,18 @@ const SatActPracticeTestForm = () => {
     setIsLoading(true);
 
     // Create a new submission object with the required fields
-    // Using the same field naming convention as SatActCourseForm
+    // Using the exact field names expected by the API based on error messages
     const submissionData = {
-      parent_firstname: formData.parent_firstname,
-      parent_lastname: formData.parent_lastname,
+      parent_first_name: formData.parent_firstname,
+      parent_last_name: formData.parent_lastname,
       parent_phone: formData.parent_phone,
       parent_email: formData.parent_email,
-      student_firstname: formData.student_firstname,
-      student_lastname: formData.student_lastname,
+      student_first_name: formData.student_firstname,
+      student_last_name: formData.student_lastname,
       student_email: formData.student_email,
       school: formData.school,
       grade: formData.grade,
-      test_type: formData.test_type,
+      test_type: [formData.test_type], // Send as array as API expects
       date: formData.test_date,
       amount: formData.amount,
       payment_status: formData.payment_status,
