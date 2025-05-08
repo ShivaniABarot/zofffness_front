@@ -80,7 +80,7 @@ const SatActPracticeTestForm = () => {
 
     setIsLoading(true);
 
-    // Try a different approach - omit test_type completely
+    // Try a different approach - use a string value for test_type
     const submissionData = {
       parent_first_name: formData.parent_firstname,
       parent_last_name: formData.parent_lastname,
@@ -91,7 +91,7 @@ const SatActPracticeTestForm = () => {
       student_email: formData.student_email,
       school: formData.school,
       grade: formData.grade,
-      // Omitting test_type field to see if it's optional or has a default value
+      test_type: "SAT", // Try uppercase value
       date: formData.test_date,
       amount: formData.amount,
       payment_status: formData.payment_status,
