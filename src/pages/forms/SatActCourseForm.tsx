@@ -26,7 +26,8 @@ const SatActCourseForm = () => {
     grade: '',
     packages: '20sessions',
     total_amount: 5900,
-    payment_status: 'Success'
+    payment_status: 'Success',
+    course_type: 'SAT/ACT Course'
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,20 +88,21 @@ const SatActCourseForm = () => {
         amount = 5900;
     }
 
-    // Create a new submission object with the correct amount
+    // Create a new submission object with the correct amount and type
     const submissionData = {
       ...formData,
-      total_amount: amount
+      total_amount: amount,
+      type: 'sat_act_course' // Add a type field that might be required by the API
     };
 
     console.log('Submitting data:', submissionData); // For debugging
 
     try {
       // Log the full request for debugging
-      console.log('API Endpoint:', 'https://zoffness.academy/api/enroll');
+      console.log('API Endpoint:', 'https://zoffness.academy/api/new_sat_act');
       console.log('Full submission data:', submissionData);
 
-      const response = await axios.post('https://zoffness.academy/api/enroll', submissionData);
+      const response = await axios.post('https://zoffness.academy/api/new_sat_act', submissionData);
 
       console.log('API Response:', response.data);
 
@@ -122,7 +124,8 @@ const SatActCourseForm = () => {
           grade: '',
           packages: '20sessions',
           total_amount: 5900,
-          payment_status: 'Success'
+          payment_status: 'Success',
+          course_type: 'SAT/ACT Course'
         });
       }
     } catch (error) {
