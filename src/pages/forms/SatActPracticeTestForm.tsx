@@ -91,7 +91,7 @@ const SatActPracticeTestForm = () => {
       student_email: formData.student_email,
       school: formData.school,
       grade: formData.grade,
-      test_type: formData.test_type, // Send as string
+      test_type: ["sat", "act"], // Send as array with valid values
       date: formData.test_date, // Changed from test_date to date
       amount: formData.amount,
       payment_status: formData.payment_status,
@@ -136,6 +136,8 @@ const SatActPracticeTestForm = () => {
         // Only log errors in development environment
         if (process.env.NODE_ENV !== 'production') {
           console.error('API Error Response:', error.response?.data);
+          console.error('Full error object:', error);
+          console.error('Validation errors:', error.response?.data?.errors);
         }
 
         if (error.response?.status === 422) {
@@ -151,9 +153,12 @@ const SatActPracticeTestForm = () => {
             }
           }
 
+          // Show the raw error for debugging
+          const rawError = JSON.stringify(error.response?.data?.errors || {});
+
           const errorMessage = errorMessages.length > 0
-            ? errorMessages.join('\n')
-            : 'Please check your form inputs.';
+            ? `${errorMessages.join('\n')}\n\nRaw error: ${rawError}`
+            : `Please check your form inputs. Raw error: ${rawError}`;
 
           toast({
             variant: 'destructive',
