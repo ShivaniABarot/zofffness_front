@@ -14,6 +14,14 @@ const SatActPracticeTestForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  // Define test types with their prices
+  const testTypePrices = {
+    'sat-regular': 95,
+    'sat-extended': 95,
+    'act-regular': 95,
+    'act-extended': 95
+  };
+
   const [formData, setFormData] = useState({
     parent_firstname: '',
     parent_lastname: '',
@@ -26,7 +34,7 @@ const SatActPracticeTestForm = () => {
     grade: '',
     test_type: 'sat-regular',
     test_date: '',
-    amount: 95,
+    amount: testTypePrices['sat-regular'], // Default price based on default test type
     payment_status: 'Success',
     course_type: 'SAT/ACT Practice Test'
   });
@@ -40,9 +48,13 @@ const SatActPracticeTestForm = () => {
   };
 
   const handleTestTypeChange = (value: string) => {
+    // Get the price for the selected test type
+    const price = testTypePrices[value as keyof typeof testTypePrices] || 95;
+
     setFormData(prev => ({
       ...prev,
-      test_type: value
+      test_type: value,
+      amount: price // Update the amount based on the selected test type
     }));
   };
 
@@ -102,7 +114,7 @@ const SatActPracticeTestForm = () => {
           grade: '',
           test_type: 'sat-regular',
           test_date: '',
-          amount: 95,
+          amount: testTypePrices['sat-regular'], // Use the price from our price mapping
           payment_status: 'Success',
           course_type: 'SAT/ACT Practice Test'
         });
