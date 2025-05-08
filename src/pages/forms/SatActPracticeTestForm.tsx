@@ -91,7 +91,7 @@ const SatActPracticeTestForm = () => {
       student_email: formData.student_email,
       school: formData.school,
       grade: formData.grade,
-      test_type: [formData.test_type], // Convert to array as API expects
+      test_type: formData.test_type, // Send as string
       date: formData.test_date, // Changed from test_date to date
       amount: formData.amount,
       payment_status: formData.payment_status,
