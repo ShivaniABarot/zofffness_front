@@ -1,15 +1,45 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Redirecting...</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found</title>
   <script>
-    // Redirect to the homepage with the current path as a query parameter
-    const path = window.location.pathname;
-    window.location.href = '/?redirect=' + encodeURIComponent(path);
+    // Store the requested URL in sessionStorage
+    sessionStorage.setItem('redirectPath', window.location.pathname);
+
+    // Redirect to the home page
+    window.location.href = '/';
   </script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+    .container {
+      max-width: 500px;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    p {
+      font-size: 16px;
+      color: #666;
+    }
+  </style>
 </head>
 <body>
-  <p>Redirecting to homepage...</p>
+  <div class="container">
+    <h1>Redirecting...</h1>
+    <p>If you are not redirected automatically, <a href="/">click here</a> to go to the homepage.</p>
+  </div>
 </body>
 </html>
