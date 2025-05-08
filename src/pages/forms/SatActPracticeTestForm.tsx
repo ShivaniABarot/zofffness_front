@@ -6,13 +6,13 @@ import { Card, CardContent } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
+// Removed unused imports
 
 const SatActPracticeTestForm = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       <main className="py-32 bg-gray-52">
         <div className="container mx-auto px-4 md:px-6">
           <div className="max-w-3xl mx-auto">
@@ -26,13 +26,13 @@ const SatActPracticeTestForm = () => {
                   {/* Parent Information */}
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-college-blue-500">Parent Information</h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="parentFirstName">Parent First Name *</Label>
                         <Input id="parentFirstName" required />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="parentLastName">Parent Last Name *</Label>
                         <Input id="parentLastName" required />
@@ -53,13 +53,13 @@ const SatActPracticeTestForm = () => {
                   {/* Student Information */}
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-college-blue-500">Student Information</h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="studentFirstName">Student First Name *</Label>
                         <Input id="studentFirstName" required />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="studentLastName">Student Last Name *</Label>
                         <Input id="studentLastName" required />
@@ -85,70 +85,86 @@ const SatActPracticeTestForm = () => {
                   {/* Test Selection */}
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-college-blue-500">Test Selection</h2>
-                    
-                    <RadioGroup defaultValue="sat">
+
+                    <RadioGroup defaultValue="sat-regular">
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="sat" id="sat" />
-                        <Label htmlFor="sat">SAT Practice Test</Label>
+                        <RadioGroupItem value="sat-regular" id="sat-regular" />
+                        <Label htmlFor="sat-regular">Full-Length Proctored Practice SAT Test with Regular Time - $95</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="act" id="act" />
-                        <Label htmlFor="act">ACT Practice Test</Label>
+                        <RadioGroupItem value="sat-extended" id="sat-extended" />
+                        <Label htmlFor="sat-extended">Full-Length Proctored Practice SAT Test with 50% Extended Time - $95</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="act-regular" id="act-regular" />
+                        <Label htmlFor="act-regular">Full-Length Proctored Practice ACT Test with Regular Time - $95</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="act-extended" id="act-extended" />
+                        <Label htmlFor="act-extended">Full-Length Proctored Practice ACT Test with 50% Extended Time - $95</Label>
                       </div>
                     </RadioGroup>
                   </div>
 
-                  {/* Package Selection */}
+                  {/* Practice Test Dates */}
                   <div className="space-y-4">
-                    <h2 className="text-xl font-semibold text-college-blue-500">Package Selection</h2>
-                    
-                    <RadioGroup defaultValue="package3">
+                    <h2 className="text-xl font-semibold text-college-blue-500">Practice Test Dates and Times</h2>
+                    <p className="text-sm font-semibold text-college-blue-500 mb-2">ACT/SAT Courses*</p>
+
+                    <RadioGroup defaultValue="april5">
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="package3" id="package3" />
-                        <Label htmlFor="package3">3 Practice Tests with Analysis - $399</Label>
+                        <RadioGroupItem value="april5" id="april5" />
+                        <Label htmlFor="april5">Saturday, April 5th @ 9am at Zoffness College Prep (510 West Boston Post Road)</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="package2" id="package2" />
-                        <Label htmlFor="package2">2 Practice Tests with Analysis - $299</Label>
+                        <RadioGroupItem value="april12" id="april12" />
+                        <Label htmlFor="april12">Saturday, April 12th @ 9am at Zoffness College Prep (510 West Boston Post Road)</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="single" id="single" />
-                        <Label htmlFor="single">Single Practice Test with Analysis - $179</Label>
+                        <RadioGroupItem value="april19" id="april19" />
+                        <Label htmlFor="april19">Saturday, April 19th @ 9am at Zoffness College Prep (510 West Boston Post Road)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="april26" id="april26" />
+                        <Label htmlFor="april26">Saturday, April 26th @ 9am at Zoffness College Prep (510 West Boston Post Road)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="may3" id="may3" />
+                        <Label htmlFor="may3">Saturday, May 3rd @ 9am at Zoffness College Prep (510 West Boston Post Road)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="may10" id="may10" />
+                        <Label htmlFor="may10">Saturday, May 10th @ 9am at Zoffness College Prep (510 West Boston Post Road)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="may17" id="may17" />
+                        <Label htmlFor="may17">Saturday, May 17th @ 9am at Zoffness College Prep (510 West Boston Post Road)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="may24" id="may24" />
+                        <Label htmlFor="may24">Saturday, May 24th @ 9am at Zoffness College Prep (510 West Boston Post Road)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="may31" id="may31" />
+                        <Label htmlFor="may31">Saturday, May 31st @ 9am at Zoffness College Prep (510 West Boston Post Road)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="june7" id="june7" />
+                        <Label htmlFor="june7">Saturday, June 7th @ 9am at Zoffness College Prep (510 West Boston Post Road)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="june14" id="june14" />
+                        <Label htmlFor="june14">Saturday, June 14th @ 9am at Zoffness College Prep (510 West Boston Post Road)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="june21" id="june21" />
+                        <Label htmlFor="june21">Saturday, June 21st @ 9am at Zoffness College Prep (510 West Boston Post Road)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="june28" id="june28" />
+                        <Label htmlFor="june28">Saturday, June 28th @ 9am at Zoffness College Prep (510 West Boston Post Road)</Label>
                       </div>
                     </RadioGroup>
-                  </div>
-
-                  {/* Preferred Schedule */}
-                  <div className="space-y-4">
-                    <h2 className="text-xl font-semibold text-college-blue-500">Preferred Schedule</h2>
-                    
-                    <div className="space-y-2">
-                      <Label>Preferred Test Date</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select date" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="date1">Saturday, March 2, 2024</SelectItem>
-                          <SelectItem value="date2">Sunday, March 3, 2024</SelectItem>
-                          <SelectItem value="date3">Saturday, March 9, 2024</SelectItem>
-                          <SelectItem value="date4">Sunday, March 10, 2024</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Preferred Time Slot</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select time" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="morning">Morning (8:00 AM - 12:00 PM)</SelectItem>
-                          <SelectItem value="afternoon">Afternoon (1:00 PM - 5:00 PM)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
                   </div>
 
                   {/* Submit Button */}
