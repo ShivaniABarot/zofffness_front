@@ -81,7 +81,6 @@ const SatActPracticeTestForm = () => {
     setIsLoading(true);
 
     // Create a new submission object with the required fields
-    // Omitting test_type field since it's causing validation issues
     const submissionData = {
       parent_first_name: formData.parent_firstname,
       parent_last_name: formData.parent_lastname,
@@ -92,6 +91,7 @@ const SatActPracticeTestForm = () => {
       student_email: formData.student_email,
       school: formData.school,
       grade: formData.grade,
+      test_type: "sat", // Use a simple string value
       date: formData.test_date, // Changed from test_date to date
       amount: formData.amount,
       payment_status: formData.payment_status,
