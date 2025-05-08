@@ -88,11 +88,22 @@ const SatActCourseForm = () => {
         amount = 5900;
     }
 
-    // Create a new submission object with the correct amount and type
+    // Create a new submission object with the field names expected by the API
     const submissionData = {
-      ...formData,
-      total_amount: amount,
-      type: 'sat_act_course' // Add a type field that might be required by the API
+      parent_firstname: formData.parent_first_name,
+      parent_lastname: formData.parent_last_name,
+      parent_phone: formData.parent_phone,
+      parent_email: formData.parent_email,
+      student_firstname: formData.student_first_name,
+      student_lastname: formData.student_last_name,
+      student_email: formData.student_email,
+      school: formData.school,
+      grade: formData.grade,
+      package_name: formData.packages,
+      amount: amount,
+      payment_status: formData.payment_status,
+      course_type: formData.course_type,
+      type: 'sat_act_course'
     };
 
     console.log('Submitting data:', submissionData); // For debugging
