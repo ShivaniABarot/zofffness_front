@@ -80,8 +80,7 @@ const SatActPracticeTestForm = () => {
 
     setIsLoading(true);
 
-    // Create a new submission object with the required fields
-    // Using the exact field names expected by the API based on error messages
+    // Try a different approach - omit test_type completely
     const submissionData = {
       parent_first_name: formData.parent_firstname,
       parent_last_name: formData.parent_lastname,
@@ -92,7 +91,7 @@ const SatActPracticeTestForm = () => {
       student_email: formData.student_email,
       school: formData.school,
       grade: formData.grade,
-      test_type: ["sat"], // Use a simple value that should be accepted
+      // Omitting test_type field to see if it's optional or has a default value
       date: formData.test_date,
       amount: formData.amount,
       payment_status: formData.payment_status,
@@ -139,6 +138,14 @@ const SatActPracticeTestForm = () => {
           console.error('API Error Response:', error.response?.data);
           console.error('Full error object:', error);
           console.error('Validation errors:', error.response?.data?.errors);
+
+          // Log more details about the validation errors
+          if (error.response?.data?.errors) {
+            console.error('Detailed validation errors:');
+            for (const [field, messages] of Object.entries(error.response.data.errors)) {
+              console.error(`Field: ${field}, Messages:`, messages);
+            }
+          }
         }
 
         if (error.response?.status === 422) {
