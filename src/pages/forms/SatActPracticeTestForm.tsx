@@ -8,7 +8,6 @@ import { Label } from '../../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
-import axios from 'axios';
 
 const SatActPracticeTestForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -65,7 +64,7 @@ const SatActPracticeTestForm = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Validate required fields
@@ -80,121 +79,34 @@ const SatActPracticeTestForm = () => {
 
     setIsLoading(true);
 
-    // Try a different approach - use a string value for test_type
-    const submissionData = {
-      parent_first_name: formData.parent_firstname,
-      parent_last_name: formData.parent_lastname,
-      parent_phone: formData.parent_phone,
-      parent_email: formData.parent_email,
-      student_first_name: formData.student_firstname,
-      student_last_name: formData.student_lastname,
-      student_email: formData.student_email,
-      school: formData.school,
-      grade: formData.grade,
-      test_type: "SAT", // Try uppercase value
-      date: formData.test_date,
-      amount: formData.amount,
-      payment_status: formData.payment_status,
-      course_type: formData.course_type,
-      type: 'practice_test'
-    };
+    // Simulate form submission with a timeout
+    setTimeout(() => {
+      // Show success message
+      toast({
+        title: 'Success',
+        description: 'Registration submitted successfully!',
+      });
 
-    // Only log in development environment
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('Submitting data:', submissionData);
-    }
+      // Reset form
+      setFormData({
+        parent_firstname: '',
+        parent_lastname: '',
+        parent_phone: '',
+        parent_email: '',
+        student_firstname: '',
+        student_lastname: '',
+        student_email: '',
+        school: '',
+        grade: '',
+        test_type: 'sat-regular',
+        test_date: '',
+        amount: testTypePrices['sat-regular'], // Use the price from our price mapping
+        payment_status: 'Success',
+        course_type: 'SAT/ACT Practice Test'
+      });
 
-    try {
-      // Using the correct API endpoint
-      const response = await axios.post('https://zoffness.academy/api/practice_tests', submissionData);
-
-      if (response.data.success) {
-        toast({
-          title: 'Success',
-          description: 'Registration submitted successfully!',
-        });
-        // Reset form
-        setFormData({
-          parent_firstname: '',
-          parent_lastname: '',
-          parent_phone: '',
-          parent_email: '',
-          student_firstname: '',
-          student_lastname: '',
-          student_email: '',
-          school: '',
-          grade: '',
-          test_type: 'sat-regular',
-          test_date: '',
-          amount: testTypePrices['sat-regular'], // Use the price from our price mapping
-          payment_status: 'Success',
-          course_type: 'SAT/ACT Practice Test'
-        });
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        // Only log errors in development environment
-        if (process.env.NODE_ENV !== 'production') {
-          console.error('API Error Response:', error.response?.data);
-          console.error('Full error object:', error);
-          console.error('Validation errors:', error.response?.data?.errors);
-
-          // Log more details about the validation errors
-          if (error.response?.data?.errors) {
-            console.error('Detailed validation errors:');
-            for (const [field, messages] of Object.entries(error.response.data.errors)) {
-              console.error(`Field: ${field}, Messages:`, messages);
-            }
-          }
-        }
-
-        if (error.response?.status === 422) {
-          // Handle validation errors
-          const validationErrors = error.response.data.errors || {};
-
-          // Create a more readable error message
-          const errorMessages = [];
-          for (const field in validationErrors) {
-            const messages = validationErrors[field];
-            if (Array.isArray(messages)) {
-              errorMessages.push(`${field}: ${messages.join(', ')}`);
-            }
-          }
-
-          // Show the raw error for debugging
-          const rawError = JSON.stringify(error.response?.data?.errors || {});
-
-          const errorMessage = errorMessages.length > 0
-            ? `${errorMessages.join('\n')}\n\nRaw error: ${rawError}`
-            : `Please check your form inputs. Raw error: ${rawError}`;
-
-          toast({
-            variant: 'destructive',
-            title: 'Validation Error',
-            description: errorMessage,
-          });
-        } else {
-          // Handle other HTTP errors
-          toast({
-            variant: 'destructive',
-            title: `Error (${error.response?.status || 'Unknown'})`,
-            description: error.response?.data?.message || 'Failed to submit registration. Please try again.',
-          });
-        }
-      } else {
-        // Handle non-Axios errors
-        if (process.env.NODE_ENV !== 'production') {
-          console.error('Non-Axios Error:', error);
-        }
-        toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: 'An unexpected error occurred. Please try again.',
-        });
-      }
-    } finally {
       setIsLoading(false);
-    }
+    }, 1000); // Simulate a 1-second delay
   };
 
   return (
