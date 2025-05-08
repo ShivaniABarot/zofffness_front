@@ -71,17 +71,17 @@ const SatActPracticeTestForm = () => {
 
     // Create a new submission object with the required fields
     const submissionData = {
-      parent_firstname: formData.parent_firstname,
-      parent_lastname: formData.parent_lastname,
+      parent_first_name: formData.parent_firstname,
+      parent_last_name: formData.parent_lastname,
       parent_phone: formData.parent_phone,
       parent_email: formData.parent_email,
-      student_firstname: formData.student_firstname,
-      student_lastname: formData.student_lastname,
+      student_first_name: formData.student_firstname,
+      student_last_name: formData.student_lastname,
       student_email: formData.student_email,
       school: formData.school,
       grade: formData.grade,
       test_type: formData.test_type,
-      test_date: formData.test_date,
+      date: formData.test_date, // Changed from test_date to date
       amount: formData.amount,
       payment_status: formData.payment_status,
       course_type: formData.course_type,
