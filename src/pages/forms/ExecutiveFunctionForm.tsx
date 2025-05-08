@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { Button } from '../../components/ui/button';
@@ -6,8 +6,135 @@ import { Card, CardContent } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
+import { Loader2 } from 'lucide-react';
+import { useToast } from '../../components/ui/use-toast';
+import axios from 'axios';
 
 const ExecutiveFunctionForm = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  // Define package prices
+  const packagePrices = {
+    'five-sessions': 450,
+    'individual': 90
+  };
+
+  const [formData, setFormData] = useState({
+    parent_first_name: '',
+    parent_last_name: '',
+    parent_phone: '',
+    parent_email: '',
+    student_first_name: '',
+    student_last_name: '',
+    student_email: '',
+    school: '',
+    grade: '',
+    package_name: 'five-sessions',
+    amount: packagePrices['five-sessions'],
+    payment_status: 'Success',
+    course_type: 'Executive Function Coaching'
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
+  const handlePackageChange = (value: string) => {
+    // Get the price for the selected package
+    const price = packagePrices[value as keyof typeof packagePrices] || 450;
+
+    setFormData(prev => ({
+      ...prev,
+      package_name: value,
+      amount: price
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      // Make the API call to the executive_coaching endpoint
+      const response = await axios.post('https://zoffness.academy/api/executive_coaching', formData);
+
+      if (response.data.success) {
+        toast({
+          title: 'Success',
+          description: 'Registration submitted successfully!',
+        });
+        // Reset form
+        setFormData({
+          parent_first_name: '',
+          parent_last_name: '',
+          parent_phone: '',
+          parent_email: '',
+          student_first_name: '',
+          student_last_name: '',
+          student_email: '',
+          school: '',
+          grade: '',
+          package_name: 'five-sessions',
+          amount: packagePrices['five-sessions'],
+          payment_status: 'Success',
+          course_type: 'Executive Function Coaching'
+        });
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // Only log errors in development environment
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('API Error Response:', error.response?.data);
+          console.error('Full error object:', error);
+        }
+
+        if (error.response?.status === 422) {
+          // Handle validation errors
+          const validationErrors = error.response.data.errors || {};
+
+          // Create a more readable error message
+          const errorMessages = [];
+          for (const field in validationErrors) {
+            const messages = validationErrors[field];
+            if (Array.isArray(messages)) {
+              errorMessages.push(`${field}: ${messages.join(', ')}`);
+            }
+          }
+
+          toast({
+            variant: 'destructive',
+            title: 'Validation Error',
+            description: errorMessages.join('\n') || 'Please check your form inputs.',
+          });
+        } else {
+          // Handle other HTTP errors
+          toast({
+            variant: 'destructive',
+            title: `Error (${error.response?.status || 'Unknown'})`,
+            description: error.response?.data?.message || 'Failed to submit registration. Please try again.',
+          });
+        }
+      } else {
+        // Handle non-Axios errors
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Non-Axios Error:', error);
+        }
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'An unexpected error occurred. Please try again.',
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -21,7 +148,7 @@ const ExecutiveFunctionForm = () => {
 
             <Card>
               <CardContent className="p-6">
-                <form className="space-y-8">
+                <form className="space-y-8" onSubmit={handleSubmit}>
                   {/* Description */}
                   <div className="space-y-4">
                     <div className="prose max-w-none">
@@ -35,7 +162,7 @@ const ExecutiveFunctionForm = () => {
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-college-blue-500">Executive Function Coaching Packages*</h2>
 
-                    <RadioGroup defaultValue="five-sessions">
+                    <RadioGroup defaultValue="five-sessions" onValueChange={handlePackageChange}>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="five-sessions" id="five-sessions" />
                         <Label htmlFor="five-sessions">Five individual 30-minute sessions package - $450</Label>
@@ -86,24 +213,46 @@ const ExecutiveFunctionForm = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="parentFirstName">Parent First Name *</Label>
-                        <Input id="parentFirstName" required />
+                        <Label htmlFor="parent_first_name">Parent First Name *</Label>
+                        <Input
+                          id="parent_first_name"
+                          value={formData.parent_first_name}
+                          onChange={handleInputChange}
+                          required
+                        />
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="parentLastName">Parent Last Name *</Label>
-                        <Input id="parentLastName" required />
+                        <Label htmlFor="parent_last_name">Parent Last Name *</Label>
+                        <Input
+                          id="parent_last_name"
+                          value={formData.parent_last_name}
+                          onChange={handleInputChange}
+                          required
+                        />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="parentPhone">Parent Phone *</Label>
-                      <Input id="parentPhone" type="tel" required />
+                      <Label htmlFor="parent_phone">Parent Phone *</Label>
+                      <Input
+                        id="parent_phone"
+                        type="tel"
+                        value={formData.parent_phone}
+                        onChange={handleInputChange}
+                        required
+                      />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="parentEmail">Parent Email *</Label>
-                      <Input id="parentEmail" type="email" required />
+                      <Label htmlFor="parent_email">Parent Email *</Label>
+                      <Input
+                        id="parent_email"
+                        type="email"
+                        value={formData.parent_email}
+                        onChange={handleInputChange}
+                        required
+                      />
                     </div>
                   </div>
 
@@ -113,35 +262,72 @@ const ExecutiveFunctionForm = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="studentFirstName">Student First Name *</Label>
-                        <Input id="studentFirstName" required />
+                        <Label htmlFor="student_first_name">Student First Name *</Label>
+                        <Input
+                          id="student_first_name"
+                          value={formData.student_first_name}
+                          onChange={handleInputChange}
+                          required
+                        />
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="studentLastName">Student Last Name *</Label>
-                        <Input id="studentLastName" required />
+                        <Label htmlFor="student_last_name">Student Last Name *</Label>
+                        <Input
+                          id="student_last_name"
+                          value={formData.student_last_name}
+                          onChange={handleInputChange}
+                          required
+                        />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="studentEmail">Student Email *</Label>
-                      <Input id="studentEmail" type="email" required />
+                      <Label htmlFor="student_email">Student Email *</Label>
+                      <Input
+                        id="student_email"
+                        type="email"
+                        value={formData.student_email}
+                        onChange={handleInputChange}
+                        required
+                      />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="school">Current School *</Label>
-                      <Input id="school" required />
+                      <Input
+                        id="school"
+                        value={formData.school}
+                        onChange={handleInputChange}
+                        required
+                      />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="grade">Current Grade *</Label>
-                      <Input id="grade" required />
+                      <Input
+                        id="grade"
+                        value={formData.grade}
+                        onChange={handleInputChange}
+                        required
+                      />
                     </div>
                   </div>
 
                   {/* Submit Button */}
-                  <Button type="submit" className="w-full bg-college-blue-500 hover:bg-college-blue-600">
-                    Submit Registration
+                  <Button
+                    type="submit"
+                    className="w-full bg-college-blue-500 hover:bg-college-blue-600"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      'Submit Registration'
+                    )}
                   </Button>
                 </form>
               </CardContent>
