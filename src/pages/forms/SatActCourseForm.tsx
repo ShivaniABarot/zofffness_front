@@ -106,16 +106,13 @@ const SatActCourseForm = () => {
       type: 'sat_act_course'
     };
 
-    console.log('Submitting data:', submissionData); // For debugging
+    // Only log in development environment
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Submitting data:', submissionData);
+    }
 
     try {
-      // Log the full request for debugging
-      console.log('API Endpoint:', 'https://zoffness.academy/api/new_sat_act');
-      console.log('Full submission data:', submissionData);
-
       const response = await axios.post('https://zoffness.academy/api/new_sat_act', submissionData);
-
-      console.log('API Response:', response.data);
 
       if (response.data.success) {
         toast({
@@ -141,12 +138,14 @@ const SatActCourseForm = () => {
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error('API Error Response:', error.response?.data);
+        // Only log errors in development environment
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('API Error Response:', error.response?.data);
+        }
 
         if (error.response?.status === 422) {
           // Handle validation errors
           const validationErrors = error.response.data.errors || {};
-          console.log('Validation Errors:', validationErrors);
 
           // Create a more readable error message
           const errorMessages = [];
@@ -176,7 +175,9 @@ const SatActCourseForm = () => {
         }
       } else {
         // Handle non-Axios errors
-        console.error('Non-Axios Error:', error);
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Non-Axios Error:', error);
+        }
         toast({
           variant: 'destructive',
           title: 'Error',
