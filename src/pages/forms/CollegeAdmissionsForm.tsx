@@ -12,7 +12,7 @@ const CollegeAdmissionsForm = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       <main className="py-32 bg-gray-52">
         <div className="container mx-auto px-4 md:px-6">
           <div className="max-w-3xl mx-auto">
@@ -23,16 +23,106 @@ const CollegeAdmissionsForm = () => {
             <Card>
               <CardContent className="p-6">
                 <form className="space-y-8">
+                  {/* Package Selection */}
+                  <div className="space-y-6">
+                    <h2 className="text-xl font-semibold text-college-blue-500">COLLEGE ADMISSIONS COUNSELING PACKAGES</h2>
+
+                    <RadioGroup defaultValue="initial">
+                      {/* Initial Intake Package */}
+                      <div className="mb-6 border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-start space-x-2">
+                          <RadioGroupItem value="initial" id="initial" className="mt-1" />
+                          <div className="flex-1">
+                            <Label htmlFor="initial" className="font-semibold text-lg">INITIAL INTAKE - $250</Label>
+                            <ul className="list-disc pl-5 text-sm text-gray-700 mt-2 space-y-1">
+                              <li>Personal meeting with student and parents to assess college and career goals.</li>
+                              <li>Review of the student's academic record, standardized test scores, extra-curricular activities and personal interests.</li>
+                              <li>Feedback and recommendations on how to most effectively reach objectives.</li>
+                              <li>Create a timeline of when each task should be completed.</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Five Session Package */}
+                      <div className="mb-6 border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-start space-x-2">
+                          <RadioGroupItem value="five" id="five" className="mt-1" />
+                          <div className="flex-1">
+                            <Label htmlFor="five" className="font-semibold text-lg">FIVE SESSION PACKAGE - $1,250</Label>
+                            <p className="text-sm text-gray-700 italic mt-1">* Includes the services above plus:</p>
+                            <ul className="list-disc pl-5 text-sm text-gray-700 mt-2 space-y-1">
+                              <li>Advising which standardized tests best showcase student's academic strengths.</li>
+                              <li>Exploring and developing a preliminary list of colleges and creating a schedule to tour various schools of interest.</li>
+                              <li>Finalizing college list of reach, target and safety schools.</li>
+                              <li>Assisting family to complete the required admissions documents.</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Ten Session Package */}
+                      <div className="mb-6 border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-start space-x-2">
+                          <RadioGroupItem value="ten" id="ten" className="mt-1" />
+                          <div className="flex-1">
+                            <Label htmlFor="ten" className="font-semibold text-lg">TEN SESSION PACKAGE - $2,500</Label>
+                            <p className="text-sm text-gray-700 italic mt-1">* Includes the services above plus:</p>
+                            <ul className="list-disc pl-5 text-sm text-gray-700 mt-2 space-y-1">
+                              <li>Recommending high school courses that parallel students interests and goals.</li>
+                              <li>Integrating extra-curricular activities to demonstrate strong character.</li>
+                              <li>Helping students to choose internships or volunteer work</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Fifteen Session Package */}
+                      <div className="mb-6 border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-start space-x-2">
+                          <RadioGroupItem value="fifteen" id="fifteen" className="mt-1" />
+                          <div className="flex-1">
+                            <Label htmlFor="fifteen" className="font-semibold text-lg">FIFTEEN SESSION PACKAGE - $3,750</Label>
+                            <p className="text-sm text-gray-700 italic mt-1">* Includes the services above plus:</p>
+                            <ul className="list-disc pl-5 text-sm text-gray-700 mt-2 space-y-1">
+                              <li>Discussing and choosing effective essay topics and themes.</li>
+                              <li>This package includes five college essay sessions (outline preparation, drafts, edits, and finalization).</li>
+                              <li>Guidance on Early Action vs. Early Decision.</li>
+                              <li>Overseeing communication with colleges.</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Twenty Session Package */}
+                      <div className="mb-6 border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-start space-x-2">
+                          <RadioGroupItem value="twenty" id="twenty" className="mt-1" />
+                          <div className="flex-1">
+                            <Label htmlFor="twenty" className="font-semibold text-lg">TWENTY SESSION PACKAGE - $5,000</Label>
+                            <p className="text-sm text-gray-700 italic mt-1">* Includes the services above plus:</p>
+                            <ul className="list-disc pl-5 text-sm text-gray-700 mt-2 space-y-1">
+                              <li>Preparing for college and scholarship interviews.</li>
+                              <li>Writing assistance with supplemental essays.</li>
+                              <li>Provide guidance to maximize merit based financial aid and apply for scholarships.</li>
+                              <li>Ensuring completed applications are ready to submit.</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
                   {/* Parent Information */}
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-college-blue-500">Parent Information</h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="parentFirstName">Parent First Name *</Label>
                         <Input id="parentFirstName" required />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="parentLastName">Parent Last Name *</Label>
                         <Input id="parentLastName" required />
@@ -53,13 +143,13 @@ const CollegeAdmissionsForm = () => {
                   {/* Student Information */}
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-college-blue-500">Student Information</h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="studentFirstName">Student First Name *</Label>
                         <Input id="studentFirstName" required />
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="studentLastName">Student Last Name *</Label>
                         <Input id="studentLastName" required />
@@ -87,36 +177,10 @@ const CollegeAdmissionsForm = () => {
                     </div>
                   </div>
 
-                  {/* Package Selection */}
-                  <div className="space-y-4">
-                    <h2 className="text-xl font-semibold text-college-blue-500">Package Selection</h2>
-                    
-                    <RadioGroup defaultValue="comprehensive">
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="comprehensive" id="comprehensive" />
-                        <Label htmlFor="comprehensive">Comprehensive Package - $5,999
-                          <p className="text-sm text-gray-600 mt-1">Full support from 9th/10th grade through college acceptance</p>
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="senior" id="senior" />
-                        <Label htmlFor="senior">Senior Year Package - $3,999
-                          <p className="text-sm text-gray-600 mt-1">Focused support during application season</p>
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="hourly" id="hourly" />
-                        <Label htmlFor="hourly">Hourly Consultation - $199/hour
-                          <p className="text-sm text-gray-600 mt-1">Flexible support as needed</p>
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
                   {/* Areas of Interest */}
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-college-blue-500">Areas of Interest</h2>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="majorInterest">Intended Major/Area of Study</Label>
                       <Input id="majorInterest" placeholder="e.g., Engineering, Business, Liberal Arts" />
