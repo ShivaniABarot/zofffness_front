@@ -59,9 +59,32 @@ const ExecutiveFunctionForm = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    // Create a submission object with the field names expected by the API
+    const submissionData = {
+      parent_firstname: formData.parent_first_name,
+      parent_lastname: formData.parent_last_name,
+      parent_phone: formData.parent_phone,
+      parent_email: formData.parent_email,
+      student_firstname: formData.student_first_name,
+      student_lastname: formData.student_last_name,
+      student_email: formData.student_email,
+      school: formData.school,
+      grade: formData.grade,
+      package_name: formData.package_name,
+      amount: formData.amount,
+      payment_status: formData.payment_status,
+      course_type: formData.course_type,
+      type: 'executive_function'
+    };
+
+    // Only log in development environment
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Submitting data:', submissionData);
+    }
+
     try {
       // Make the API call to the executive_coaching endpoint
-      const response = await axios.post('https://zoffness.academy/api/executive_coaching', formData);
+      const response = await axios.post('https://zoffness.academy/api/executive_coaching', submissionData);
 
       if (response.data.success) {
         toast({
@@ -91,6 +114,14 @@ const ExecutiveFunctionForm = () => {
         if (process.env.NODE_ENV !== 'production') {
           console.error('API Error Response:', error.response?.data);
           console.error('Full error object:', error);
+
+          // Log more details about the validation errors
+          if (error.response?.data?.errors) {
+            console.error('Detailed validation errors:');
+            for (const [field, messages] of Object.entries(error.response.data.errors)) {
+              console.error(`Field: ${field}, Messages:`, messages);
+            }
+          }
         }
 
         if (error.response?.status === 422) {
