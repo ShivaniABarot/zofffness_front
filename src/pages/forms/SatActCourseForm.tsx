@@ -68,8 +68,35 @@ const SatActCourseForm = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    // Ensure the correct amount is set based on the selected package
+    let amount = 5900;
+    switch (formData.packages) {
+      case '20sessions':
+        amount = 5900;
+        break;
+      case '15sessions':
+        amount = 4425;
+        break;
+      case '10sessions':
+        amount = 2950;
+        break;
+      case '5sessions':
+        amount = 1475;
+        break;
+      default:
+        amount = 5900;
+    }
+
+    // Create a new submission object with the correct amount
+    const submissionData = {
+      ...formData,
+      total_amount: amount
+    };
+
+    console.log('Submitting data:', submissionData); // For debugging
+
     try {
-      const response = await axios.post('https://zoffness.academy/api/new_sat_act', formData);
+      const response = await axios.post('https://zoffness.academy/api/new_sat_act', submissionData);
 
       if (response.data.success) {
         toast({
@@ -103,6 +130,7 @@ const SatActCourseForm = () => {
           description: errorMessage || 'Please check your form inputs.',
         });
       } else {
+        console.error('API Error:', error); // For debugging
         toast({
           variant: 'destructive',
           title: 'Error',
