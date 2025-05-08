@@ -6,7 +6,6 @@ import { Card, CardContent } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 
 const ExecutiveFunctionForm = () => {
   return (
@@ -137,39 +136,6 @@ const ExecutiveFunctionForm = () => {
                     <div className="space-y-2">
                       <Label htmlFor="grade">Current Grade *</Label>
                       <Input id="grade" required />
-                    </div>
-                  </div>
-
-                  {/* Schedule Preference */}
-                  <div className="space-y-4">
-                    <h2 className="text-xl font-semibold text-college-blue-500">Schedule Preference</h2>
-
-                    <div className="space-y-2">
-                      <Label>Preferred Days</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select days" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="weekday">Weekdays Only</SelectItem>
-                          <SelectItem value="weekend">Weekends Only</SelectItem>
-                          <SelectItem value="both">Both Weekdays and Weekends</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Preferred Time</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select time" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="morning">Morning (9:00 AM - 12:00 PM)</SelectItem>
-                          <SelectItem value="afternoon">Afternoon (12:00 PM - 4:00 PM)</SelectItem>
-                          <SelectItem value="evening">Evening (4:00 PM - 8:00 PM)</SelectItem>
-                        </SelectContent>
-                      </Select>
                     </div>
                   </div>
 
