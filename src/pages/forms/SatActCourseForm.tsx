@@ -96,7 +96,13 @@ const SatActCourseForm = () => {
     console.log('Submitting data:', submissionData); // For debugging
 
     try {
-      const response = await axios.post('https://zoffness.academy/api/new_sat_act', submissionData);
+      // Log the full request for debugging
+      console.log('API Endpoint:', 'https://zoffness.academy/api/enroll');
+      console.log('Full submission data:', submissionData);
+
+      const response = await axios.post('https://zoffness.academy/api/enroll', submissionData);
+
+      console.log('API Response:', response.data);
 
       if (response.data.success) {
         toast({
@@ -120,21 +126,47 @@ const SatActCourseForm = () => {
         });
       }
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 422) {
-        // Handle validation errors
-        const validationErrors = error.response.data.errors;
-        const errorMessage = Object.values(validationErrors).flat().join('\n');
-        toast({
-          variant: 'destructive',
-          title: 'Validation Error',
-          description: errorMessage || 'Please check your form inputs.',
-        });
+      if (axios.isAxiosError(error)) {
+        console.error('API Error Response:', error.response?.data);
+
+        if (error.response?.status === 422) {
+          // Handle validation errors
+          const validationErrors = error.response.data.errors || {};
+          console.log('Validation Errors:', validationErrors);
+
+          // Create a more readable error message
+          const errorMessages = [];
+          for (const field in validationErrors) {
+            const messages = validationErrors[field];
+            if (Array.isArray(messages)) {
+              errorMessages.push(`${field}: ${messages.join(', ')}`);
+            }
+          }
+
+          const errorMessage = errorMessages.length > 0
+            ? errorMessages.join('\n')
+            : 'Please check your form inputs.';
+
+          toast({
+            variant: 'destructive',
+            title: 'Validation Error',
+            description: errorMessage,
+          });
+        } else {
+          // Handle other HTTP errors
+          toast({
+            variant: 'destructive',
+            title: `Error (${error.response?.status || 'Unknown'})`,
+            description: error.response?.data?.message || 'Failed to submit registration. Please try again.',
+          });
+        }
       } else {
-        console.error('API Error:', error); // For debugging
+        // Handle non-Axios errors
+        console.error('Non-Axios Error:', error);
         toast({
           variant: 'destructive',
           title: 'Error',
-          description: 'Failed to submit registration. Please try again.',
+          description: 'An unexpected error occurred. Please try again.',
         });
       }
     } finally {
