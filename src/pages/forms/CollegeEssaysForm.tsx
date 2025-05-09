@@ -45,7 +45,8 @@ const CollegeEssaysForm = () => {
     // Removing school field as it's not in the database
     graduation_year: '',
     packages: 'one-session',
-    session: packagePrices['one-session'],
+    // Changed from 'session' to 'sessions' to match database field name
+    sessions: packagePrices['one-session'],
     payment_status: 'Success',
     course_type: 'College Essays'
   });
@@ -65,7 +66,7 @@ const CollegeEssaysForm = () => {
     setFormData(prev => ({
       ...prev,
       packages: value,
-      session: price
+      sessions: price // Changed from 'session' to 'sessions' to match database field name
     }));
   };
 
@@ -86,7 +87,7 @@ const CollegeEssaysForm = () => {
       // Removed school field as it's not in the database
       graduation_year: formData.graduation_year,
       packages: formData.packages,
-      session: formData.session,
+      sessions: formData.sessions, // Changed from 'session' to 'sessions' to match database field name
       payment_status: formData.payment_status,
       course_type: formData.course_type
     };
@@ -134,7 +135,7 @@ const CollegeEssaysForm = () => {
           student_email: '',
           graduation_year: '',
           packages: 'one-session',
-          session: packagePrices['one-session'],
+          sessions: packagePrices['one-session'], // Changed from 'session' to 'sessions' to match database field name
           payment_status: 'Success',
           course_type: 'College Essays'
         });
@@ -170,7 +171,7 @@ const CollegeEssaysForm = () => {
             student_email: '',
             graduation_year: '',
             packages: 'one-session',
-            session: packagePrices['one-session'],
+            sessions: packagePrices['one-session'], // Changed from 'session' to 'sessions' to match database field name
             payment_status: 'Success',
             course_type: 'College Essays'
           });
