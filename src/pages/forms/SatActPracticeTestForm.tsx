@@ -138,7 +138,7 @@ const SatActPracticeTestForm = () => {
     setIsLoading(true);
 
     // Create a new submission object with the field names expected by the API
-    const payload = {
+    const submissionData = {
       parent_firstname: formData.parent_first_name,
       parent_lastname: formData.parent_last_name,
       parent_phone: formData.parent_phone,
@@ -158,17 +158,18 @@ const SatActPracticeTestForm = () => {
       type: 'practice_test'
     };
 
-    // Log the payload in development environment
+    // Log the submission data in development environment
     if (process.env.NODE_ENV !== 'production') {
-      console.log('Submitting data:', payload);
+      console.log('Submitting data:', submissionData);
     }
 
     try {
-      const response = await axios.post('https://zoffness.academy/api/practice_tests', payload);
+      const response = await axios.post('https://zoffness.academy/api/practice_tests', submissionData);
 
       // Log the response in development environment
       if (process.env.NODE_ENV !== 'production') {
         console.log('API Response:', response.data);
+
       }
 
       if (response.data.success) {
