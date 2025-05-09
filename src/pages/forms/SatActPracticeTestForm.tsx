@@ -107,6 +107,7 @@ const SatActPracticeTestForm = () => {
       'student_email',
       'school',
       'grade'
+      // test_type is not included as it has a default value
     ];
 
     requiredFields.forEach(field => {
@@ -147,7 +148,7 @@ const SatActPracticeTestForm = () => {
       student_email: formData.student_email,
       school: formData.school,
       grade: parseInt(formData.grade, 10) || 0,
-      test_type: [formData.test_type], // Send as array as API expects
+      test_type: formData.test_type, // Send as string
       date: formData.test_date,
       test_time: '09:00:00',
       location: '510 West Boston Post Road',
@@ -276,22 +277,10 @@ const SatActPracticeTestForm = () => {
                     <div className="space-y-2">
                       <Label htmlFor="test_type">Select Test Type *</Label>
                       <Select
-                        onValueChange={(value) => {
-                          handleTestTypeChange(value);
-                          // Clear error when user selects a test type
-                          if (errors.test_type) {
-                            setErrors(prev => ({
-                              ...prev,
-                              test_type: false
-                            }));
-                          }
-                        }}
+                        onValueChange={handleTestTypeChange}
                         defaultValue="sat-regular"
                       >
-                        <SelectTrigger
-                          id="test_type"
-                          className={errors.test_type ? 'border-red-500' : ''}
-                        >
+                        <SelectTrigger id="test_type">
                           <SelectValue placeholder="Select test type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -301,9 +290,6 @@ const SatActPracticeTestForm = () => {
                           <SelectItem value="act-extended">Full-Length Proctored Practice ACT Test with 50% Extended Time - $95</SelectItem>
                         </SelectContent>
                       </Select>
-                      {errors.test_type && (
-                        <p className="text-red-500 text-xs mt-1">Please select a test type</p>
-                      )}
                     </div>
                   </div>
 
