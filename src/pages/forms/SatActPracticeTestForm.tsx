@@ -33,9 +33,16 @@ const SatActPracticeTestForm = () => {
     const fetchSessions = async () => {
       try {
         const response = await axios.get('https://zoffness.academy/api/get_sessions');
+        // Log the API response for debugging
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('API Response:', response.data);
+        }
+
         if (response.data.success && Array.isArray(response.data.data)) {
           // Filter sessions to only include practice test-related ones (exclude diagnostic tests)
           const practiceTestSessions = response.data.data.filter((session: Session) =>
+            session.name &&
+            typeof session.name === 'string' &&
             session.name.toLowerCase().includes('practice') &&
             !session.name.toLowerCase().includes('diagnostic')
           );
@@ -50,6 +57,13 @@ const SatActPracticeTestForm = () => {
         }
       } catch (error) {
         console.error('Error fetching sessions:', error);
+
+        // Log more detailed information about the response
+        if (axios.isAxiosError(error)) {
+          console.error('API Error Response:', error.response?.data);
+          console.error('API Error Status:', error.response?.status);
+        }
+
         toast({
           title: 'Warning',
           description: 'Could not load test options from server. Using default options.',
