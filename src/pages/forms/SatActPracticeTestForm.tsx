@@ -77,21 +77,7 @@ const SatActPracticeTestForm = () => {
     fetchSessions();
   }, [toast]);
 
-  // Define test types with their prices and IDs (fallback)
-  const testTypePrices = {
-    '1': 95,  // SAT Regular Time (ID: 1)
-    '2': 95,  // SAT Extended Time (ID: 2)
-    '3': 95,  // ACT Regular Time (ID: 3)
-    '4': 95   // ACT Extended Time (ID: 4)
-  };
-
-  // Map display names to test type IDs (fallback)
-  const testTypeMap = {
-    'sat': '1',
-    'sat-extended': '2',
-    'act': '3',
-    'act-extended': '4'
-  };
+  // We're now using the API for test types and prices
 
   // Define validation state
   const [errors, setErrors] = useState<{[key: string]: boolean}>({});
@@ -106,10 +92,10 @@ const SatActPracticeTestForm = () => {
     student_email: '',
     school: '',
     grade: '',
-    test_type: '1', // Using ID 1 for SAT Regular Time
-    session_id: '', // For API session ID
+    test_type: '',
+    session_id: '',
     test_date: '',
-    amount: testTypePrices['1'].toString(),
+    amount: '0',
     payment_status: 'Success',
     course_type: 'SAT/ACT Practice Test'
   });
@@ -131,28 +117,17 @@ const SatActPracticeTestForm = () => {
   };
 
   const handleTestTypeChange = (value: string) => {
-    // First check if the value is a session ID from the API
+    if (!value) return; // Don't update if no value is provided
+
+    // Find the selected session from the API
     const selectedSession = sessions.find(session => session.id.toString() === value);
 
     if (selectedSession) {
-      // If it's a session from the API
       setFormData(prev => ({
         ...prev,
         session_id: selectedSession.id.toString(),
         test_type: selectedSession.id.toString(), // Use session ID as test_type
         amount: parseFloat(selectedSession.price).toString()
-      }));
-    } else {
-      // Fallback to hardcoded values if API sessions aren't available
-      // Convert display value to test type ID
-      const testTypeId = testTypeMap[value as keyof typeof testTypeMap] || '1';
-      const price = testTypePrices[testTypeId] || 95;
-
-      setFormData(prev => ({
-        ...prev,
-        session_id: '',
-        test_type: testTypeId,
-        amount: price.toString()
       }));
     }
   };
@@ -298,10 +273,10 @@ const SatActPracticeTestForm = () => {
           student_email: '',
           school: '',
           grade: '',
-          test_type: '1',
+          test_type: '',
           session_id: '',
           test_date: '',
-          amount: testTypePrices['1'].toString(),
+          amount: '0',
           payment_status: 'Success',
           course_type: 'SAT/ACT Practice Test'
         });
@@ -334,10 +309,10 @@ const SatActPracticeTestForm = () => {
             student_email: '',
             school: '',
             grade: '',
-            test_type: '1',
+            test_type: '',
             session_id: '',
             test_date: '',
-            amount: testTypePrices['1'].toString(),
+            amount: '0',
             payment_status: 'Success',
             course_type: 'SAT/ACT Practice Test'
           });
@@ -446,7 +421,7 @@ const SatActPracticeTestForm = () => {
                       ) : (
                         <Select
                           onValueChange={handleTestTypeChange}
-                          defaultValue={sessions.length > 0 ? sessions[0].id.toString() : "sat"}
+                          defaultValue={sessions.length > 0 ? sessions[0].id.toString() : ""}
                         >
                           <SelectTrigger id="test_type">
                             <SelectValue placeholder="Select test type" />
@@ -460,13 +435,10 @@ const SatActPracticeTestForm = () => {
                                 </SelectItem>
                               ))
                             ) : (
-                              // Fallback to hardcoded options if API fails
-                              <>
-                                <SelectItem value="sat">Full-Length Proctored Practice SAT Test with Regular Time - $95</SelectItem>
-                                <SelectItem value="sat-extended">Full-Length Proctored Practice SAT Test with 50% Extended Time - $95</SelectItem>
-                                <SelectItem value="act">Full-Length Proctored Practice ACT Test with Regular Time - $95</SelectItem>
-                                <SelectItem value="act-extended">Full-Length Proctored Practice ACT Test with 50% Extended Time - $95</SelectItem>
-                              </>
+                              // Show message when no sessions are available
+                              <SelectItem value="" disabled>
+                                No test options available. Please try again later.
+                              </SelectItem>
                             )}
                           </SelectContent>
                         </Select>

@@ -88,7 +88,7 @@ const SatActDiagnosticForm = () => {
     grade: '',
     packages: '',
     session_id: '',
-    total_amount: 180,
+    total_amount: 0,
     payment_status: 'Success'
   });
 
@@ -101,24 +101,17 @@ const SatActDiagnosticForm = () => {
   };
 
   const handleRadioChange = (value: string) => {
-    // Check if the value is a session ID from the API
+    if (!value) return; // Don't update if no value is provided
+
+    // Find the selected session from the API
     const selectedSession = sessions.find(session => session.id.toString() === value);
 
     if (selectedSession) {
-      // If it's a session from the API
       setFormData(prev => ({
         ...prev,
         session_id: selectedSession.id.toString(),
         packages: selectedSession.name,
         total_amount: parseFloat(selectedSession.price)
-      }));
-    } else {
-      // Fallback to hardcoded values if API sessions aren't available
-      setFormData(prev => ({
-        ...prev,
-        session_id: '',
-        packages: value,
-        total_amount: 180 // Default price for diagnostic tests
       }));
     }
   };
@@ -156,7 +149,7 @@ const SatActDiagnosticForm = () => {
           grade: '',
           packages: '',
           session_id: '',
-          total_amount: 180,
+          total_amount: 0,
           payment_status: 'Success'
         });
       }
@@ -217,7 +210,7 @@ const SatActDiagnosticForm = () => {
                       </div>
                     ) : (
                       <RadioGroup
-                        defaultValue={sessions.length > 0 ? sessions[0].id.toString() : "both-standard"}
+                        defaultValue={sessions.length > 0 ? sessions[0].id.toString() : ""}
                         onValueChange={handleRadioChange}
                       >
                         {sessions.length > 0 ? (
@@ -231,17 +224,10 @@ const SatActDiagnosticForm = () => {
                             </div>
                           ))
                         ) : (
-                          // Fallback to hardcoded options if API fails
-                          <>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="both-standard" id="both-standard" />
-                              <Label htmlFor="both-standard">Full-Length Proctored Diagnostic SAT/ACT Assessment - $180</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="both-extended" id="both-extended" />
-                              <Label htmlFor="both-extended">Full-Length Proctored Diagnostic SAT/ACT Assessment with 50% Extended Time - $180</Label>
-                            </div>
-                          </>
+                          // Show message when no sessions are available
+                          <div className="text-center py-2 text-gray-500">
+                            No test options available. Please try again later.
+                          </div>
                         )}
                       </RadioGroup>
                     )}
