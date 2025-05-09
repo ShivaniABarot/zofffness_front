@@ -164,13 +164,7 @@ const SatActPracticeTestForm = () => {
     }
 
     try {
-      // Make sure the API endpoint is correct
-      const response = await axios.post('https://zoffness.academy/api/practice_tests', submissionData);
-
-      // Log the response in development environment
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('API Response:', response.data);
-      }
+      const response = await axios.post('https://zoffness.academy/api/new_sat_act', submissionData);
 
       if (response.data.success) {
         toast({
