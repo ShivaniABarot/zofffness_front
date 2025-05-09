@@ -21,6 +21,9 @@ const SatActPracticeTestForm = () => {
     'act-extended': 95
   };
 
+  // Define validation state
+  const [errors, setErrors] = useState<{[key: string]: boolean}>({});
+
   const [formData, setFormData] = useState({
     parent_first_name: '',
     parent_last_name: '',
@@ -44,6 +47,14 @@ const SatActPracticeTestForm = () => {
       ...prev,
       [id]: value
     }));
+
+    // Clear error for this field when user types
+    if (errors[id]) {
+      setErrors(prev => ({
+        ...prev,
+        [id]: false
+      }));
+    }
   };
 
   const handleTestTypeChange = ( value: string) => {
@@ -81,11 +92,44 @@ const SatActPracticeTestForm = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    // Validate all required fields
+    const newErrors: {[key: string]: boolean} = {};
+    let hasErrors = false;
+
+    // Check required fields
+    const requiredFields = [
+      'parent_first_name',
+      'parent_last_name',
+      'parent_phone',
+      'parent_email',
+      'student_first_name',
+      'student_last_name',
+      'student_email',
+      'school',
+      'grade'
+    ];
+
+    requiredFields.forEach(field => {
+      if (!formData[field as keyof typeof formData]) {
+        newErrors[field] = true;
+        hasErrors = true;
+      }
+    });
+
+    // Check test date
     if (!formData.test_date) {
+      newErrors.test_date = true;
+      hasErrors = true;
+    }
+
+    // Update error state
+    setErrors(newErrors);
+
+    if (hasErrors) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Please select a test date',
+        title: 'Validation Error',
+        description: 'Please fill in all required fields',
       });
       return;
     }
@@ -103,7 +147,7 @@ const SatActPracticeTestForm = () => {
       student_email: formData.student_email,
       school: formData.school,
       grade: parseInt(formData.grade, 10) || 0,
-      test_type: formData.test_type,
+      test_type: [formData.test_type], // Send as array as API expects
       date: formData.test_date,
       test_time: '09:00:00',
       location: '510 West Boston Post Road',
@@ -231,8 +275,23 @@ const SatActPracticeTestForm = () => {
 
                     <div className="space-y-2">
                       <Label htmlFor="test_type">Select Test Type *</Label>
-                      <Select onValueChange={handleTestTypeChange} defaultValue="sat-regular">
-                        <SelectTrigger id="test_type">
+                      <Select
+                        onValueChange={(value) => {
+                          handleTestTypeChange(value);
+                          // Clear error when user selects a test type
+                          if (errors.test_type) {
+                            setErrors(prev => ({
+                              ...prev,
+                              test_type: false
+                            }));
+                          }
+                        }}
+                        defaultValue="sat-regular"
+                      >
+                        <SelectTrigger
+                          id="test_type"
+                          className={errors.test_type ? 'border-red-500' : ''}
+                        >
                           <SelectValue placeholder="Select test type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -242,6 +301,9 @@ const SatActPracticeTestForm = () => {
                           <SelectItem value="act-extended">Full-Length Proctored Practice ACT Test with 50% Extended Time - $95</SelectItem>
                         </SelectContent>
                       </Select>
+                      {errors.test_type && (
+                        <p className="text-red-500 text-xs mt-1">Please select a test type</p>
+                      )}
                     </div>
                   </div>
 
@@ -252,8 +314,23 @@ const SatActPracticeTestForm = () => {
 
                     <div className="space-y-2">
                       <Label htmlFor="test_date">Select Test Date *</Label>
-                      <Select onValueChange={handleTestDateChange} required>
-                        <SelectTrigger id="test_date">
+                      <Select
+                        onValueChange={(value) => {
+                          handleTestDateChange(value);
+                          // Clear error when user selects a date
+                          if (errors.test_date) {
+                            setErrors(prev => ({
+                              ...prev,
+                              test_date: false
+                            }));
+                          }
+                        }}
+                        required
+                      >
+                        <SelectTrigger
+                          id="test_date"
+                          className={errors.test_date ? 'border-red-500' : ''}
+                        >
                           <SelectValue placeholder="Select test date" />
                         </SelectTrigger>
                         <SelectContent>
@@ -272,6 +349,9 @@ const SatActPracticeTestForm = () => {
                           <SelectItem value="june28">Saturday, June 28th @ 9am at Zoffness College Prep</SelectItem>
                         </SelectContent>
                       </Select>
+                      {errors.test_date && (
+                        <p className="text-red-500 text-xs mt-1">Please select a test date</p>
+                      )}
                       <p className="text-xs text-gray-500 mt-1">All tests are held at 510 West Boston Post Road</p>
                     </div>
                   </div>
@@ -287,8 +367,12 @@ const SatActPracticeTestForm = () => {
                           id="parent_first_name"
                           value={formData.parent_first_name}
                           onChange={handleInputChange}
+                          className={errors.parent_first_name ? 'border-red-500' : ''}
                           required
                         />
+                        {errors.parent_first_name && (
+                          <p className="text-red-500 text-xs mt-1">This field is required</p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
@@ -297,8 +381,12 @@ const SatActPracticeTestForm = () => {
                           id="parent_last_name"
                           value={formData.parent_last_name}
                           onChange={handleInputChange}
+                          className={errors.parent_last_name ? 'border-red-500' : ''}
                           required
                         />
+                        {errors.parent_last_name && (
+                          <p className="text-red-500 text-xs mt-1">This field is required</p>
+                        )}
                       </div>
                     </div>
 
@@ -309,8 +397,12 @@ const SatActPracticeTestForm = () => {
                         type="tel"
                         value={formData.parent_phone}
                         onChange={handleInputChange}
+                        className={errors.parent_phone ? 'border-red-500' : ''}
                         required
                       />
+                      {errors.parent_phone && (
+                        <p className="text-red-500 text-xs mt-1">This field is required</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -320,8 +412,12 @@ const SatActPracticeTestForm = () => {
                         type="email"
                         value={formData.parent_email}
                         onChange={handleInputChange}
+                        className={errors.parent_email ? 'border-red-500' : ''}
                         required
                       />
+                      {errors.parent_email && (
+                        <p className="text-red-500 text-xs mt-1">This field is required</p>
+                      )}
                     </div>
                   </div>
 
@@ -336,8 +432,12 @@ const SatActPracticeTestForm = () => {
                           id="student_first_name"
                           value={formData.student_first_name}
                           onChange={handleInputChange}
+                          className={errors.student_first_name ? 'border-red-500' : ''}
                           required
                         />
+                        {errors.student_first_name && (
+                          <p className="text-red-500 text-xs mt-1">This field is required</p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
@@ -346,8 +446,12 @@ const SatActPracticeTestForm = () => {
                           id="student_last_name"
                           value={formData.student_last_name}
                           onChange={handleInputChange}
+                          className={errors.student_last_name ? 'border-red-500' : ''}
                           required
                         />
+                        {errors.student_last_name && (
+                          <p className="text-red-500 text-xs mt-1">This field is required</p>
+                        )}
                       </div>
                     </div>
 
@@ -358,8 +462,12 @@ const SatActPracticeTestForm = () => {
                         type="email"
                         value={formData.student_email}
                         onChange={handleInputChange}
+                        className={errors.student_email ? 'border-red-500' : ''}
                         required
                       />
+                      {errors.student_email && (
+                        <p className="text-red-500 text-xs mt-1">This field is required</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -368,8 +476,12 @@ const SatActPracticeTestForm = () => {
                         id="school"
                         value={formData.school}
                         onChange={handleInputChange}
+                        className={errors.school ? 'border-red-500' : ''}
                         required
                       />
+                      {errors.school && (
+                        <p className="text-red-500 text-xs mt-1">This field is required</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -378,8 +490,12 @@ const SatActPracticeTestForm = () => {
                         id="grade"
                         value={formData.grade}
                         onChange={handleInputChange}
+                        className={errors.grade ? 'border-red-500' : ''}
                         required
                       />
+                      {errors.grade && (
+                        <p className="text-red-500 text-xs mt-1">This field is required</p>
+                      )}
                     </div>
                   </div>
 
