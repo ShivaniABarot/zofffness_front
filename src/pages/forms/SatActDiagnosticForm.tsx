@@ -14,9 +14,10 @@ import SuccessScreen from '../../components/SuccessScreen';
 // Define interface for session data
 interface Session {
   id: number;
-  name: string;
-  price: string;
+  title: string;
+  price_per_slot: string;
   description?: string;
+  session_type: string;
   created_at: string;
   updated_at: string;
 }
@@ -41,9 +42,9 @@ const SatActDiagnosticForm = () => {
         if (response.data.success && Array.isArray(response.data.data)) {
           // Filter sessions to only include diagnostic-related ones
           const diagnosticSessions = response.data.data.filter((session: Session) =>
-            session.name &&
-            typeof session.name === 'string' &&
-            session.name.toLowerCase().includes('diagnostic')
+            session.title &&
+            typeof session.title === 'string' &&
+            session.title.toLowerCase().includes('diagnostic')
           );
           setSessions(diagnosticSessions);
         } else {
@@ -110,8 +111,8 @@ const SatActDiagnosticForm = () => {
       setFormData(prev => ({
         ...prev,
         session_id: selectedSession.id.toString(),
-        packages: selectedSession.name,
-        total_amount: parseFloat(selectedSession.price)
+        packages: selectedSession.title,
+        total_amount: parseFloat(selectedSession.price_per_slot)
       }));
     }
   };
@@ -219,7 +220,7 @@ const SatActDiagnosticForm = () => {
                             <div key={session.id} className="flex items-center space-x-2">
                               <RadioGroupItem value={session.id.toString()} id={`session-${session.id}`} />
                               <Label htmlFor={`session-${session.id}`}>
-                                {session.name} - ${parseFloat(session.price).toFixed(2)}
+                                {session.title} - ${parseFloat(session.price_per_slot).toFixed(2)}
                               </Label>
                             </div>
                           ))

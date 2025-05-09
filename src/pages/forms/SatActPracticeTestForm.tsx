@@ -14,9 +14,10 @@ import SuccessScreen from '../../components/SuccessScreen';
 // Define interface for session data
 interface Session {
   id: number;
-  name: string;
-  price: string;
+  title: string;
+  price_per_slot: string;
   description?: string;
+  session_type: string;
   created_at: string;
   updated_at: string;
 }
@@ -41,10 +42,10 @@ const SatActPracticeTestForm = () => {
         if (response.data.success && Array.isArray(response.data.data)) {
           // Filter sessions to only include practice test-related ones (exclude diagnostic tests)
           const practiceTestSessions = response.data.data.filter((session: Session) =>
-            session.name &&
-            typeof session.name === 'string' &&
-            session.name.toLowerCase().includes('practice') &&
-            !session.name.toLowerCase().includes('diagnostic')
+            session.title &&
+            typeof session.title === 'string' &&
+            session.title.toLowerCase().includes('practice') &&
+            !session.title.toLowerCase().includes('diagnostic')
           );
           setSessions(practiceTestSessions);
         } else {
@@ -127,7 +128,7 @@ const SatActPracticeTestForm = () => {
         ...prev,
         session_id: selectedSession.id.toString(),
         test_type: selectedSession.id.toString(), // Use session ID as test_type
-        amount: parseFloat(selectedSession.price).toString()
+        amount: parseFloat(selectedSession.price_per_slot).toString()
       }));
     }
   };
@@ -421,7 +422,7 @@ const SatActPracticeTestForm = () => {
                       ) : (
                         <Select
                           onValueChange={handleTestTypeChange}
-                          defaultValue={sessions.length > 0 ? sessions[0].id.toString() : ""}
+                          defaultValue={sessions.length > 0 ? sessions[0].id.toString() : "no-options"}
                         >
                           <SelectTrigger id="test_type">
                             <SelectValue placeholder="Select test type" />
@@ -431,12 +432,12 @@ const SatActPracticeTestForm = () => {
                               // Render sessions from API
                               sessions.map((session) => (
                                 <SelectItem key={session.id} value={session.id.toString()}>
-                                  {session.name} - ${parseFloat(session.price).toFixed(2)}
+                                  {session.title} - ${parseFloat(session.price_per_slot).toFixed(2)}
                                 </SelectItem>
                               ))
                             ) : (
                               // Show message when no sessions are available
-                              <SelectItem value="" disabled>
+                              <SelectItem value="no-options" disabled>
                                 No test options available. Please try again later.
                               </SelectItem>
                             )}
