@@ -42,7 +42,7 @@ const CollegeEssaysForm = () => {
     student_first_name: '',
     student_last_name: '',
     student_email: '',
-    school: '',
+    // Removing school field as it's not in the database
     graduation_year: '',
     packages: 'one-session',
     session: packagePrices['one-session'],
@@ -83,7 +83,7 @@ const CollegeEssaysForm = () => {
       student_first_name: formData.student_first_name,
       student_last_name: formData.student_last_name,
       student_email: formData.student_email,
-      school: formData.school,
+      // Removed school field as it's not in the database
       graduation_year: formData.graduation_year,
       packages: formData.packages,
       session: formData.session,
@@ -132,7 +132,6 @@ const CollegeEssaysForm = () => {
           student_first_name: '',
           student_last_name: '',
           student_email: '',
-          school: '',
           graduation_year: '',
           packages: 'one-session',
           session: packagePrices['one-session'],
@@ -169,7 +168,6 @@ const CollegeEssaysForm = () => {
             student_first_name: '',
             student_last_name: '',
             student_email: '',
-            school: '',
             graduation_year: '',
             packages: 'one-session',
             session: packagePrices['one-session'],
@@ -466,15 +464,7 @@ const CollegeEssaysForm = () => {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="school">Current School *</Label>
-                      <Input
-                        id="school"
-                        value={formData.school}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
+                    {/* Removed school field as it's not in the database */}
 
                     <div className="space-y-2">
                       <Label htmlFor="graduation_year">Expected Graduation Year *</Label>
