@@ -14,10 +14,11 @@ const SatActPracticeTestForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  // Define test types with their prices
   const testTypePrices = {
-    'sat-regular': 95,
+    'sat': 95,         // Changed from 'sat-regular' to 'sat'
     'sat-extended': 95,
-    'act-regular': 95,
+    'act': 95,         // Changed from 'act-regular' to 'act'
     'act-extended': 95
   };
 
@@ -34,9 +35,9 @@ const SatActPracticeTestForm = () => {
     student_email: '',
     school: '',
     grade: '',
-    test_type: 'sat-regular',
+    test_type: 'sat', // Changed from 'sat-regular' to 'sat'
     test_date: '',
-    amount: testTypePrices['sat-regular'].toString(),
+    amount: testTypePrices['sat'].toString(),
     payment_status: 'Success',
     course_type: 'SAT/ACT Practice Test'
   });
@@ -187,9 +188,9 @@ const SatActPracticeTestForm = () => {
           student_email: '',
           school: '',
           grade: '',
-          test_type: 'sat-regular',
+          test_type: 'sat',
           test_date: '',
-          amount: testTypePrices['sat-regular'].toString(),
+          amount: testTypePrices['sat'].toString(),
           payment_status: 'Success',
           course_type: 'SAT/ACT Practice Test'
         });
@@ -278,15 +279,15 @@ const SatActPracticeTestForm = () => {
                       <Label htmlFor="test_type">Select Test Type *</Label>
                       <Select
                         onValueChange={handleTestTypeChange}
-                        defaultValue="sat-regular"
+                        defaultValue="sat"
                       >
                         <SelectTrigger id="test_type">
                           <SelectValue placeholder="Select test type" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="sat-regular">Full-Length Proctored Practice SAT Test with Regular Time - $95</SelectItem>
+                          <SelectItem value="sat">Full-Length Proctored Practice SAT Test with Regular Time - $95</SelectItem>
                           <SelectItem value="sat-extended">Full-Length Proctored Practice SAT Test with 50% Extended Time - $95</SelectItem>
-                          <SelectItem value="act-regular">Full-Length Proctored Practice ACT Test with Regular Time - $95</SelectItem>
+                          <SelectItem value="act">Full-Length Proctored Practice ACT Test with Regular Time - $95</SelectItem>
                           <SelectItem value="act-extended">Full-Length Proctored Practice ACT Test with 50% Extended Time - $95</SelectItem>
                         </SelectContent>
                       </Select>
