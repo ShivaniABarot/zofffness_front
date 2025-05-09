@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { Button } from '../../components/ui/button';
@@ -9,13 +9,61 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Loader2 } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
 import axios from 'axios';
+import SuccessScreen from '../../components/SuccessScreen';
+
+// Define interface for session data
+interface Session {
+  id: number;
+  name: string;
+  price: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
 
 const SatActPracticeTestForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [isLoadingSessions, setIsLoadingSessions] = useState(true);
   const { toast } = useToast();
 
-  // Define test types with their prices and IDs
+  // Fetch sessions from API
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        const response = await axios.get('https://zoffness.academy/api/get_sessions');
+        if (response.data.success && Array.isArray(response.data.data)) {
+          // Filter sessions to only include practice test-related ones (exclude diagnostic tests)
+          const practiceTestSessions = response.data.data.filter((session: Session) =>
+            session.name.toLowerCase().includes('practice') &&
+            !session.name.toLowerCase().includes('diagnostic')
+          );
+          setSessions(practiceTestSessions);
+        } else {
+          console.error('Failed to fetch sessions or invalid data format');
+          toast({
+            title: 'Warning',
+            description: 'Could not load test options from server. Using default options.',
+            variant: 'destructive',
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching sessions:', error);
+        toast({
+          title: 'Warning',
+          description: 'Could not load test options from server. Using default options.',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoadingSessions(false);
+      }
+    };
+
+    fetchSessions();
+  }, [toast]);
+
+  // Define test types with their prices and IDs (fallback)
   const testTypePrices = {
     '1': 95,  // SAT Regular Time (ID: 1)
     '2': 95,  // SAT Extended Time (ID: 2)
@@ -23,7 +71,7 @@ const SatActPracticeTestForm = () => {
     '4': 95   // ACT Extended Time (ID: 4)
   };
 
-  // Map display names to test type IDs
+  // Map display names to test type IDs (fallback)
   const testTypeMap = {
     'sat': '1',
     'sat-extended': '2',
@@ -45,6 +93,7 @@ const SatActPracticeTestForm = () => {
     school: '',
     grade: '',
     test_type: '1', // Using ID 1 for SAT Regular Time
+    session_id: '', // For API session ID
     test_date: '',
     amount: testTypePrices['1'].toString(),
     payment_status: 'Success',
@@ -68,15 +117,30 @@ const SatActPracticeTestForm = () => {
   };
 
   const handleTestTypeChange = (value: string) => {
-    // Convert display value to test type ID
-    const testTypeId = testTypeMap[value as keyof typeof testTypeMap] || '1';
-    const price = testTypePrices[testTypeId] || 95;
+    // First check if the value is a session ID from the API
+    const selectedSession = sessions.find(session => session.id.toString() === value);
 
-    setFormData(prev => ({
-      ...prev,
-      test_type: testTypeId,
-      amount: price.toString()
-    }));
+    if (selectedSession) {
+      // If it's a session from the API
+      setFormData(prev => ({
+        ...prev,
+        session_id: selectedSession.id.toString(),
+        test_type: selectedSession.id.toString(), // Use session ID as test_type
+        amount: parseFloat(selectedSession.price).toString()
+      }));
+    } else {
+      // Fallback to hardcoded values if API sessions aren't available
+      // Convert display value to test type ID
+      const testTypeId = testTypeMap[value as keyof typeof testTypeMap] || '1';
+      const price = testTypePrices[testTypeId] || 95;
+
+      setFormData(prev => ({
+        ...prev,
+        session_id: '',
+        test_type: testTypeId,
+        amount: price.toString()
+      }));
+    }
   };
 
   const testDateMap: { [key: string]: string } = {
@@ -161,6 +225,8 @@ const SatActPracticeTestForm = () => {
       student_email: formData.student_email,
       school: formData.school,
       grade: parseInt(formData.grade, 10) || 0,
+      // Include session_id from API if available
+      session_id: formData.session_id || null,
       // Format test_type as an array of integers
       test_type: [parseInt(formData.test_type, 10)],
       date: formData.test_date,
@@ -219,6 +285,7 @@ const SatActPracticeTestForm = () => {
           school: '',
           grade: '',
           test_type: '1',
+          session_id: '',
           test_date: '',
           amount: testTypePrices['1'].toString(),
           payment_status: 'Success',
@@ -254,6 +321,7 @@ const SatActPracticeTestForm = () => {
             school: '',
             grade: '',
             test_type: '1',
+            session_id: '',
             test_date: '',
             amount: testTypePrices['1'].toString(),
             payment_status: 'Success',
@@ -342,33 +410,10 @@ const SatActPracticeTestForm = () => {
             </h1>
 
             {isSubmitted ? (
-              <Card className="border-green-500">
-                <CardContent className="p-6">
-                  <div className="text-center py-8 space-y-4">
-                    <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <h2 className="text-2xl font-bold text-green-600">Registration Successful!</h2>
-                    <p className="text-gray-600 font-medium">
-                      Registration successful!
-                    </p>
-                    <p className="text-gray-600">
-                      Thank you for registering for the SAT/ACT Practice Test. We have received your information.
-                    </p>
-                    <p className="text-gray-600">
-                      You will receive a confirmation email shortly with additional details.
-                    </p>
-                    <Button
-                      className="mt-4 bg-college-blue-500 hover:bg-college-blue-600"
-                      onClick={() => setIsSubmitted(false)}
-                    >
-                      Register Another Student
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <SuccessScreen
+                serviceName="SAT/ACT Practice Test"
+                onRegisterAnother={() => setIsSubmitted(false)}
+              />
             ) : (
               <Card>
                 <CardContent className="p-6">
@@ -379,20 +424,39 @@ const SatActPracticeTestForm = () => {
 
                     <div className="space-y-2">
                       <Label htmlFor="test_type">Select Test Type *</Label>
-                      <Select
-                        onValueChange={handleTestTypeChange}
-                        defaultValue="sat"
-                      >
-                        <SelectTrigger id="test_type">
-                          <SelectValue placeholder="Select test type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="sat">Full-Length Proctored Practice SAT Test with Regular Time - $95</SelectItem>
-                          <SelectItem value="sat-extended">Full-Length Proctored Practice SAT Test with 50% Extended Time - $95</SelectItem>
-                          <SelectItem value="act">Full-Length Proctored Practice ACT Test with Regular Time - $95</SelectItem>
-                          <SelectItem value="act-extended">Full-Length Proctored Practice ACT Test with 50% Extended Time - $95</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      {isLoadingSessions ? (
+                        <div className="flex items-center py-2">
+                          <Loader2 className="h-4 w-4 animate-spin text-college-blue-500 mr-2" />
+                          <span className="text-sm text-college-blue-500">Loading test options...</span>
+                        </div>
+                      ) : (
+                        <Select
+                          onValueChange={handleTestTypeChange}
+                          defaultValue={sessions.length > 0 ? sessions[0].id.toString() : "sat"}
+                        >
+                          <SelectTrigger id="test_type">
+                            <SelectValue placeholder="Select test type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {sessions.length > 0 ? (
+                              // Render sessions from API
+                              sessions.map((session) => (
+                                <SelectItem key={session.id} value={session.id.toString()}>
+                                  {session.name} - ${parseFloat(session.price).toFixed(2)}
+                                </SelectItem>
+                              ))
+                            ) : (
+                              // Fallback to hardcoded options if API fails
+                              <>
+                                <SelectItem value="sat">Full-Length Proctored Practice SAT Test with Regular Time - $95</SelectItem>
+                                <SelectItem value="sat-extended">Full-Length Proctored Practice SAT Test with 50% Extended Time - $95</SelectItem>
+                                <SelectItem value="act">Full-Length Proctored Practice ACT Test with Regular Time - $95</SelectItem>
+                                <SelectItem value="act-extended">Full-Length Proctored Practice ACT Test with 50% Extended Time - $95</SelectItem>
+                              </>
+                            )}
+                          </SelectContent>
+                        </Select>
+                      )}
                     </div>
                   </div>
 
