@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { Button } from '../../components/ui/button';
@@ -10,13 +10,26 @@ import { Loader2 } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
 import axios from 'axios';
 
+// Define interface for package data
+interface Package {
+  id: number;
+  name: string;
+  price: string;
+  number_of_sessions: number;
+  description: string;
+  created_at: string;
+  updated_at: string;
+}
+
 const CollegeAdmissionsForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [isLoadingPackages, setIsLoadingPackages] = useState(true);
   const { toast } = useToast();
 
-  // Define package prices
+  // Fallback package prices (used if API fails)
   const packagePrices = {
     'initial': 250,
     'five': 1250,
@@ -25,7 +38,7 @@ const CollegeAdmissionsForm = () => {
     'twenty': 5000
   };
 
-  // Package name mapping for display
+  // Fallback package name mapping (used if API fails)
   const packageNames = {
     'initial': 'Initial Intake',
     'five': 'Five Session Package',
@@ -33,6 +46,36 @@ const CollegeAdmissionsForm = () => {
     'fifteen': 'Fifteen Session Package',
     'twenty': 'Twenty Session Package'
   };
+
+  // Fetch packages from API
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const response = await axios.get('https://zoffness.academy/api/get_packages');
+        if (response.data.success && Array.isArray(response.data.data)) {
+          setPackages(response.data.data);
+        } else {
+          console.error('Failed to fetch packages or invalid data format');
+          toast({
+            title: 'Warning',
+            description: 'Could not load packages from server. Using default packages.',
+            variant: 'destructive',
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching packages:', error);
+        toast({
+          title: 'Warning',
+          description: 'Could not load packages from server. Using default packages.',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoadingPackages(false);
+      }
+    };
+
+    fetchPackages();
+  }, [toast]);
 
   const [formData, setFormData] = useState({
     parent_first_name: '',
@@ -45,6 +88,7 @@ const CollegeAdmissionsForm = () => {
     school: '',
     grade: '',
     graduation_year: '',
+    package_id: '',
     package_name: 'initial',
     amount: packagePrices['initial'],
     payment_status: 'Success',
@@ -60,14 +104,29 @@ const CollegeAdmissionsForm = () => {
   };
 
   const handlePackageChange = (value: string) => {
-    // Get the price for the selected package
-    const price = packagePrices[value as keyof typeof packagePrices] || 250;
+    // Check if the value is a package ID from the API
+    const selectedPackage = packages.find(pkg => pkg.id.toString() === value);
 
-    setFormData(prev => ({
-      ...prev,
-      package_name: value,
-      amount: price
-    }));
+    if (selectedPackage) {
+      // If it's a package from the API
+      setFormData(prev => ({
+        ...prev,
+        package_id: selectedPackage.id.toString(),
+        package_name: selectedPackage.name,
+        amount: parseFloat(selectedPackage.price)
+      }));
+    } else {
+      // Fallback to hardcoded packages if API packages aren't available
+      const price = packagePrices[value as keyof typeof packagePrices] || 250;
+      const name = packageNames[value as keyof typeof packageNames] || 'Initial Intake';
+
+      setFormData(prev => ({
+        ...prev,
+        package_id: '',
+        package_name: value,
+        amount: price
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -87,6 +146,7 @@ const CollegeAdmissionsForm = () => {
       school: formData.school,
       grade: formData.grade,
       graduation_year: formData.graduation_year,
+      package_id: formData.package_id, // Add package_id from API
       package_type: formData.package_name,
       subtotal: formData.amount,
       payment_status: formData.payment_status,
@@ -138,6 +198,7 @@ const CollegeAdmissionsForm = () => {
           school: '',
           grade: '',
           graduation_year: '',
+          package_id: '',
           package_name: 'initial',
           amount: packagePrices['initial'],
           payment_status: 'Success',
@@ -176,6 +237,7 @@ const CollegeAdmissionsForm = () => {
             school: '',
             grade: '',
             graduation_year: '',
+            package_id: '',
             package_name: 'initial',
             amount: packagePrices['initial'],
             payment_status: 'Success',
@@ -205,6 +267,7 @@ const CollegeAdmissionsForm = () => {
               school: '',
               grade: '',
               graduation_year: '',
+              package_id: '',
               package_name: 'initial',
               amount: packagePrices['initial'],
               payment_status: 'Success',
@@ -349,90 +412,131 @@ const CollegeAdmissionsForm = () => {
                   <div className="space-y-6">
                     <h2 className="text-xl font-semibold text-college-blue-500">COLLEGE ADMISSIONS COUNSELING PACKAGES</h2>
 
-                    <RadioGroup defaultValue="initial" onValueChange={handlePackageChange}>
-                      {/* Initial Intake Package */}
-                      <div className="mb-6 border rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-start space-x-2">
-                          <RadioGroupItem value="initial" id="initial" className="mt-1" />
-                          <div className="flex-1">
-                            <Label htmlFor="initial" className="font-semibold text-lg">INITIAL INTAKE - ${packagePrices.initial}</Label>
-                            <ul className="list-disc pl-5 text-sm text-gray-700 mt-2 space-y-1">
-                              <li>Personal meeting with student and parents to assess college and career goals.</li>
-                              <li>Review of the student's academic record, standardized test scores, extra-curricular activities and personal interests.</li>
-                              <li>Feedback and recommendations on how to most effectively reach objectives.</li>
-                              <li>Create a timeline of when each task should be completed.</li>
-                            </ul>
-                          </div>
-                        </div>
+                    {isLoadingPackages ? (
+                      <div className="flex justify-center items-center py-8">
+                        <Loader2 className="h-8 w-8 animate-spin text-college-blue-500" />
+                        <span className="ml-2 text-college-blue-500">Loading packages...</span>
                       </div>
+                    ) : (
+                      <RadioGroup
+                        defaultValue={packages.length > 0 ? packages[0].id.toString() : "initial"}
+                        onValueChange={handlePackageChange}
+                      >
+                        {packages.length > 0 ? (
+                          // Render packages from API
+                          packages.map((pkg) => (
+                            <div key={pkg.id} className="mb-6 border rounded-lg p-4 hover:shadow-md transition-shadow">
+                              <div className="flex items-start space-x-2">
+                                <RadioGroupItem value={pkg.id.toString()} id={`package-${pkg.id}`} className="mt-1" />
+                                <div className="flex-1">
+                                  <Label htmlFor={`package-${pkg.id}`} className="font-semibold text-lg">
+                                    {pkg.name} - ${parseFloat(pkg.price).toFixed(2)}
+                                  </Label>
+                                  {pkg.number_of_sessions > 0 && (
+                                    <p className="text-sm text-gray-700 mt-1">
+                                      {pkg.number_of_sessions} {pkg.number_of_sessions === 1 ? 'session' : 'sessions'}
+                                    </p>
+                                  )}
+                                  {pkg.description && (
+                                    <div className="mt-2">
+                                      <div className="text-sm text-gray-700 mt-2 space-y-1"
+                                        dangerouslySetInnerHTML={{ __html: pkg.description }}
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          // Fallback to hardcoded packages if API fails
+                          <>
+                            {/* Initial Intake Package */}
+                            <div className="mb-6 border rounded-lg p-4 hover:shadow-md transition-shadow">
+                              <div className="flex items-start space-x-2">
+                                <RadioGroupItem value="initial" id="initial" className="mt-1" />
+                                <div className="flex-1">
+                                  <Label htmlFor="initial" className="font-semibold text-lg">INITIAL INTAKE - ${packagePrices.initial}</Label>
+                                  <ul className="list-disc pl-5 text-sm text-gray-700 mt-2 space-y-1">
+                                    <li>Personal meeting with student and parents to assess college and career goals.</li>
+                                    <li>Review of the student's academic record, standardized test scores, extra-curricular activities and personal interests.</li>
+                                    <li>Feedback and recommendations on how to most effectively reach objectives.</li>
+                                    <li>Create a timeline of when each task should be completed.</li>
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
 
-                      {/* Five Session Package */}
-                      <div className="mb-6 border rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-start space-x-2">
-                          <RadioGroupItem value="five" id="five" className="mt-1" />
-                          <div className="flex-1">
-                            <Label htmlFor="five" className="font-semibold text-lg">FIVE SESSION PACKAGE - ${packagePrices.five}</Label>
-                            <p className="text-sm text-gray-700 italic mt-1">* Includes the services above plus:</p>
-                            <ul className="list-disc pl-5 text-sm text-gray-700 mt-2 space-y-1">
-                              <li>Advising which standardized tests best showcase student's academic strengths.</li>
-                              <li>Exploring and developing a preliminary list of colleges and creating a schedule to tour various schools of interest.</li>
-                              <li>Finalizing college list of reach, target and safety schools.</li>
-                              <li>Assisting family to complete the required admissions documents.</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
+                            {/* Five Session Package */}
+                            <div className="mb-6 border rounded-lg p-4 hover:shadow-md transition-shadow">
+                              <div className="flex items-start space-x-2">
+                                <RadioGroupItem value="five" id="five" className="mt-1" />
+                                <div className="flex-1">
+                                  <Label htmlFor="five" className="font-semibold text-lg">FIVE SESSION PACKAGE - ${packagePrices.five}</Label>
+                                  <p className="text-sm text-gray-700 italic mt-1">* Includes the services above plus:</p>
+                                  <ul className="list-disc pl-5 text-sm text-gray-700 mt-2 space-y-1">
+                                    <li>Advising which standardized tests best showcase student's academic strengths.</li>
+                                    <li>Exploring and developing a preliminary list of colleges and creating a schedule to tour various schools of interest.</li>
+                                    <li>Finalizing college list of reach, target and safety schools.</li>
+                                    <li>Assisting family to complete the required admissions documents.</li>
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
 
-                      {/* Ten Session Package */}
-                      <div className="mb-6 border rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-start space-x-2">
-                          <RadioGroupItem value="ten" id="ten" className="mt-1" />
-                          <div className="flex-1">
-                            <Label htmlFor="ten" className="font-semibold text-lg">TEN SESSION PACKAGE - ${packagePrices.ten}</Label>
-                            <p className="text-sm text-gray-700 italic mt-1">* Includes the services above plus:</p>
-                            <ul className="list-disc pl-5 text-sm text-gray-700 mt-2 space-y-1">
-                              <li>Recommending high school courses that parallel students interests and goals.</li>
-                              <li>Integrating extra-curricular activities to demonstrate strong character.</li>
-                              <li>Helping students to choose internships or volunteer work</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
+                            {/* Ten Session Package */}
+                            <div className="mb-6 border rounded-lg p-4 hover:shadow-md transition-shadow">
+                              <div className="flex items-start space-x-2">
+                                <RadioGroupItem value="ten" id="ten" className="mt-1" />
+                                <div className="flex-1">
+                                  <Label htmlFor="ten" className="font-semibold text-lg">TEN SESSION PACKAGE - ${packagePrices.ten}</Label>
+                                  <p className="text-sm text-gray-700 italic mt-1">* Includes the services above plus:</p>
+                                  <ul className="list-disc pl-5 text-sm text-gray-700 mt-2 space-y-1">
+                                    <li>Recommending high school courses that parallel students interests and goals.</li>
+                                    <li>Integrating extra-curricular activities to demonstrate strong character.</li>
+                                    <li>Helping students to choose internships or volunteer work</li>
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
 
-                      {/* Fifteen Session Package */}
-                      <div className="mb-6 border rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-start space-x-2">
-                          <RadioGroupItem value="fifteen" id="fifteen" className="mt-1" />
-                          <div className="flex-1">
-                            <Label htmlFor="fifteen" className="font-semibold text-lg">FIFTEEN SESSION PACKAGE - ${packagePrices.fifteen}</Label>
-                            <p className="text-sm text-gray-700 italic mt-1">* Includes the services above plus:</p>
-                            <ul className="list-disc pl-5 text-sm text-gray-700 mt-2 space-y-1">
-                              <li>Discussing and choosing effective essay topics and themes.</li>
-                              <li>This package includes five college essay sessions (outline preparation, drafts, edits, and finalization).</li>
-                              <li>Guidance on Early Action vs. Early Decision.</li>
-                              <li>Overseeing communication with colleges.</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
+                            {/* Fifteen Session Package */}
+                            <div className="mb-6 border rounded-lg p-4 hover:shadow-md transition-shadow">
+                              <div className="flex items-start space-x-2">
+                                <RadioGroupItem value="fifteen" id="fifteen" className="mt-1" />
+                                <div className="flex-1">
+                                  <Label htmlFor="fifteen" className="font-semibold text-lg">FIFTEEN SESSION PACKAGE - ${packagePrices.fifteen}</Label>
+                                  <p className="text-sm text-gray-700 italic mt-1">* Includes the services above plus:</p>
+                                  <ul className="list-disc pl-5 text-sm text-gray-700 mt-2 space-y-1">
+                                    <li>Discussing and choosing effective essay topics and themes.</li>
+                                    <li>This package includes five college essay sessions (outline preparation, drafts, edits, and finalization).</li>
+                                    <li>Guidance on Early Action vs. Early Decision.</li>
+                                    <li>Overseeing communication with colleges.</li>
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
 
-                      {/* Twenty Session Package */}
-                      <div className="mb-6 border rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-start space-x-2">
-                          <RadioGroupItem value="twenty" id="twenty" className="mt-1" />
-                          <div className="flex-1">
-                            <Label htmlFor="twenty" className="font-semibold text-lg">TWENTY SESSION PACKAGE - ${packagePrices.twenty}</Label>
-                            <p className="text-sm text-gray-700 italic mt-1">* Includes the services above plus:</p>
-                            <ul className="list-disc pl-5 text-sm text-gray-700 mt-2 space-y-1">
-                              <li>Preparing for college and scholarship interviews.</li>
-                              <li>Writing assistance with supplemental essays.</li>
-                              <li>Provide guidance to maximize merit based financial aid and apply for scholarships.</li>
-                              <li>Ensuring completed applications are ready to submit.</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    </RadioGroup>
+                            {/* Twenty Session Package */}
+                            <div className="mb-6 border rounded-lg p-4 hover:shadow-md transition-shadow">
+                              <div className="flex items-start space-x-2">
+                                <RadioGroupItem value="twenty" id="twenty" className="mt-1" />
+                                <div className="flex-1">
+                                  <Label htmlFor="twenty" className="font-semibold text-lg">TWENTY SESSION PACKAGE - ${packagePrices.twenty}</Label>
+                                  <p className="text-sm text-gray-700 italic mt-1">* Includes the services above plus:</p>
+                                  <ul className="list-disc pl-5 text-sm text-gray-700 mt-2 space-y-1">
+                                    <li>Preparing for college and scholarship interviews.</li>
+                                    <li>Writing assistance with supplemental essays.</li>
+                                    <li>Provide guidance to maximize merit based financial aid and apply for scholarships.</li>
+                                    <li>Ensuring completed applications are ready to submit.</li>
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </RadioGroup>
+                    )}
                   </div>
 
                   {/* Parent Information */}
