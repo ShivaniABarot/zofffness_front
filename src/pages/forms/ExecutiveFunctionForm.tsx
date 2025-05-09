@@ -13,6 +13,7 @@ import axios from 'axios';
 const ExecutiveFunctionForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   // Define package prices
@@ -59,20 +60,21 @@ const ExecutiveFunctionForm = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setValidationErrors({});
 
     // Create a submission object with the field names expected by the API
     const submissionData = {
-      parent_firstname: formData.parent_first_name,
-      parent_lastname: formData.parent_last_name,
+      parent_first_name: formData.parent_first_name,
+      parent_last_name: formData.parent_last_name,
       parent_phone: formData.parent_phone,
       parent_email: formData.parent_email,
-      student_firstname: formData.student_first_name,
-      student_lastname: formData.student_last_name,
+      student_first_name: formData.student_first_name,
+      student_last_name: formData.student_last_name,
       student_email: formData.student_email,
       school: formData.school,
       grade: formData.grade,
-      package_name: formData.package_name,
-      amount: formData.amount,
+      package_type: formData.package_name,
+      subtotal: formData.amount,
       payment_status: formData.payment_status,
       course_type: formData.course_type,
       type: 'executive_function'
@@ -90,7 +92,8 @@ const ExecutiveFunctionForm = () => {
         submissionData,
         {
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
           }
         }
       );
@@ -183,19 +186,29 @@ const ExecutiveFunctionForm = () => {
 
         if (error.response?.status === 422) {
           // Handle validation errors
-          const validationErrors = error.response.data.errors || {};
+          const apiErrors = error.response.data.errors || {};
+          const formattedErrors: Record<string, string> = {};
           const errorMessages = [];
 
-          for (const field in validationErrors) {
-            const messages = validationErrors[field];
-            if (Array.isArray(messages)) {
-              errorMessages.push(`${field}: ${messages.join(', ')}`);
-            }
+          // Create a formatted error message for display
+          for (const field in apiErrors) {
+            const messages = apiErrors[field];
+            const formattedMessage = Array.isArray(messages) ? messages[0] : messages;
+
+            // Add to formatted errors for state
+            formattedErrors[field] = formattedMessage;
+
+            // Add to error messages for toast
+            errorMessages.push(`${field.replace(/_/g, ' ')}: ${formattedMessage}`);
           }
 
+          // Set validation errors state
+          setValidationErrors(formattedErrors);
+
+          // Create a more user-friendly error message
           const errorMessage = errorMessages.length > 0
-            ? errorMessages.join('\n')
-            : 'Please check your form inputs.';
+            ? 'Please correct the following errors:\n' + errorMessages.join('\n')
+            : 'Please check your form inputs and try again.';
 
           toast({
             variant: 'destructive',
@@ -269,6 +282,17 @@ const ExecutiveFunctionForm = () => {
               <Card>
                 <CardContent className="p-6">
                   <form className="space-y-8" onSubmit={handleSubmit}>
+                    {/* Validation Errors */}
+                    {Object.keys(validationErrors).length > 0 && (
+                      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                        <strong className="font-bold">Validation Error</strong>
+                        <span className="block sm:inline">
+                          {Object.entries(validationErrors).map(([field, message]) => (
+                            <div key={field}>{field.replace(/_/g, ' ')}: {message}</div>
+                          ))}
+                        </span>
+                      </div>
+                    )}
                   {/* Description */}
                   <div className="space-y-4">
                     <div className="prose max-w-none">
