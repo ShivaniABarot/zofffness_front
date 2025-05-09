@@ -98,8 +98,10 @@ const ExecutiveFunctionForm = () => {
         }
       );
 
-      // Check if the response contains a success message
-      if (response.data.success || (response.data.message && response.data.message.includes('successfully'))) {
+      // Check if the response contains a success message or status
+      if (response.data.success ||
+          (response.data.message && response.data.message.includes('successfully')) ||
+          response.data.status === 'success') {
         // Show success toast
         toast({
           title: 'Success',
@@ -130,10 +132,14 @@ const ExecutiveFunctionForm = () => {
         // Log the response for debugging
         if (process.env.NODE_ENV !== 'production') {
           console.log('API Response:', response.data);
+          console.log('API Response status:', response.data.status);
+          console.log('API Response success:', response.data.success);
+          console.log('API Response message:', response.data.message);
         }
 
-        // Handle case where API returns success: false but has a success message
-        if (response.data.message && response.data.message.includes('successfully')) {
+        // Handle case where API returns success: false but has a success message or status
+        if ((response.data.message && response.data.message.includes('successfully')) ||
+            response.data.status === 'success') {
           toast({
             title: 'Success',
             description: 'Registration submitted successfully!',
@@ -160,12 +166,41 @@ const ExecutiveFunctionForm = () => {
             course_type: 'Executive Function Coaching'
           });
         } else {
-          // Handle actual error
-          toast({
-            title: 'Error',
-            description: response.data.message || 'Something went wrong. Please try again.',
-            variant: 'destructive',
-          });
+          // Check if we have a status field indicating success
+          if (response.data.status === 'success') {
+            toast({
+              title: 'Success',
+              description: 'Registration submitted successfully!',
+              variant: 'default',
+            });
+
+            // Set form as submitted
+            setIsSubmitted(true);
+
+            // Reset form data
+            setFormData({
+              parent_first_name: '',
+              parent_last_name: '',
+              parent_phone: '',
+              parent_email: '',
+              student_first_name: '',
+              student_last_name: '',
+              student_email: '',
+              school: '',
+              grade: '',
+              package_name: 'five-sessions',
+              amount: packagePrices['five-sessions'],
+              payment_status: 'Success',
+              course_type: 'Executive Function Coaching'
+            });
+          } else {
+            // Handle actual error
+            toast({
+              title: 'Error',
+              description: response.data.message || 'Something went wrong. Please try again.',
+              variant: 'destructive',
+            });
+          }
         }
       }
     } catch (error) {
