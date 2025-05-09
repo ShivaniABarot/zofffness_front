@@ -14,12 +14,20 @@ const SatActPracticeTestForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // Define test types with their prices
+  // Define test types with their prices and IDs
   const testTypePrices = {
-    'sat': 95,         // Changed from 'sat-regular' to 'sat'
-    'sat-extended': 95,
-    'act': 95,         // Changed from 'act-regular' to 'act'
-    'act-extended': 95
+    '1': 95,  // SAT Regular Time (ID: 1)
+    '2': 95,  // SAT Extended Time (ID: 2)
+    '3': 95,  // ACT Regular Time (ID: 3)
+    '4': 95   // ACT Extended Time (ID: 4)
+  };
+
+  // Map display names to test type IDs
+  const testTypeMap = {
+    'sat': '1',
+    'sat-extended': '2',
+    'act': '3',
+    'act-extended': '4'
   };
 
   // Define validation state
@@ -35,9 +43,9 @@ const SatActPracticeTestForm = () => {
     student_email: '',
     school: '',
     grade: '',
-    test_type: 'sat', // Changed from 'sat-regular' to 'sat'
+    test_type: '1', // Using ID 1 for SAT Regular Time
     test_date: '',
-    amount: testTypePrices['sat'].toString(),
+    amount: testTypePrices['1'].toString(),
     payment_status: 'Success',
     course_type: 'SAT/ACT Practice Test'
   });
@@ -58,11 +66,14 @@ const SatActPracticeTestForm = () => {
     }
   };
 
-  const handleTestTypeChange = ( value: string) => {
-    const price = testTypePrices[value as keyof typeof testTypePrices] || 95;
+  const handleTestTypeChange = (value: string) => {
+    // Convert display value to test type ID
+    const testTypeId = testTypeMap[value as keyof typeof testTypeMap] || '1';
+    const price = testTypePrices[testTypeId] || 95;
+
     setFormData(prev => ({
       ...prev,
-      test_type: value,
+      test_type: testTypeId,
       amount: price.toString()
     }));
   };
@@ -149,7 +160,7 @@ const SatActPracticeTestForm = () => {
       student_email: formData.student_email,
       school: formData.school,
       grade: parseInt(formData.grade, 10) || 0,
-      test_type: [formData.test_type], // Send as array as API expects
+      test_type: formData.test_type, // Send as string with the ID
       date: formData.test_date, // Use 'date' as the API expects
       test_time: '09:00:00',
       location: '510 West Boston Post Road',
@@ -188,9 +199,9 @@ const SatActPracticeTestForm = () => {
           student_email: '',
           school: '',
           grade: '',
-          test_type: 'sat',
+          test_type: '1',
           test_date: '',
-          amount: testTypePrices['sat'].toString(),
+          amount: testTypePrices['1'].toString(),
           payment_status: 'Success',
           course_type: 'SAT/ACT Practice Test'
         });
