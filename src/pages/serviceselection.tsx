@@ -104,16 +104,16 @@ const ServiceSelection = () => {
                       <p className="text-gray-700 mb-6">{service.description}</p>
 
                       <Button
-                        onClick={() => navigate(service.path)}
-                        className="w-full bg-college-blue-500 hover:bg-college-blue-600 mb-2"
-                      >
-                        Learn More
-                      </Button>
-                      <Button
                         onClick={() => navigate(service.formPath)}
-                        className="w-full bg-white hover:bg-gray-50 text-college-blue-500 hover:text-college-blue-600 font-medium mt-2"
+                        className="w-full bg-college-blue-500 hover:bg-college-blue-600 mb-2 font-semibold shadow-md transform hover:scale-105 transition-all"
                       >
                         {service.registerText}
+                      </Button>
+                      <Button
+                        onClick={() => navigate(service.path)}
+                        className="w-full bg-white hover:bg-gray-50 text-college-blue-500 hover:text-college-blue-600 font-medium mt-2 border border-college-blue-300"
+                      >
+                        Learn More
                       </Button>
                     </CardContent>
                   </Card>
