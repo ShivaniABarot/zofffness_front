@@ -160,7 +160,7 @@ const SatActPracticeTestForm = () => {
       student_email: formData.student_email,
       school: formData.school,
       grade: parseInt(formData.grade, 10) || 0,
-      test_type: JSON.stringify([parseInt(formData.test_type)]), // Send as JSON array string
+      test_type: [parseInt(formData.test_type)], // Send as array of integers
       date: formData.test_date, // Use 'date' as the API expects
       test_time: '09:00:00',
       location: '510 West Boston Post Road',
