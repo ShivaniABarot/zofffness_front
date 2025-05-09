@@ -13,7 +13,6 @@ import axios from 'axios';
 const SatActPracticeTestForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
   const { toast } = useToast();
 
   // Define test types with their prices and IDs
@@ -201,12 +200,11 @@ const SatActPracticeTestForm = () => {
         // Show success toast
         toast({
           title: 'Success',
-          description: response.data.message || 'Registration submitted successfully!',
+          description: 'Registration submitted successfully!',
           variant: 'default',
         });
 
-        // Set success message and form as submitted
-        setSuccessMessage(response.data.message || 'Registration submitted successfully!');
+        // Set form as submitted
         setIsSubmitted(true);
 
         // Reset form data
@@ -237,12 +235,11 @@ const SatActPracticeTestForm = () => {
         if (response.data.message && response.data.message.includes('successfully')) {
           toast({
             title: 'Success',
-            description: response.data.message,
+            description: 'Registration submitted successfully!',
             variant: 'default',
           });
 
-          // Set success message and form as submitted
-          setSuccessMessage(response.data.message);
+          // Set form as submitted
           setIsSubmitted(true);
 
           // Reset form data
@@ -355,7 +352,7 @@ const SatActPracticeTestForm = () => {
                     </div>
                     <h2 className="text-2xl font-bold text-green-600">Registration Successful!</h2>
                     <p className="text-gray-600 font-medium">
-                      {successMessage}
+                      Registration successful!
                     </p>
                     <p className="text-gray-600">
                       Thank you for registering for the SAT/ACT Practice Test. We have received your information.
