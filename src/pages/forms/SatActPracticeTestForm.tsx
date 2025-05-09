@@ -160,7 +160,7 @@ const SatActPracticeTestForm = () => {
       student_email: formData.student_email,
       school: formData.school,
       grade: parseInt(formData.grade, 10) || 0,
-      test_type: formData.test_type, // Send as string with the ID
+      test_type: [formData.test_type], // Send as array with the ID
       date: formData.test_date, // Use 'date' as the API expects
       test_time: '09:00:00',
       location: '510 West Boston Post Road',
@@ -179,6 +179,8 @@ const SatActPracticeTestForm = () => {
       // Log the submission data in development environment
       if (process.env.NODE_ENV !== 'production') {
         console.log('Final submission data:', submissionData);
+        console.log('test_type type:', typeof submissionData.test_type);
+        console.log('test_type value:', submissionData.test_type);
       }
 
       const response = await axios.post('https://zoffness.academy/api/practice_tests', submissionData);
