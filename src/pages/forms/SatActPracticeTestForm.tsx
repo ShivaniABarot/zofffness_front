@@ -13,6 +13,7 @@ import axios from 'axios';
 const SatActPracticeTestForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const { toast } = useToast();
 
   // Define test types with their prices and IDs
@@ -195,15 +196,17 @@ const SatActPracticeTestForm = () => {
         }
       );
 
-      if (response.data.success) {
+      // Check if the response contains a success message
+      if (response.data.success || (response.data.message && response.data.message.includes('successfully'))) {
         // Show success toast
         toast({
           title: 'Success',
-          description: 'Registration submitted successfully!',
+          description: response.data.message || 'Registration submitted successfully!',
           variant: 'default',
         });
 
-        // Set form as submitted
+        // Set success message and form as submitted
+        setSuccessMessage(response.data.message || 'Registration submitted successfully!');
         setIsSubmitted(true);
 
         // Reset form data
@@ -224,12 +227,49 @@ const SatActPracticeTestForm = () => {
           course_type: 'SAT/ACT Practice Test'
         });
       } else {
-        // Handle case where API returns success: false
-        toast({
-          title: 'Error',
-          description: response.data.message || 'Something went wrong. Please try again.',
-          variant: 'destructive',
-        });
+        // Log the response for debugging
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('API Response:', response.data);
+        }
+
+        // Handle case where API returns success: false but has a success message
+        // This handles the case where the API returns { success: false, message: "Practice test created successfully" }
+        if (response.data.message && response.data.message.includes('successfully')) {
+          toast({
+            title: 'Success',
+            description: response.data.message,
+            variant: 'default',
+          });
+
+          // Set success message and form as submitted
+          setSuccessMessage(response.data.message);
+          setIsSubmitted(true);
+
+          // Reset form data
+          setFormData({
+            parent_first_name: '',
+            parent_last_name: '',
+            parent_phone: '',
+            parent_email: '',
+            student_first_name: '',
+            student_last_name: '',
+            student_email: '',
+            school: '',
+            grade: '',
+            test_type: '1',
+            test_date: '',
+            amount: testTypePrices['1'].toString(),
+            payment_status: 'Success',
+            course_type: 'SAT/ACT Practice Test'
+          });
+        } else {
+          // Handle actual error
+          toast({
+            title: 'Error',
+            description: response.data.message || 'Something went wrong. Please try again.',
+            variant: 'destructive',
+          });
+        }
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -314,6 +354,9 @@ const SatActPracticeTestForm = () => {
                       </svg>
                     </div>
                     <h2 className="text-2xl font-bold text-green-600">Registration Successful!</h2>
+                    <p className="text-gray-600 font-medium">
+                      {successMessage}
+                    </p>
                     <p className="text-gray-600">
                       Thank you for registering for the SAT/ACT Practice Test. We have received your information.
                     </p>
