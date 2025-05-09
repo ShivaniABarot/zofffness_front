@@ -12,6 +12,7 @@ import axios from 'axios';
 
 const SatActPracticeTestForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
 
   // Define test types with their prices and IDs
@@ -85,8 +86,8 @@ const SatActPracticeTestForm = () => {
     april26: '2025-04-26',
     may3: '2025-05-03',
     may10: '2025-05-10',
-    may17: '2025-05-17',
     may24: '2025-05-24',
+    may17: '2025-05-17',
     may31: '2025-05-31',
     june7: '2025-06-07',
     june14: '2025-06-14',
@@ -195,11 +196,17 @@ const SatActPracticeTestForm = () => {
       );
 
       if (response.data.success) {
+        // Show success toast
         toast({
           title: 'Success',
           description: 'Registration submitted successfully!',
+          variant: 'default',
         });
 
+        // Set form as submitted
+        setIsSubmitted(true);
+
+        // Reset form data
         setFormData({
           parent_first_name: '',
           parent_last_name: '',
@@ -215,6 +222,13 @@ const SatActPracticeTestForm = () => {
           amount: testTypePrices['1'].toString(),
           payment_status: 'Success',
           course_type: 'SAT/ACT Practice Test'
+        });
+      } else {
+        // Handle case where API returns success: false
+        toast({
+          title: 'Error',
+          description: response.data.message || 'Something went wrong. Please try again.',
+          variant: 'destructive',
         });
       }
     } catch (error) {
@@ -290,9 +304,35 @@ const SatActPracticeTestForm = () => {
               SAT/ACT Practice Test Registration
             </h1>
 
-            <Card>
-              <CardContent className="p-6">
-                <form className="space-y-8" onSubmit={handleSubmit}>
+            {isSubmitted ? (
+              <Card className="border-green-500">
+                <CardContent className="p-6">
+                  <div className="text-center py-8 space-y-4">
+                    <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <h2 className="text-2xl font-bold text-green-600">Registration Successful!</h2>
+                    <p className="text-gray-600">
+                      Thank you for registering for the SAT/ACT Practice Test. We have received your information.
+                    </p>
+                    <p className="text-gray-600">
+                      You will receive a confirmation email shortly with additional details.
+                    </p>
+                    <Button
+                      className="mt-4 bg-college-blue-500 hover:bg-college-blue-600"
+                      onClick={() => setIsSubmitted(false)}
+                    >
+                      Register Another Student
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardContent className="p-6">
+                  <form className="space-y-8" onSubmit={handleSubmit}>
                   {/* Test Selection */}
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-college-blue-500">Test Selection</h2>
@@ -526,6 +566,7 @@ const SatActPracticeTestForm = () => {
                 </form>
               </CardContent>
             </Card>
+            )}
           </div>
         </div>
       </main>
