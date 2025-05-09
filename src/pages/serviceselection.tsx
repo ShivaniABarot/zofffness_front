@@ -111,7 +111,8 @@ const ServiceSelection = () => {
                       </Button>
                       <Button
                         onClick={() => navigate(service.path)}
-                        className="w-full bg-white hover:bg-gray-50 text-college-blue-500 hover:text-college-blue-600 font-medium mt-2 border border-college-blue-300"
+                        className="w-full bg-white hover:bg-gray-50 text-gray-600 hover:text-college-blue-500 mt-2 font-normal"
+                        variant="ghost"
                       >
                         Learn More
                       </Button>
