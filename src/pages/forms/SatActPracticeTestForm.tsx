@@ -149,7 +149,32 @@ const SatActPracticeTestForm = () => {
 
     setIsLoading(true);
 
-    // Create a new submission object with the field names expected by the API
+    // Create FormData object for multipart/form-data submission
+    const formDataObj = new FormData();
+
+    // Add all fields to FormData
+    formDataObj.append('parent_first_name', formData.parent_first_name);
+    formDataObj.append('parent_last_name', formData.parent_last_name);
+    formDataObj.append('parent_phone', formData.parent_phone);
+    formDataObj.append('parent_email', formData.parent_email);
+    formDataObj.append('student_first_name', formData.student_first_name);
+    formDataObj.append('student_last_name', formData.student_last_name);
+    formDataObj.append('student_email', formData.student_email);
+    formDataObj.append('school', formData.school);
+    formDataObj.append('grade', (parseInt(formData.grade, 10) || 0).toString());
+
+    // Add test_type as array notation for PHP
+    formDataObj.append('test_type[]', '1');
+
+    formDataObj.append('date', formData.test_date);
+    formDataObj.append('test_time', '09:00:00');
+    formDataObj.append('location', '510 West Boston Post Road');
+    formDataObj.append('amount', (parseInt(formData.amount, 10)).toString());
+    formDataObj.append('payment_status', formData.payment_status);
+    formDataObj.append('course_type', formData.course_type);
+    formDataObj.append('type', 'practice_test');
+
+    // For debugging, create a regular object to log
     const submissionData = {
       parent_first_name: formData.parent_first_name,
       parent_last_name: formData.parent_last_name,
@@ -160,8 +185,8 @@ const SatActPracticeTestForm = () => {
       student_email: formData.student_email,
       school: formData.school,
       grade: parseInt(formData.grade, 10) || 0,
-      test_type: [1], // Hardcoded as array with integer 1 based on API requirements
-      date: formData.test_date, // Use 'date' as the API expects
+      test_type: ['1'], // Show as array for logging
+      date: formData.test_date,
       test_time: '09:00:00',
       location: '510 West Boston Post Road',
       amount: parseInt(formData.amount, 10),
@@ -183,7 +208,11 @@ const SatActPracticeTestForm = () => {
         console.log('test_type value:', submissionData.test_type);
       }
 
-      const response = await axios.post('https://zoffness.academy/api/practice_tests', submissionData);
+      const response = await axios.post('https://zoffness.academy/api/practice_tests', formDataObj, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
 
       if (response.data.success) {
         toast({
