@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ScrollToTop from "./components/ScrollToTop";
 import Index from "./pages/Index";
 import CollegeEssays from "./pages/CollegeEssays";
 import CollegeAdmissions from "./pages/CollegeAdmissions";
@@ -60,6 +61,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/college-essays" element={<CollegeEssays />} />
@@ -72,32 +74,32 @@ const App = () => (
           <Route path="/service-selection" element={<ServiceSelection />} />
           <Route path="/online-payment" element={<OnlinePayment />} />
           <Route path="/community-feedback" element={<CommunityFeedback />} />
-          
+
           {/* Program Routes */}
           <Route path="/programs/college-application-mastery" element={<CollegeApplicationMastery />} />
           <Route path="/programs/sat-act-preparation" element={<SATACTPreparation />} />
           <Route path="/programs/one-on-one-mentorship" element={<OneOnOneMentorship />} />
           <Route path="/programs/summer-intensive" element={<SummerIntensive />} />
           <Route path="/programs/virtual-tutoring" element={<VirtualTutoring />} />
-          
+
           {/* Resource Routes */}
           <Route path="/resources/blog" element={<Blog />} />
           <Route path="/resources/test-resources" element={<TestResources />} />
           <Route path="/resources/essay-tips" element={<EssayTips />} />
           <Route path="/resources/scholarships" element={<Scholarships />} />
           <Route path="/resources/financial-aid" element={<FinancialAid />} />
-          
+
           {/* Legal Routes */}
           <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/legal/terms-of-service" element={<TermsOfService />} />
           <Route path="/legal/sitemap" element={<Sitemap />} />
-          
+
           {/* Account Routes */}
           <Route path="/account/dashboard" element={<Dashboard />} />
           <Route path="/account/settings" element={<Settings />} />
           <Route path="/account/earnings" element={<Earnings />} />
           <Route path="/account/sign-out" element={<SignOut />} />
-          
+
           {/* New Button Pages */}
           <Route path="/contact/support" element={<SupportContact />} />
           <Route path="/mentorship/schedule" element={<MentorshipConsultation />} />
@@ -109,7 +111,7 @@ const App = () => (
           <Route path="/forms/college-admissions" element={<CollegeAdmissionsForm />} />
           <Route path="/forms/college-essays" element={<CollegeEssaysForm />} />
           <Route path="/forms/executive-function" element={<ExecutiveFunctionForm />} />
-          
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
