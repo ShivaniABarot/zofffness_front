@@ -8,12 +8,12 @@ import { Label } from '../../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
+import axios from 'axios';
 
 const SatActPracticeTestForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // Define test types with their prices
   const testTypePrices = {
     'sat-regular': 95,
     'sat-extended': 95,
@@ -22,18 +22,18 @@ const SatActPracticeTestForm = () => {
   };
 
   const [formData, setFormData] = useState({
-    parent_firstname: '',
-    parent_lastname: '',
+    parent_first_name: '',
+    parent_last_name: '',
     parent_phone: '',
     parent_email: '',
-    student_firstname: '',
-    student_lastname: '',
+    student_first_name: '',
+    student_last_name: '',
     student_email: '',
     school: '',
     grade: '',
     test_type: 'sat-regular',
     test_date: '',
-    amount: testTypePrices['sat-regular'], // Default price based on default test type
+    amount: testTypePrices['sat-regular'].toString(),
     payment_status: 'Success',
     course_type: 'SAT/ACT Practice Test'
   });
@@ -46,28 +46,41 @@ const SatActPracticeTestForm = () => {
     }));
   };
 
-  const handleTestTypeChange = (value: string) => {
-    // Get the price for the selected test type
+  const handleTestTypeChange = ( value: string) => {
     const price = testTypePrices[value as keyof typeof testTypePrices] || 95;
-
     setFormData(prev => ({
       ...prev,
       test_type: value,
-      amount: price // Update the amount based on the selected test type
+      amount: price.toString()
     }));
+  };
+
+  const testDateMap: { [key: string]: string } = {
+    april5: '2025-04-05',
+    april12: '2025-04-12',
+    april19: '2025-04-19',
+    april26: '2025-04-26',
+    may3: '2025-05-03',
+    may10: '2025-05-10',
+    may17: '2025-05-17',
+    may24: '2025-05-24',
+    may31: '2025-05-31',
+    june7: '2025-06-07',
+    june14: '2025-06-14',
+    june21: '2025-06-21',
+    june28: '2025-06-28',
   };
 
   const handleTestDateChange = (value: string) => {
     setFormData(prev => ({
       ...prev,
-      test_date: value
+      test_date: testDateMap[value] || ''
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Validate required fields
     if (!formData.test_date) {
       toast({
         variant: 'destructive',
@@ -79,34 +92,123 @@ const SatActPracticeTestForm = () => {
 
     setIsLoading(true);
 
-    // Simulate form submission with a timeout
-    setTimeout(() => {
-      // Show success message
-      toast({
-        title: 'Success',
-        description: 'Registration submitted successfully!',
-      });
+    // Create a new submission object with the field names expected by the API
+    const payload = {
+      parent_firstname: formData.parent_first_name,
+      parent_lastname: formData.parent_last_name,
+      parent_phone: formData.parent_phone,
+      parent_email: formData.parent_email,
+      student_firstname: formData.student_first_name,
+      student_lastname: formData.student_last_name,
+      student_email: formData.student_email,
+      school: formData.school,
+      grade: parseInt(formData.grade, 10) || 0,
+      test_type: formData.test_type,
+      date: formData.test_date,
+      test_time: '09:00:00',
+      location: '510 West Boston Post Road',
+      amount: parseInt(formData.amount, 10),
+      payment_status: formData.payment_status,
+      course_type: formData.course_type,
+      type: 'practice_test'
+    };
 
-      // Reset form
-      setFormData({
-        parent_firstname: '',
-        parent_lastname: '',
-        parent_phone: '',
-        parent_email: '',
-        student_firstname: '',
-        student_lastname: '',
-        student_email: '',
-        school: '',
-        grade: '',
-        test_type: 'sat-regular',
-        test_date: '',
-        amount: testTypePrices['sat-regular'], // Use the price from our price mapping
-        payment_status: 'Success',
-        course_type: 'SAT/ACT Practice Test'
-      });
+    // Log the payload in development environment
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Submitting data:', payload);
+    }
 
+    try {
+      const response = await axios.post('https://zoffness.academy/api/practice_tests', payload);
+
+      // Log the response in development environment
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('API Response:', response.data);
+      }
+
+      if (response.data.success) {
+        toast({
+          title: 'Success',
+          description: 'Registration submitted successfully!',
+        });
+
+        setFormData({
+          parent_first_name: '',
+          parent_last_name: '',
+          parent_phone: '',
+          parent_email: '',
+          student_first_name: '',
+          student_last_name: '',
+          student_email: '',
+          school: '',
+          grade: '',
+          test_type: 'sat-regular',
+          test_date: '',
+          amount: testTypePrices['sat-regular'].toString(),
+          payment_status: 'Success',
+          course_type: 'SAT/ACT Practice Test'
+        });
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // Log detailed error information in development environment
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('API Error Response:', error.response?.data);
+          console.error('Full error object:', error);
+
+          // Log more details about the validation errors
+          if (error.response?.data?.errors) {
+            console.error('Detailed validation errors:');
+            for (const [field, messages] of Object.entries(error.response.data.errors)) {
+              console.error(`Field: ${field}, Messages:`, messages);
+            }
+          }
+        }
+
+        if (error.response?.status === 422) {
+          // Handle validation errors
+          const validationErrors = error.response.data.errors || {};
+          const errorMessages = [];
+
+          for (const field in validationErrors) {
+            const messages = validationErrors[field];
+            if (Array.isArray(messages)) {
+              errorMessages.push(`${field}: ${messages.join(', ')}`);
+            }
+          }
+
+          const errorMessage = errorMessages.length > 0
+            ? errorMessages.join('\n')
+            : 'Please check your form inputs.';
+
+          toast({
+            variant: 'destructive',
+            title: 'Validation Error',
+            description: errorMessage,
+          });
+        } else {
+          // Handle other HTTP errors
+          toast({
+            variant: 'destructive',
+            title: `Error (${error.response?.status || 'Unknown'})`,
+            description: error.response?.data?.message || 'Failed to submit registration. Please try again.',
+          });
+        }
+      } else {
+        // Handle non-Axios errors
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Non-Axios Error:', error);
+        }
+
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'An unexpected error occurred. Please try again.',
+        });
+      }
+    } finally {
       setIsLoading(false);
-    }, 1000); // Simulate a 1-second delay
+    }
   };
 
   return (
@@ -128,9 +230,9 @@ const SatActPracticeTestForm = () => {
                     <h2 className="text-xl font-semibold text-college-blue-500">Test Selection</h2>
 
                     <div className="space-y-2">
-                      <Label htmlFor="testType">Select Test Type *</Label>
+                      <Label htmlFor="test_type">Select Test Type *</Label>
                       <Select onValueChange={handleTestTypeChange} defaultValue="sat-regular">
-                        <SelectTrigger id="testType">
+                        <SelectTrigger id="test_type">
                           <SelectValue placeholder="Select test type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -149,9 +251,9 @@ const SatActPracticeTestForm = () => {
                     <p className="text-sm font-semibold text-college-blue-500 mb-2">ACT/SAT Courses*</p>
 
                     <div className="space-y-2">
-                      <Label htmlFor="testDate">Select Test Date *</Label>
+                      <Label htmlFor="test_date">Select Test Date *</Label>
                       <Select onValueChange={handleTestDateChange} required>
-                        <SelectTrigger id="testDate">
+                        <SelectTrigger id="test_date">
                           <SelectValue placeholder="Select test date" />
                         </SelectTrigger>
                         <SelectContent>
@@ -180,20 +282,20 @@ const SatActPracticeTestForm = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="parent_firstname">Parent First Name *</Label>
+                        <Label htmlFor="parent_first_name">Parent First Name *</Label>
                         <Input
-                          id="parent_firstname"
-                          value={formData.parent_firstname}
+                          id="parent_first_name"
+                          value={formData.parent_first_name}
                           onChange={handleInputChange}
                           required
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="parent_lastname">Parent Last Name *</Label>
+                        <Label htmlFor="parent_last_name">Parent Last Name *</Label>
                         <Input
-                          id="parent_lastname"
-                          value={formData.parent_lastname}
+                          id="parent_last_name"
+                          value={formData.parent_last_name}
                           onChange={handleInputChange}
                           required
                         />
@@ -229,20 +331,20 @@ const SatActPracticeTestForm = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="student_firstname">Student First Name *</Label>
+                        <Label htmlFor="student_first_name">Student First Name *</Label>
                         <Input
-                          id="student_firstname"
-                          value={formData.student_firstname}
+                          id="student_first_name"
+                          value={formData.student_first_name}
                           onChange={handleInputChange}
                           required
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="student_lastname">Student Last Name *</Label>
+                        <Label htmlFor="student_last_name">Student Last Name *</Label>
                         <Input
-                          id="student_lastname"
-                          value={formData.student_lastname}
+                          id="student_last_name"
+                          value={formData.student_last_name}
                           onChange={handleInputChange}
                           required
                         />
