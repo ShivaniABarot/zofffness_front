@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Loader2 } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
 import axios from 'axios';
-import { submitPracticeTestRegistration } from '../../services/api';
 
 const SatActPracticeTestForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -150,32 +149,7 @@ const SatActPracticeTestForm = () => {
 
     setIsLoading(true);
 
-    // Create FormData object for multipart/form-data submission
-    const formDataObj = new FormData();
-
-    // Add all fields to FormData
-    formDataObj.append('parent_first_name', formData.parent_first_name);
-    formDataObj.append('parent_last_name', formData.parent_last_name);
-    formDataObj.append('parent_phone', formData.parent_phone);
-    formDataObj.append('parent_email', formData.parent_email);
-    formDataObj.append('student_first_name', formData.student_first_name);
-    formDataObj.append('student_last_name', formData.student_last_name);
-    formDataObj.append('student_email', formData.student_email);
-    formDataObj.append('school', formData.school);
-    formDataObj.append('grade', (parseInt(formData.grade, 10) || 0).toString());
-
-    // Add test_type as array notation for PHP
-    formDataObj.append('test_type[]', '1');
-
-    formDataObj.append('date', formData.test_date);
-    formDataObj.append('test_time', '09:00:00');
-    formDataObj.append('location', '510 West Boston Post Road');
-    formDataObj.append('amount', (parseInt(formData.amount, 10)).toString());
-    formDataObj.append('payment_status', formData.payment_status);
-    formDataObj.append('course_type', formData.course_type);
-    formDataObj.append('type', 'practice_test');
-
-    // For debugging, create a regular object to log
+    // Create submission data object based on the API format shown in Postman
     const submissionData = {
       parent_first_name: formData.parent_first_name,
       parent_last_name: formData.parent_last_name,
@@ -186,7 +160,8 @@ const SatActPracticeTestForm = () => {
       student_email: formData.student_email,
       school: formData.school,
       grade: parseInt(formData.grade, 10) || 0,
-      test_type: ['1'], // Show as array for logging
+      // Format test_type as an array of integers
+      test_type: [parseInt(formData.test_type, 10)],
       date: formData.test_date,
       test_time: '09:00:00',
       location: '510 West Boston Post Road',
@@ -205,29 +180,21 @@ const SatActPracticeTestForm = () => {
       // Log the submission data in development environment
       if (process.env.NODE_ENV !== 'production') {
         console.log('Final submission data:', submissionData);
+        console.log('test_type value:', submissionData.test_type);
       }
 
-      // Use our custom API service to handle the submission
-      const response = await submitPracticeTestRegistration({
-        parent_first_name: formData.parent_first_name,
-        parent_last_name: formData.parent_last_name,
-        parent_phone: formData.parent_phone,
-        parent_email: formData.parent_email,
-        student_first_name: formData.student_first_name,
-        student_last_name: formData.student_last_name,
-        student_email: formData.student_email,
-        school: formData.school,
-        grade: parseInt(formData.grade, 10) || 0,
-        date: formData.test_date,
-        test_time: '09:00:00',
-        location: '510 West Boston Post Road',
-        amount: parseInt(formData.amount, 10),
-        payment_status: formData.payment_status,
-        course_type: formData.course_type,
-        type: 'practice_test'
-      });
+      // Make a direct API call with the JSON data
+      const response = await axios.post(
+        'https://zoffness.academy/api/practice_tests',
+        submissionData,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
-      if (response.success) {
+      if (response.data.success) {
         toast({
           title: 'Success',
           description: 'Registration submitted successfully!',
