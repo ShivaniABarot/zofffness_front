@@ -12,6 +12,7 @@ import axios from 'axios';
 
 const ExecutiveFunctionForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
 
   // Define package prices
@@ -84,14 +85,29 @@ const ExecutiveFunctionForm = () => {
 
     try {
       // Make the API call to the executive_coaching endpoint
-      const response = await axios.post('https://zoffness.academy/api/executive_coaching', submissionData);
+      const response = await axios.post(
+        'https://zoffness.academy/api/executive_coaching',
+        submissionData,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
-      if (response.data.success) {
+      // Check if the response contains a success message
+      if (response.data.success || (response.data.message && response.data.message.includes('successfully'))) {
+        // Show success toast
         toast({
           title: 'Success',
           description: 'Registration submitted successfully!',
+          variant: 'default',
         });
-        // Reset form
+
+        // Set form as submitted
+        setIsSubmitted(true);
+
+        // Reset form data
         setFormData({
           parent_first_name: '',
           parent_last_name: '',
@@ -107,10 +123,51 @@ const ExecutiveFunctionForm = () => {
           payment_status: 'Success',
           course_type: 'Executive Function Coaching'
         });
+      } else {
+        // Log the response for debugging
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('API Response:', response.data);
+        }
+
+        // Handle case where API returns success: false but has a success message
+        if (response.data.message && response.data.message.includes('successfully')) {
+          toast({
+            title: 'Success',
+            description: 'Registration submitted successfully!',
+            variant: 'default',
+          });
+
+          // Set form as submitted
+          setIsSubmitted(true);
+
+          // Reset form data
+          setFormData({
+            parent_first_name: '',
+            parent_last_name: '',
+            parent_phone: '',
+            parent_email: '',
+            student_first_name: '',
+            student_last_name: '',
+            student_email: '',
+            school: '',
+            grade: '',
+            package_name: 'five-sessions',
+            amount: packagePrices['five-sessions'],
+            payment_status: 'Success',
+            course_type: 'Executive Function Coaching'
+          });
+        } else {
+          // Handle actual error
+          toast({
+            title: 'Error',
+            description: response.data.message || 'Something went wrong. Please try again.',
+            variant: 'destructive',
+          });
+        }
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        // Only log errors in development environment
+        // Log detailed error information in development environment
         if (process.env.NODE_ENV !== 'production') {
           console.error('API Error Response:', error.response?.data);
           console.error('Full error object:', error);
@@ -127,9 +184,8 @@ const ExecutiveFunctionForm = () => {
         if (error.response?.status === 422) {
           // Handle validation errors
           const validationErrors = error.response.data.errors || {};
-
-          // Create a more readable error message
           const errorMessages = [];
+
           for (const field in validationErrors) {
             const messages = validationErrors[field];
             if (Array.isArray(messages)) {
@@ -137,10 +193,14 @@ const ExecutiveFunctionForm = () => {
             }
           }
 
+          const errorMessage = errorMessages.length > 0
+            ? errorMessages.join('\n')
+            : 'Please check your form inputs.';
+
           toast({
             variant: 'destructive',
             title: 'Validation Error',
-            description: errorMessages.join('\n') || 'Please check your form inputs.',
+            description: errorMessage,
           });
         } else {
           // Handle other HTTP errors
@@ -177,9 +237,38 @@ const ExecutiveFunctionForm = () => {
               Executive Function Coaching Registration
             </h1>
 
-            <Card>
-              <CardContent className="p-6">
-                <form className="space-y-8" onSubmit={handleSubmit}>
+            {isSubmitted ? (
+              <Card className="border-green-500">
+                <CardContent className="p-6">
+                  <div className="text-center py-8 space-y-4">
+                    <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <h2 className="text-2xl font-bold text-green-600">Registration Successful!</h2>
+                    <p className="text-gray-600 font-medium">
+                      Registration successful!
+                    </p>
+                    <p className="text-gray-600">
+                      Thank you for registering for Executive Function Coaching. We have received your information.
+                    </p>
+                    <p className="text-gray-600">
+                      You will receive a confirmation email shortly with additional details.
+                    </p>
+                    <Button
+                      className="mt-4 bg-college-blue-500 hover:bg-college-blue-600"
+                      onClick={() => setIsSubmitted(false)}
+                    >
+                      Register Another Student
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardContent className="p-6">
+                  <form className="space-y-8" onSubmit={handleSubmit}>
                   {/* Description */}
                   <div className="space-y-4">
                     <div className="prose max-w-none">
@@ -363,6 +452,7 @@ const ExecutiveFunctionForm = () => {
                 </form>
               </CardContent>
             </Card>
+            )}
           </div>
         </div>
       </main>
