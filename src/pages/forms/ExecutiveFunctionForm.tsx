@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { Button } from '../../components/ui/button';
@@ -11,14 +11,30 @@ import { useToast } from '../../components/ui/use-toast';
 import axios from 'axios';
 import SuccessScreen from '../../components/SuccessScreen';
 
+// Define interface for package data
+interface Package {
+  id: number;
+  name: string;
+  price: number;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+  pivot?: {
+    form_id: number;
+    package_id: number;
+  };
+}
+
 const ExecutiveFunctionForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [isLoadingPackages, setIsLoadingPackages] = useState(true);
   const { toast } = useToast();
 
-  // Define package prices
-  const packagePrices = {
+  // Fallback package prices in case API fails
+  const fallbackPackagePrices = {
     'five-sessions': 450,
     'individual': 90
   };
@@ -33,11 +49,86 @@ const ExecutiveFunctionForm = () => {
     student_email: '',
     school: '',
     grade: '',
-    package_name: 'five-sessions',
-    amount: packagePrices['five-sessions'],
+    package_name: '',
+    amount: 0,
     payment_status: 'Success',
     course_type: 'Executive Function Coaching'
   });
+
+  // Fetch packages from API
+  useEffect(() => {
+    const fetchPackages = async () => {
+      setIsLoadingPackages(true);
+      try {
+        const response = await axios.get('https://zoffness.academy/api/get_ExecutivePackage');
+
+        // Log the API response for debugging
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('API Response:', response.data);
+        }
+
+        if (response.data.success && Array.isArray(response.data.data)) {
+          setPackages(response.data.data);
+
+          // If packages are available, set the default package to the first one
+          if (response.data.data.length > 0) {
+            const defaultPackage = response.data.data[0];
+            setFormData(prev => ({
+              ...prev,
+              package_name: defaultPackage.id.toString(),
+              amount: defaultPackage.price
+            }));
+          } else {
+            // If no packages are returned, use fallback
+            setFormData(prev => ({
+              ...prev,
+              package_name: 'five-sessions',
+              amount: fallbackPackagePrices['five-sessions']
+            }));
+          }
+        } else {
+          console.error('Failed to fetch packages or invalid data format');
+          toast({
+            title: 'Warning',
+            description: 'Could not load package options from server. Using default options.',
+            variant: 'destructive',
+          });
+
+          // Use fallback packages
+          setFormData(prev => ({
+            ...prev,
+            package_name: 'five-sessions',
+            amount: fallbackPackagePrices['five-sessions']
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching packages:', error);
+
+        // Log more detailed information about the response
+        if (axios.isAxiosError(error)) {
+          console.error('API Error Response:', error.response?.data);
+          console.error('API Error Status:', error.response?.status);
+        }
+
+        toast({
+          title: 'Warning',
+          description: 'Could not load package options from server. Using default options.',
+          variant: 'destructive',
+        });
+
+        // Use fallback packages
+        setFormData(prev => ({
+          ...prev,
+          package_name: 'five-sessions',
+          amount: fallbackPackagePrices['five-sessions']
+        }));
+      } finally {
+        setIsLoadingPackages(false);
+      }
+    };
+
+    fetchPackages();
+  }, [toast]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -48,14 +139,36 @@ const ExecutiveFunctionForm = () => {
   };
 
   const handlePackageChange = (value: string) => {
-    // Get the price for the selected package
-    const price = packagePrices[value as keyof typeof packagePrices] || 450;
+    // Find the selected package from the packages array
+    const selectedPackage = packages.find(pkg => pkg.id.toString() === value);
 
-    setFormData(prev => ({
-      ...prev,
-      package_name: value,
-      amount: price
-    }));
+    // If package is found, update the form data with its price
+    if (selectedPackage) {
+      setFormData(prev => ({
+        ...prev,
+        package_name: value,
+        amount: selectedPackage.price
+      }));
+    } else {
+      // Fallback to default if package not found
+      console.warn(`Package with ID ${value} not found`);
+
+      // Check if it's one of our fallback packages
+      if (value === 'five-sessions' || value === 'individual') {
+        setFormData(prev => ({
+          ...prev,
+          package_name: value,
+          amount: fallbackPackagePrices[value as keyof typeof fallbackPackagePrices]
+        }));
+      } else {
+        // Use the first fallback package as default
+        setFormData(prev => ({
+          ...prev,
+          package_name: 'five-sessions',
+          amount: fallbackPackagePrices['five-sessions']
+        }));
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -124,8 +237,8 @@ const ExecutiveFunctionForm = () => {
           student_email: '',
           school: '',
           grade: '',
-          package_name: 'five-sessions',
-          amount: packagePrices['five-sessions'],
+          package_name: packages.length > 0 ? packages[0].id.toString() : 'five-sessions',
+          amount: packages.length > 0 ? packages[0].price : fallbackPackagePrices['five-sessions'],
           payment_status: 'Success',
           course_type: 'Executive Function Coaching'
         });
@@ -161,8 +274,8 @@ const ExecutiveFunctionForm = () => {
             student_email: '',
             school: '',
             grade: '',
-            package_name: 'five-sessions',
-            amount: packagePrices['five-sessions'],
+            package_name: packages.length > 0 ? packages[0].id.toString() : 'five-sessions',
+            amount: packages.length > 0 ? packages[0].price : fallbackPackagePrices['five-sessions'],
             payment_status: 'Success',
             course_type: 'Executive Function Coaching'
           });
@@ -189,8 +302,8 @@ const ExecutiveFunctionForm = () => {
               student_email: '',
               school: '',
               grade: '',
-              package_name: 'five-sessions',
-              amount: packagePrices['five-sessions'],
+              package_name: packages.length > 0 ? packages[0].id.toString() : 'five-sessions',
+              amount: packages.length > 0 ? packages[0].price : fallbackPackagePrices['five-sessions'],
               payment_status: 'Success',
               course_type: 'Executive Function Coaching'
             });
@@ -342,16 +455,46 @@ const ExecutiveFunctionForm = () => {
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-college-blue-500">Executive Function Coaching Packages*</h2>
 
-                    <RadioGroup defaultValue="five-sessions" onValueChange={handlePackageChange}>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="five-sessions" id="five-sessions" />
-                        <Label htmlFor="five-sessions">Five individual 30-minute sessions package - $450</Label>
+                    {isLoadingPackages ? (
+                      <div className="flex items-center py-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-college-blue-500 mr-2" />
+                        <span className="text-sm text-college-blue-500">Loading package options...</span>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="individual" id="individual" />
-                        <Label htmlFor="individual">Individualized 30 minute sessions - $90</Label>
-                      </div>
-                    </RadioGroup>
+                    ) : packages.length > 0 ? (
+                      <RadioGroup
+                        defaultValue={packages[0]?.id.toString()}
+                        onValueChange={handlePackageChange}
+                        value={formData.package_name}
+                      >
+                        {packages.map(pkg => (
+                          <div className="border rounded-lg p-4 mb-4 hover:border-college-blue-300 transition-colors" key={pkg.id}>
+                            <div className="flex items-start">
+                              <RadioGroupItem value={pkg.id.toString()} id={`package-${pkg.id}`} className="mt-1" />
+                              <div className="ml-3">
+                                <Label htmlFor={`package-${pkg.id}`} className="font-medium">
+                                  {pkg.name} - ${pkg.price}
+                                </Label>
+                                {pkg.description && (
+                                  <p className="text-gray-700 text-sm mt-1">{pkg.description}</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    ) : (
+                      // Fallback to hardcoded packages if API fails
+                      <RadioGroup defaultValue="five-sessions" onValueChange={handlePackageChange}>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="five-sessions" id="five-sessions" />
+                          <Label htmlFor="five-sessions">Five individual 30-minute sessions package - $450</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="individual" id="individual" />
+                          <Label htmlFor="individual">Individualized 30 minute sessions - $90</Label>
+                        </div>
+                      </RadioGroup>
+                    )}
                   </div>
 
                   {/* Critical Skills */}
