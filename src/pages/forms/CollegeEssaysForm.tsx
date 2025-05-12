@@ -287,46 +287,15 @@ const CollegeEssaysForm = () => {
                         </span>
                       </div>
                     )}
-                  {/* Session Descriptions */}
-                  <div className="space-y-6">
-                    <h2 className="text-xl font-semibold text-college-blue-500">Session Descriptions</h2>
-
-                    <div className="space-y-4">
-                      <div className="border rounded-lg p-4 bg-gray-50">
-                        <h3 className="font-semibold text-college-blue-500">Session One:</h3>
-                        <p className="text-sm text-gray-700 mt-1">
-                          Brainstorm ideas and focal points for possible responses. Identify the most appropriate questions to address. Begin drafting the main portions of essays using a series of tailored prompts.
-                        </p>
-                      </div>
-
-                      <div className="border rounded-lg p-4 bg-gray-50">
-                        <h3 className="font-semibold text-college-blue-500">Session Two:</h3>
-                        <p className="text-sm text-gray-700 mt-1">
-                          Evaluate drafts or written exercises generated during the previous session. Identify and collate the strongest responses into a complete framework for the final essay. Assess the writing for descriptive and analytical depth.
-                        </p>
-                      </div>
-
-                      <div className="border rounded-lg p-4 bg-gray-50">
-                        <h3 className="font-semibold text-college-blue-500">Session Three:</h3>
-                        <p className="text-sm text-gray-700 mt-1">
-                          Begin to hone the draft for contextual, rhetorical, and analytical completeness. Identify where vividness, logic, and/or transitions need to be strengthened. Scan the completed draft for possible alternative connections or conclusions.
-                        </p>
-                      </div>
-
-                      <div className="border rounded-lg p-4 bg-gray-50">
-                        <h3 className="font-semibold text-college-blue-500">Session Four:</h3>
-                        <p className="text-sm text-gray-700 mt-1">
-                          Fine-tune exposition and linkages, word-by-word, and line-by-line. Consider word limits, and cut all superfluous information, and making sure all "best fit" information and explanation is thoroughly and appropriately expressed.
-                        </p>
-                      </div>
-
-                      <div className="border rounded-lg p-4 bg-gray-50">
-                        <h3 className="font-semibold text-college-blue-500">Session Five:</h3>
-                        <p className="text-sm text-gray-700 mt-1">
-                          Review and polish the final draft. Check one final time to be sure vocabulary and sentence structure has been achieved for maximum effectiveness. Proofread for concision and flawlessness.
-                        </p>
-                      </div>
-                    </div>
+                  {/* Introduction */}
+                  <div className="space-y-4 mb-6">
+                    <p className="text-gray-700">
+                      Our College Essay Service provides personalized guidance through the college essay writing process.
+                      Each session is designed to help students craft compelling, authentic essays that showcase their unique voice and experiences.
+                    </p>
+                    <p className="text-gray-700">
+                      Select the package that best fits your needs from the options below:
+                    </p>
                   </div>
 
                   {/* Package Selection */}
@@ -334,25 +303,68 @@ const CollegeEssaysForm = () => {
                     <h2 className="text-xl font-semibold text-college-blue-500">Package Selection</h2>
 
                     <RadioGroup defaultValue="one-session" onValueChange={handlePackageChange}>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="one-session" id="one-session" />
-                        <Label htmlFor="one-session">One Session - ${packagePrices['one-session']}</Label>
+                      <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
+                        <div className="flex items-start">
+                          <RadioGroupItem value="one-session" id="one-session" className="mt-1" />
+                          <div className="ml-3">
+                            <Label htmlFor="one-session" className="text-lg font-bold">ONE SESSION - ${packagePrices['one-session']}</Label>
+                            <p className="text-gray-700 mt-2">
+                              Brainstorm ideas and focal points for possible responses. Identify the most appropriate questions to address. Begin drafting the main portions of essays using a series of tailored prompts.
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="two-sessions" id="two-sessions" />
-                        <Label htmlFor="two-sessions">Two Sessions - ${packagePrices['two-sessions']}</Label>
+
+                      <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
+                        <div className="flex items-start">
+                          <RadioGroupItem value="two-sessions" id="two-sessions" className="mt-1" />
+                          <div className="ml-3">
+                            <Label htmlFor="two-sessions" className="text-lg font-bold">TWO SESSIONS - ${packagePrices['two-sessions']}</Label>
+                            <p className="text-gray-700 mt-2">
+                              Session 1: Brainstorm ideas and begin drafting.<br/>
+                              Session 2: Evaluate drafts and create a complete framework for the final essay.
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="three-sessions" id="three-sessions" />
-                        <Label htmlFor="three-sessions">Three Sessions - ${packagePrices['three-sessions']}</Label>
+
+                      <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
+                        <div className="flex items-start">
+                          <RadioGroupItem value="three-sessions" id="three-sessions" className="mt-1" />
+                          <div className="ml-3">
+                            <Label htmlFor="three-sessions" className="text-lg font-bold">THREE SESSIONS - ${packagePrices['three-sessions']}</Label>
+                            <p className="text-gray-700 mt-2">
+                              Sessions 1-2: Brainstorm ideas, begin drafting, and create a framework.<br/>
+                              Session 3: Hone the draft for contextual, rhetorical, and analytical completeness.
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="four-sessions" id="four-sessions" />
-                        <Label htmlFor="four-sessions">Four Sessions - ${packagePrices['four-sessions']}</Label>
+
+                      <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
+                        <div className="flex items-start">
+                          <RadioGroupItem value="four-sessions" id="four-sessions" className="mt-1" />
+                          <div className="ml-3">
+                            <Label htmlFor="four-sessions" className="text-lg font-bold">FOUR SESSIONS - ${packagePrices['four-sessions']}</Label>
+                            <p className="text-gray-700 mt-2">
+                              Sessions 1-3: Brainstorm ideas, create framework, and hone the draft.<br/>
+                              Session 4: Fine-tune exposition and linkages, word-by-word, and line-by-line.
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="five-sessions" id="five-sessions" />
-                        <Label htmlFor="five-sessions">Five Sessions - ${packagePrices['five-sessions']}</Label>
+
+                      <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
+                        <div className="flex items-start">
+                          <RadioGroupItem value="five-sessions" id="five-sessions" className="mt-1" />
+                          <div className="ml-3">
+                            <Label htmlFor="five-sessions" className="text-lg font-bold">FIVE SESSIONS - ${packagePrices['five-sessions']}</Label>
+                            <p className="text-gray-700 mt-2">
+                              Sessions 1-4: Complete brainstorming, drafting, and fine-tuning process.<br/>
+                              Session 5: Review and polish the final draft. Proofread for concision and flawlessness.
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </RadioGroup>
                   </div>
