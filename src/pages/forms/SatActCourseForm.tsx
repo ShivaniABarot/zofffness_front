@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { Button } from '../../components/ui/button';
@@ -13,12 +13,82 @@ import PaymentModal from '../../components/PaymentModal';
 import { updatePaymentStatus } from '../../services/paymentService';
 import SuccessScreen from '../../components/SuccessScreen';
 
+// Define interface for package data
+interface Package {
+  id: number;
+  name: string;
+  price: number;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+  pivot?: {
+    form_id: number;
+    package_id: number;
+  };
+}
+
 const SatActCourseForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [formSubmissionId, setFormSubmissionId] = useState<string | null>(null);
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [isLoadingPackages, setIsLoadingPackages] = useState(true);
   const { toast } = useToast();
+
+  // Fetch packages from API
+  useEffect(() => {
+    const fetchPackages = async () => {
+      setIsLoadingPackages(true);
+      try {
+        const response = await axios.get('https://zoffness.academy/api/get_sat_act_packages');
+
+        // Log the API response for debugging
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('API Response:', response.data);
+        }
+
+        if (response.data.success && Array.isArray(response.data.data)) {
+          setPackages(response.data.data);
+
+          // If packages are available, set the default package to the first one
+          if (response.data.data.length > 0) {
+            const defaultPackage = response.data.data[0];
+            setFormData(prev => ({
+              ...prev,
+              packages: defaultPackage.id.toString(),
+              total_amount: defaultPackage.price
+            }));
+          }
+        } else {
+          console.error('Failed to fetch packages or invalid data format');
+          toast({
+            title: 'Warning',
+            description: 'Could not load package options from server. Using default options.',
+            variant: 'destructive',
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching packages:', error);
+
+        // Log more detailed information about the response
+        if (axios.isAxiosError(error)) {
+          console.error('API Error Response:', error.response?.data);
+          console.error('API Error Status:', error.response?.status);
+        }
+
+        toast({
+          title: 'Warning',
+          description: 'Could not load package options from server. Using default options.',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoadingPackages(false);
+      }
+    };
+
+    fetchPackages();
+  }, [toast]);
 
   const [formData, setFormData] = useState({
     parent_first_name: '',
@@ -45,73 +115,37 @@ const SatActCourseForm = () => {
   };
 
   const handleRadioChange = (value: string) => {
-    let amount = 5900; // Default for 20 sessions
+    // Find the selected package from the packages array
+    const selectedPackage = packages.find(pkg => pkg.id.toString() === value);
 
-    switch (value) {
-      case '20sessions':
-        amount = 5900;
-        break;
-      case '15sessions':
-        amount = 4425;
-        break;
-      case '10sessions':
-        amount = 2950;
-        break;
-      case '5sessions':
-        amount = 1475;
-        break;
-      default:
-        amount = 5900;
+    // If package is found, update the form data with its price
+    if (selectedPackage) {
+      setFormData(prev => ({
+        ...prev,
+        packages: value,
+        total_amount: selectedPackage.price
+      }));
+    } else {
+      // Fallback to default if package not found
+      console.warn(`Package with ID ${value} not found`);
+      setFormData(prev => ({
+        ...prev,
+        packages: value,
+        total_amount: 5900 // Default fallback price
+      }));
     }
-
-    setFormData(prev => ({
-      ...prev,
-      packages: value,
-      total_amount: amount
-    }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Ensure the correct amount is set based on the selected package
-    let amount = 5900;
-    switch (formData.packages) {
-      case '20sessions':
-        amount = 5900;
-        break;
-      case '15sessions':
-        amount = 4425;
-        break;
-      case '10sessions':
-        amount = 2950;
-        break;
-      case '5sessions':
-        amount = 1475;
-        break;
-      default:
-        amount = 5900;
-    }
+    // Find the selected package from the packages array
+    const selectedPackage = packages.find(pkg => pkg.id.toString() === formData.packages);
 
-    // Get package name based on selected package
-    let packageName = '';
-    switch (formData.packages) {
-      case '20sessions':
-        packageName = '20 session package';
-        break;
-      case '15sessions':
-        packageName = '15 session package';
-        break;
-      case '10sessions':
-        packageName = '10 session package';
-        break;
-      case '5sessions':
-        packageName = '5 session package';
-        break;
-      default:
-        packageName = '20 session package';
-    }
+    // Get amount and package name from the selected package
+    const amount = selectedPackage ? selectedPackage.price : formData.total_amount;
+    const packageName = selectedPackage ? selectedPackage.name : 'SAT/ACT Course Package';
 
     // Create a new submission object with the field names expected by the API
     const submissionData = {
@@ -310,24 +344,54 @@ const SatActCourseForm = () => {
                       <p className="text-sm font-semibold text-college-blue-500 mt-2">ACT/SAT Courses</p>
                     </div>
 
-                    <RadioGroup defaultValue="20sessions" onValueChange={handleRadioChange}>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="20sessions" id="20sessions" />
-                        <Label htmlFor="20sessions">20 session package - $5,900</Label>
+                    {isLoadingPackages ? (
+                      <div className="flex items-center py-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-college-blue-500 mr-2" />
+                        <span className="text-sm text-college-blue-500">Loading package options...</span>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="15sessions" id="15sessions" />
-                        <Label htmlFor="15sessions">15 session package - $4,425</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="10sessions" id="10sessions" />
-                        <Label htmlFor="10sessions">10 session package - $2,950</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="5sessions" id="5sessions" />
-                        <Label htmlFor="5sessions">5 session package - $1,475</Label>
-                      </div>
-                    </RadioGroup>
+                    ) : packages.length > 0 ? (
+                      <RadioGroup
+                        defaultValue={packages[0]?.id.toString()}
+                        onValueChange={handleRadioChange}
+                        value={formData.packages}
+                      >
+                        {packages.map(pkg => (
+                          <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors" key={pkg.id}>
+                            <div className="flex items-start">
+                              <RadioGroupItem value={pkg.id.toString()} id={`package-${pkg.id}`} className="mt-1" />
+                              <div className="ml-3">
+                                <Label htmlFor={`package-${pkg.id}`} className="text-lg font-bold">
+                                  {pkg.name} - ${pkg.price.toLocaleString()}
+                                </Label>
+                                {pkg.description && (
+                                  <p className="text-gray-700 mt-2">{pkg.description}</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    ) : (
+                      // Fallback to hardcoded packages if API fails
+                      <RadioGroup defaultValue="20sessions" onValueChange={handleRadioChange}>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="20sessions" id="20sessions" />
+                          <Label htmlFor="20sessions">20 session package - $5,900</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="15sessions" id="15sessions" />
+                          <Label htmlFor="15sessions">15 session package - $4,425</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="10sessions" id="10sessions" />
+                          <Label htmlFor="10sessions">10 session package - $2,950</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="5sessions" id="5sessions" />
+                          <Label htmlFor="5sessions">5 session package - $1,475</Label>
+                        </div>
+                      </RadioGroup>
+                    )}
                   </div>
 
                   {/* Parent Information */}
