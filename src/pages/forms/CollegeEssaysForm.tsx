@@ -33,23 +33,7 @@ const CollegeEssaysForm = () => {
   const [isLoadingPackages, setIsLoadingPackages] = useState(true);
   const { toast } = useToast();
 
-  // Fallback package prices in case API fails
-  const fallbackPackagePrices = {
-    'one-session': 295,
-    'two-sessions': 590,
-    'three-sessions': 885,
-    'four-sessions': 1180,
-    'five-sessions': 1475
-  };
-
-  // Fallback package name mapping for display
-  const fallbackPackageNames = {
-    'one-session': 'One Session',
-    'two-sessions': 'Two Sessions',
-    'three-sessions': 'Three Sessions',
-    'four-sessions': 'Four Sessions',
-    'five-sessions': 'Five Sessions'
-  };
+  // No fallback packages - we'll rely solely on API data
 
   const [formData, setFormData] = useState({
     parent_first_name: '',
@@ -80,39 +64,23 @@ const CollegeEssaysForm = () => {
           console.log('API Response:', response.data);
         }
 
-        if (response.data.success && Array.isArray(response.data.data)) {
+        if (response.data.success && Array.isArray(response.data.data) && response.data.data.length > 0) {
           setPackages(response.data.data);
 
-          // If packages are available, set the default package to the first one
-          if (response.data.data.length > 0) {
-            const defaultPackage = response.data.data[0];
-            setFormData(prev => ({
-              ...prev,
-              packages: defaultPackage.id.toString(),
-              sessions: defaultPackage.price
-            }));
-          } else {
-            // If no packages are returned, use fallback
-            setFormData(prev => ({
-              ...prev,
-              packages: 'one-session',
-              sessions: fallbackPackagePrices['one-session']
-            }));
-          }
-        } else {
-          console.error('Failed to fetch packages or invalid data format');
-          toast({
-            title: 'Warning',
-            description: 'Could not load package options from server. Using default options.',
-            variant: 'destructive',
-          });
-
-          // Use fallback packages
+          // Set the default package to the first one
+          const defaultPackage = response.data.data[0];
           setFormData(prev => ({
             ...prev,
-            packages: 'one-session',
-            sessions: fallbackPackagePrices['one-session']
+            packages: defaultPackage.id.toString(),
+            sessions: defaultPackage.price
           }));
+        } else {
+          console.error('Failed to fetch packages or no packages available');
+          toast({
+            title: 'Warning',
+            description: 'Could not load package options from server. Please try again later.',
+            variant: 'destructive',
+          });
         }
       } catch (error) {
         console.error('Error fetching packages:', error);
@@ -124,17 +92,10 @@ const CollegeEssaysForm = () => {
         }
 
         toast({
-          title: 'Warning',
-          description: 'Could not load package options from server. Using default options.',
+          title: 'Error',
+          description: 'Could not load package options from server. Please try again later.',
           variant: 'destructive',
         });
-
-        // Use fallback packages
-        setFormData(prev => ({
-          ...prev,
-          packages: 'one-session',
-          sessions: fallbackPackagePrices['one-session']
-        }));
       } finally {
         setIsLoadingPackages(false);
       }
@@ -163,23 +124,23 @@ const CollegeEssaysForm = () => {
         sessions: selectedPackage.price
       }));
     } else {
-      // Fallback to default if package not found
+      // Log warning if package not found
       console.warn(`Package with ID ${value} not found`);
 
-      // Check if it's one of our fallback packages
-      if (value === 'one-session' || value === 'two-sessions' || value === 'three-sessions' ||
-          value === 'four-sessions' || value === 'five-sessions') {
+      // If packages are available, use the first one as default
+      if (packages.length > 0) {
+        const defaultPackage = packages[0];
         setFormData(prev => ({
           ...prev,
-          packages: value,
-          sessions: fallbackPackagePrices[value as keyof typeof fallbackPackagePrices]
+          packages: defaultPackage.id.toString(),
+          sessions: defaultPackage.price
         }));
       } else {
-        // Use the first fallback package as default
+        // If no packages are available, set empty values
         setFormData(prev => ({
           ...prev,
-          packages: 'one-session',
-          sessions: fallbackPackagePrices['one-session']
+          packages: '',
+          sessions: 0
         }));
       }
     }
@@ -249,8 +210,8 @@ const CollegeEssaysForm = () => {
           student_last_name: '',
           student_email: '',
           graduation_year: '',
-          packages: packages.length > 0 ? packages[0].id.toString() : 'one-session',
-          sessions: packages.length > 0 ? packages[0].price : fallbackPackagePrices['one-session'],
+          packages: packages.length > 0 ? packages[0].id.toString() : '',
+          sessions: packages.length > 0 ? packages[0].price : 0,
           payment_status: 'Success',
           course_type: 'College Essays'
         });
@@ -285,8 +246,8 @@ const CollegeEssaysForm = () => {
             student_last_name: '',
             student_email: '',
             graduation_year: '',
-            packages: packages.length > 0 ? packages[0].id.toString() : 'one-session',
-            sessions: packages.length > 0 ? packages[0].price : fallbackPackagePrices['one-session'],
+            packages: packages.length > 0 ? packages[0].id.toString() : '',
+            sessions: packages.length > 0 ? packages[0].price : 0,
             payment_status: 'Success',
             course_type: 'College Essays'
           });
@@ -444,72 +405,20 @@ const CollegeEssaysForm = () => {
                         ))}
                       </RadioGroup>
                     ) : (
-                      // Fallback to hardcoded packages if API fails
-                      <RadioGroup defaultValue="one-session" onValueChange={handlePackageChange}>
-                        <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
-                          <div className="flex items-start">
-                            <RadioGroupItem value="one-session" id="one-session" className="mt-1" />
-                            <div className="ml-3">
-                              <Label htmlFor="one-session" className="text-lg font-bold">ONE SESSION - ${fallbackPackagePrices['one-session']}</Label>
-                              <p className="text-gray-700 mt-2">
-                                Brainstorm ideas and focal points for possible responses. Identify the most appropriate questions to address. Begin drafting the main portions of essays using a series of tailored prompts.
-                              </p>
-                            </div>
+                      // No packages available
+                      <div className="border rounded-lg p-6 mb-4 bg-red-50 text-red-700">
+                        <div className="flex items-start">
+                          <div className="ml-3">
+                            <h3 className="text-lg font-bold">No Packages Available</h3>
+                            <p className="mt-2">
+                              We're currently unable to load our package options. Please try again later or contact us directly for assistance.
+                            </p>
+                            <p className="mt-2">
+                              You can reach us at <a href="mailto:info@zoffness.academy" className="underline">info@zoffness.academy</a> or call us at <a href="tel:+1234567890" className="underline">123-456-7890</a>.
+                            </p>
                           </div>
                         </div>
-
-                        <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
-                          <div className="flex items-start">
-                            <RadioGroupItem value="two-sessions" id="two-sessions" className="mt-1" />
-                            <div className="ml-3">
-                              <Label htmlFor="two-sessions" className="text-lg font-bold">TWO SESSIONS - ${fallbackPackagePrices['two-sessions']}</Label>
-                              <p className="text-gray-700 mt-2">
-                                Session 1: Brainstorm ideas and begin drafting.<br/>
-                                Session 2: Evaluate drafts and create a complete framework for the final essay.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
-                          <div className="flex items-start">
-                            <RadioGroupItem value="three-sessions" id="three-sessions" className="mt-1" />
-                            <div className="ml-3">
-                              <Label htmlFor="three-sessions" className="text-lg font-bold">THREE SESSIONS - ${fallbackPackagePrices['three-sessions']}</Label>
-                              <p className="text-gray-700 mt-2">
-                                Sessions 1-2: Brainstorm ideas, begin drafting, and create a framework.<br/>
-                                Session 3: Hone the draft for contextual, rhetorical, and analytical completeness.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
-                          <div className="flex items-start">
-                            <RadioGroupItem value="four-sessions" id="four-sessions" className="mt-1" />
-                            <div className="ml-3">
-                              <Label htmlFor="four-sessions" className="text-lg font-bold">FOUR SESSIONS - ${fallbackPackagePrices['four-sessions']}</Label>
-                              <p className="text-gray-700 mt-2">
-                                Sessions 1-3: Brainstorm ideas, create framework, and hone the draft.<br/>
-                                Session 4: Fine-tune exposition and linkages, word-by-word, and line-by-line.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
-                          <div className="flex items-start">
-                            <RadioGroupItem value="five-sessions" id="five-sessions" className="mt-1" />
-                            <div className="ml-3">
-                              <Label htmlFor="five-sessions" className="text-lg font-bold">FIVE SESSIONS - ${fallbackPackagePrices['five-sessions']}</Label>
-                              <p className="text-gray-700 mt-2">
-                                Sessions 1-4: Complete brainstorming, drafting, and fine-tuning process.<br/>
-                                Session 5: Review and polish the final draft. Proofread for concision and flawlessness.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </RadioGroup>
+                      </div>
                     )}
                   </div>
 
@@ -616,13 +525,15 @@ const CollegeEssaysForm = () => {
                   <Button
                     type="submit"
                     className="w-full bg-college-blue-500 hover:bg-college-blue-600"
-                    disabled={isLoading}
+                    disabled={isLoading || packages.length === 0}
                   >
                     {isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Submitting...
                       </>
+                    ) : packages.length === 0 ? (
+                      'No Packages Available'
                     ) : (
                       'Submit Registration'
                     )}
