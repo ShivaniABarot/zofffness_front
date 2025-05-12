@@ -234,14 +234,14 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Complete Your Payment</CardTitle>
-        <CardDescription>
+    <div className="w-full">
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold">Complete Your Payment</h3>
+        <p className="text-sm text-gray-500">
           {description}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+        </p>
+      </div>
+      <div className="space-y-4">
         {error && (
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
@@ -265,16 +265,16 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
             <p className="text-sm text-gray-700 mb-2">Amount: ${(amount / 100).toFixed(2)}</p>
           </div>
 
-          <h3 className="text-lg font-semibold mb-4">Billing Information</h3>
+          <h3 className="text-base font-semibold mb-2">Billing Information</h3>
 
           {/* Name */}
-          <div className="mb-4">
-            <Label htmlFor="name" className="block mb-1">Name on Card *</Label>
+          <div className="mb-3">
+            <Label htmlFor="name" className="block text-sm mb-1">Name on Card *</Label>
             <Input
               id="name"
               value={billingDetails.name}
               onChange={handleInputChange}
-              className={validationErrors.name ? 'border-red-500' : ''}
+              className={`h-9 ${validationErrors.name ? 'border-red-500' : ''}`}
               required
             />
             {validationErrors.name && (
@@ -283,14 +283,14 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
           </div>
 
           {/* Email */}
-          <div className="mb-4">
-            <Label htmlFor="email" className="block mb-1">Email *</Label>
+          <div className="mb-3">
+            <Label htmlFor="email" className="block text-sm mb-1">Email *</Label>
             <Input
               id="email"
               type="email"
               value={billingDetails.email}
               onChange={handleInputChange}
-              className={validationErrors.email ? 'border-red-500' : ''}
+              className={`h-9 ${validationErrors.email ? 'border-red-500' : ''}`}
               required
             />
             {validationErrors.email && (
@@ -299,26 +299,27 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
           </div>
 
           {/* Phone */}
-          <div className="mb-4">
-            <Label htmlFor="phone" className="block mb-1">Phone</Label>
+          <div className="mb-3">
+            <Label htmlFor="phone" className="block text-sm mb-1">Phone</Label>
             <Input
               id="phone"
               type="tel"
               value={billingDetails.phone}
               onChange={handleInputChange}
+              className="h-9"
             />
           </div>
 
-          <h3 className="text-lg font-semibold mb-4">Billing Address</h3>
+          <h3 className="text-base font-semibold mb-2">Billing Address</h3>
 
           {/* Address Line 1 */}
-          <div className="mb-4">
-            <Label htmlFor="address.line1" className="block mb-1">Address *</Label>
+          <div className="mb-3">
+            <Label htmlFor="address.line1" className="block text-sm mb-1">Address *</Label>
             <Input
               id="address.line1"
               value={billingDetails.address.line1}
               onChange={handleInputChange}
-              className={validationErrors['address.line1'] ? 'border-red-500' : ''}
+              className={`h-9 ${validationErrors['address.line1'] ? 'border-red-500' : ''}`}
               required
             />
             {validationErrors['address.line1'] && (
@@ -327,24 +328,25 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
           </div>
 
           {/* Address Line 2 */}
-          <div className="mb-4">
-            <Label htmlFor="address.line2" className="block mb-1">Address Line 2</Label>
+          <div className="mb-3">
+            <Label htmlFor="address.line2" className="block text-sm mb-1">Address Line 2</Label>
             <Input
               id="address.line2"
               value={billingDetails.address.line2}
               onChange={handleInputChange}
+              className="h-9"
             />
           </div>
 
           {/* City and State */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
             <div>
-              <Label htmlFor="address.city" className="block mb-1">City *</Label>
+              <Label htmlFor="address.city" className="block text-sm mb-1">City *</Label>
               <Input
                 id="address.city"
                 value={billingDetails.address.city}
                 onChange={handleInputChange}
-                className={validationErrors['address.city'] ? 'border-red-500' : ''}
+                className={`h-9 ${validationErrors['address.city'] ? 'border-red-500' : ''}`}
                 required
               />
               {validationErrors['address.city'] && (
@@ -352,24 +354,25 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
               )}
             </div>
             <div>
-              <Label htmlFor="address.state" className="block mb-1">State/Province</Label>
+              <Label htmlFor="address.state" className="block text-sm mb-1">State/Province</Label>
               <Input
                 id="address.state"
                 value={billingDetails.address.state}
                 onChange={handleInputChange}
+                className="h-9"
               />
             </div>
           </div>
 
           {/* Postal Code and Country */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
             <div>
-              <Label htmlFor="address.postal_code" className="block mb-1">Postal Code *</Label>
+              <Label htmlFor="address.postal_code" className="block text-sm mb-1">Postal Code *</Label>
               <Input
                 id="address.postal_code"
                 value={billingDetails.address.postal_code}
                 onChange={handleInputChange}
-                className={validationErrors['address.postal_code'] ? 'border-red-500' : ''}
+                className={`h-9 ${validationErrors['address.postal_code'] ? 'border-red-500' : ''}`}
                 required
               />
               {validationErrors['address.postal_code'] && (
@@ -377,12 +380,12 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
               )}
             </div>
             <div>
-              <Label htmlFor="address.country" className="block mb-1">Country *</Label>
+              <Label htmlFor="address.country" className="block text-sm mb-1">Country *</Label>
               <Select
                 value={billingDetails.address.country}
                 onValueChange={handleCountryChange}
               >
-                <SelectTrigger id="address.country">
+                <SelectTrigger id="address.country" className="h-9">
                   <SelectValue placeholder="Select country" />
                 </SelectTrigger>
                 <SelectContent>
@@ -398,31 +401,32 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
             </div>
           </div>
 
-          <h3 className="text-lg font-semibold mb-4">Credit Card</h3>
+          <h3 className="text-base font-semibold mb-2">Credit Card</h3>
 
-          <div className="mb-6">
-            <div className="p-3 border rounded-md">
+          <div className="mb-4">
+            <div className="p-2 border rounded-md">
               <CardElement options={cardElementOptions} />
             </div>
           </div>
 
-          <div className="flex justify-between mt-6">
+          <div className="flex justify-between mt-4">
             <Button
               type="button"
               variant="outline"
               onClick={onCancel}
               disabled={processing}
+              className="h-9 px-3 text-sm"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={!stripe || processing || succeeded}
-              className="bg-college-blue-500 hover:bg-college-blue-600"
+              className="bg-college-blue-500 hover:bg-college-blue-600 h-9 px-4 text-sm"
             >
               {processing ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                   Processing...
                 </>
               ) : (
@@ -431,8 +435,8 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

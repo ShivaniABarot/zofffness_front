@@ -38,16 +38,16 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         try {
           setLoading(true);
           setError(null);
-          
+
           // Convert amount to cents if it's in dollars
           const amountInCents = Math.round(amount * 100);
-          
+
           const { clientSecret } = await createPaymentIntent(
             amountInCents,
             description,
             metadata
           );
-          
+
           setClientSecret(clientSecret);
         } catch (err) {
           console.error('Error creating payment intent:', err);
@@ -67,14 +67,14 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg md:max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Complete Your Payment</DialogTitle>
           <DialogDescription>
             Please enter your payment details to complete your registration.
           </DialogDescription>
         </DialogHeader>
-        
+
         {loading ? (
           <div className="flex justify-center items-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-college-blue-500" />
@@ -86,13 +86,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           </div>
         ) : clientSecret ? (
           <StripeProvider>
-            <StripePaymentForm
-              amount={amount * 100} // Convert to cents
-              description={description}
-              onSuccess={handleSuccess}
-              onCancel={onClose}
-              clientSecret={clientSecret}
-            />
+            <div className="py-2">
+              <StripePaymentForm
+                amount={amount * 100} // Convert to cents
+                description={description}
+                onSuccess={handleSuccess}
+                onCancel={onClose}
+                clientSecret={clientSecret}
+              />
+            </div>
           </StripeProvider>
         ) : null}
       </DialogContent>
