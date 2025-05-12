@@ -10,6 +10,8 @@ import { Loader2 } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
 import axios from 'axios';
 import SuccessScreen from '../../components/SuccessScreen';
+import PaymentModal from '../../components/PaymentModal';
+import { updatePaymentStatus } from '../../services/paymentService';
 
 // Define interface for session data
 interface Session {
