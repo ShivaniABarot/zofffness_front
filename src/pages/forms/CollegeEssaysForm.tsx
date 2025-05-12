@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { Button } from '../../components/ui/button';
@@ -11,14 +11,30 @@ import { useToast } from '../../components/ui/use-toast';
 import axios from 'axios';
 import SuccessScreen from '../../components/SuccessScreen';
 
+// Define interface for package data
+interface Package {
+  id: number;
+  name: string;
+  price: number;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+  pivot?: {
+    form_id: number;
+    package_id: number;
+  };
+}
+
 const CollegeEssaysForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [isLoadingPackages, setIsLoadingPackages] = useState(true);
   const { toast } = useToast();
 
-  // Define package prices
-  const packagePrices = {
+  // Fallback package prices in case API fails
+  const fallbackPackagePrices = {
     'one-session': 295,
     'two-sessions': 590,
     'three-sessions': 885,
@@ -26,8 +42,8 @@ const CollegeEssaysForm = () => {
     'five-sessions': 1475
   };
 
-  // Package name mapping for display
-  const packageNames = {
+  // Fallback package name mapping for display
+  const fallbackPackageNames = {
     'one-session': 'One Session',
     'two-sessions': 'Two Sessions',
     'three-sessions': 'Three Sessions',
@@ -45,12 +61,87 @@ const CollegeEssaysForm = () => {
     student_email: '',
     // Removing school field as it's not in the database
     graduation_year: '',
-    packages: 'one-session',
+    packages: '',
     // Changed from 'session' to 'sessions' to match database field name
-    sessions: packagePrices['one-session'],
+    sessions: 0,
     payment_status: 'Success',
     course_type: 'College Essays'
   });
+
+  // Fetch packages from API
+  useEffect(() => {
+    const fetchPackages = async () => {
+      setIsLoadingPackages(true);
+      try {
+        const response = await axios.get('https://zoffness.academy/api/get_CollageEssaysPackage');
+
+        // Log the API response for debugging
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('API Response:', response.data);
+        }
+
+        if (response.data.success && Array.isArray(response.data.data)) {
+          setPackages(response.data.data);
+
+          // If packages are available, set the default package to the first one
+          if (response.data.data.length > 0) {
+            const defaultPackage = response.data.data[0];
+            setFormData(prev => ({
+              ...prev,
+              packages: defaultPackage.id.toString(),
+              sessions: defaultPackage.price
+            }));
+          } else {
+            // If no packages are returned, use fallback
+            setFormData(prev => ({
+              ...prev,
+              packages: 'one-session',
+              sessions: fallbackPackagePrices['one-session']
+            }));
+          }
+        } else {
+          console.error('Failed to fetch packages or invalid data format');
+          toast({
+            title: 'Warning',
+            description: 'Could not load package options from server. Using default options.',
+            variant: 'destructive',
+          });
+
+          // Use fallback packages
+          setFormData(prev => ({
+            ...prev,
+            packages: 'one-session',
+            sessions: fallbackPackagePrices['one-session']
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching packages:', error);
+
+        // Log more detailed information about the response
+        if (axios.isAxiosError(error)) {
+          console.error('API Error Response:', error.response?.data);
+          console.error('API Error Status:', error.response?.status);
+        }
+
+        toast({
+          title: 'Warning',
+          description: 'Could not load package options from server. Using default options.',
+          variant: 'destructive',
+        });
+
+        // Use fallback packages
+        setFormData(prev => ({
+          ...prev,
+          packages: 'one-session',
+          sessions: fallbackPackagePrices['one-session']
+        }));
+      } finally {
+        setIsLoadingPackages(false);
+      }
+    };
+
+    fetchPackages();
+  }, [toast]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -61,14 +152,37 @@ const CollegeEssaysForm = () => {
   };
 
   const handlePackageChange = (value: string) => {
-    // Get the price for the selected package
-    const price = packagePrices[value as keyof typeof packagePrices] || 295;
+    // Find the selected package from the packages array
+    const selectedPackage = packages.find(pkg => pkg.id.toString() === value);
 
-    setFormData(prev => ({
-      ...prev,
-      packages: value,
-      sessions: price // Changed from 'session' to 'sessions' to match database field name
-    }));
+    // If package is found, update the form data with its price
+    if (selectedPackage) {
+      setFormData(prev => ({
+        ...prev,
+        packages: value,
+        sessions: selectedPackage.price
+      }));
+    } else {
+      // Fallback to default if package not found
+      console.warn(`Package with ID ${value} not found`);
+
+      // Check if it's one of our fallback packages
+      if (value === 'one-session' || value === 'two-sessions' || value === 'three-sessions' ||
+          value === 'four-sessions' || value === 'five-sessions') {
+        setFormData(prev => ({
+          ...prev,
+          packages: value,
+          sessions: fallbackPackagePrices[value as keyof typeof fallbackPackagePrices]
+        }));
+      } else {
+        // Use the first fallback package as default
+        setFormData(prev => ({
+          ...prev,
+          packages: 'one-session',
+          sessions: fallbackPackagePrices['one-session']
+        }));
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -135,8 +249,8 @@ const CollegeEssaysForm = () => {
           student_last_name: '',
           student_email: '',
           graduation_year: '',
-          packages: 'one-session',
-          sessions: packagePrices['one-session'], // Changed from 'session' to 'sessions' to match database field name
+          packages: packages.length > 0 ? packages[0].id.toString() : 'one-session',
+          sessions: packages.length > 0 ? packages[0].price : fallbackPackagePrices['one-session'],
           payment_status: 'Success',
           course_type: 'College Essays'
         });
@@ -171,8 +285,8 @@ const CollegeEssaysForm = () => {
             student_last_name: '',
             student_email: '',
             graduation_year: '',
-            packages: 'one-session',
-            sessions: packagePrices['one-session'], // Changed from 'session' to 'sessions' to match database field name
+            packages: packages.length > 0 ? packages[0].id.toString() : 'one-session',
+            sessions: packages.length > 0 ? packages[0].price : fallbackPackagePrices['one-session'],
             payment_status: 'Success',
             course_type: 'College Essays'
           });
@@ -302,71 +416,101 @@ const CollegeEssaysForm = () => {
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-college-blue-500">Package Selection</h2>
 
-                    <RadioGroup defaultValue="one-session" onValueChange={handlePackageChange}>
-                      <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
-                        <div className="flex items-start">
-                          <RadioGroupItem value="one-session" id="one-session" className="mt-1" />
-                          <div className="ml-3">
-                            <Label htmlFor="one-session" className="text-lg font-bold">ONE SESSION - ${packagePrices['one-session']}</Label>
-                            <p className="text-gray-700 mt-2">
-                              Brainstorm ideas and focal points for possible responses. Identify the most appropriate questions to address. Begin drafting the main portions of essays using a series of tailored prompts.
-                            </p>
+                    {isLoadingPackages ? (
+                      <div className="flex items-center py-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-college-blue-500 mr-2" />
+                        <span className="text-sm text-college-blue-500">Loading package options...</span>
+                      </div>
+                    ) : packages.length > 0 ? (
+                      <RadioGroup
+                        defaultValue={packages[0]?.id.toString()}
+                        onValueChange={handlePackageChange}
+                        value={formData.packages}
+                      >
+                        {packages.map(pkg => (
+                          <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors" key={pkg.id}>
+                            <div className="flex items-start">
+                              <RadioGroupItem value={pkg.id.toString()} id={`package-${pkg.id}`} className="mt-1" />
+                              <div className="ml-3">
+                                <Label htmlFor={`package-${pkg.id}`} className="text-lg font-bold">
+                                  {pkg.name.toUpperCase()} - ${pkg.price}
+                                </Label>
+                                {pkg.description && (
+                                  <p className="text-gray-700 mt-2">{pkg.description}</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    ) : (
+                      // Fallback to hardcoded packages if API fails
+                      <RadioGroup defaultValue="one-session" onValueChange={handlePackageChange}>
+                        <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
+                          <div className="flex items-start">
+                            <RadioGroupItem value="one-session" id="one-session" className="mt-1" />
+                            <div className="ml-3">
+                              <Label htmlFor="one-session" className="text-lg font-bold">ONE SESSION - ${fallbackPackagePrices['one-session']}</Label>
+                              <p className="text-gray-700 mt-2">
+                                Brainstorm ideas and focal points for possible responses. Identify the most appropriate questions to address. Begin drafting the main portions of essays using a series of tailored prompts.
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
-                        <div className="flex items-start">
-                          <RadioGroupItem value="two-sessions" id="two-sessions" className="mt-1" />
-                          <div className="ml-3">
-                            <Label htmlFor="two-sessions" className="text-lg font-bold">TWO SESSIONS - ${packagePrices['two-sessions']}</Label>
-                            <p className="text-gray-700 mt-2">
-                              Session 1: Brainstorm ideas and begin drafting.<br/>
-                              Session 2: Evaluate drafts and create a complete framework for the final essay.
-                            </p>
+                        <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
+                          <div className="flex items-start">
+                            <RadioGroupItem value="two-sessions" id="two-sessions" className="mt-1" />
+                            <div className="ml-3">
+                              <Label htmlFor="two-sessions" className="text-lg font-bold">TWO SESSIONS - ${fallbackPackagePrices['two-sessions']}</Label>
+                              <p className="text-gray-700 mt-2">
+                                Session 1: Brainstorm ideas and begin drafting.<br/>
+                                Session 2: Evaluate drafts and create a complete framework for the final essay.
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
-                        <div className="flex items-start">
-                          <RadioGroupItem value="three-sessions" id="three-sessions" className="mt-1" />
-                          <div className="ml-3">
-                            <Label htmlFor="three-sessions" className="text-lg font-bold">THREE SESSIONS - ${packagePrices['three-sessions']}</Label>
-                            <p className="text-gray-700 mt-2">
-                              Sessions 1-2: Brainstorm ideas, begin drafting, and create a framework.<br/>
-                              Session 3: Hone the draft for contextual, rhetorical, and analytical completeness.
-                            </p>
+                        <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
+                          <div className="flex items-start">
+                            <RadioGroupItem value="three-sessions" id="three-sessions" className="mt-1" />
+                            <div className="ml-3">
+                              <Label htmlFor="three-sessions" className="text-lg font-bold">THREE SESSIONS - ${fallbackPackagePrices['three-sessions']}</Label>
+                              <p className="text-gray-700 mt-2">
+                                Sessions 1-2: Brainstorm ideas, begin drafting, and create a framework.<br/>
+                                Session 3: Hone the draft for contextual, rhetorical, and analytical completeness.
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
-                        <div className="flex items-start">
-                          <RadioGroupItem value="four-sessions" id="four-sessions" className="mt-1" />
-                          <div className="ml-3">
-                            <Label htmlFor="four-sessions" className="text-lg font-bold">FOUR SESSIONS - ${packagePrices['four-sessions']}</Label>
-                            <p className="text-gray-700 mt-2">
-                              Sessions 1-3: Brainstorm ideas, create framework, and hone the draft.<br/>
-                              Session 4: Fine-tune exposition and linkages, word-by-word, and line-by-line.
-                            </p>
+                        <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
+                          <div className="flex items-start">
+                            <RadioGroupItem value="four-sessions" id="four-sessions" className="mt-1" />
+                            <div className="ml-3">
+                              <Label htmlFor="four-sessions" className="text-lg font-bold">FOUR SESSIONS - ${fallbackPackagePrices['four-sessions']}</Label>
+                              <p className="text-gray-700 mt-2">
+                                Sessions 1-3: Brainstorm ideas, create framework, and hone the draft.<br/>
+                                Session 4: Fine-tune exposition and linkages, word-by-word, and line-by-line.
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
-                        <div className="flex items-start">
-                          <RadioGroupItem value="five-sessions" id="five-sessions" className="mt-1" />
-                          <div className="ml-3">
-                            <Label htmlFor="five-sessions" className="text-lg font-bold">FIVE SESSIONS - ${packagePrices['five-sessions']}</Label>
-                            <p className="text-gray-700 mt-2">
-                              Sessions 1-4: Complete brainstorming, drafting, and fine-tuning process.<br/>
-                              Session 5: Review and polish the final draft. Proofread for concision and flawlessness.
-                            </p>
+                        <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors">
+                          <div className="flex items-start">
+                            <RadioGroupItem value="five-sessions" id="five-sessions" className="mt-1" />
+                            <div className="ml-3">
+                              <Label htmlFor="five-sessions" className="text-lg font-bold">FIVE SESSIONS - ${fallbackPackagePrices['five-sessions']}</Label>
+                              <p className="text-gray-700 mt-2">
+                                Sessions 1-4: Complete brainstorming, drafting, and fine-tuning process.<br/>
+                                Session 5: Review and polish the final draft. Proofread for concision and flawlessness.
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </RadioGroup>
+                      </RadioGroup>
+                    )}
                   </div>
 
                   {/* Parent Information */}
