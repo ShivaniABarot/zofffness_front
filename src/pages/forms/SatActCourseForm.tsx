@@ -109,7 +109,8 @@ const SatActCourseForm = () => {
       amount: amount,
       payment_status: 'Pending', // Set as pending until payment is completed
       course_type: formData.course_type,
-      type: 'sat_act_course'
+      type: 'sat_act_course',
+      courses: [1] // Adding the courses field as required by the API
     };
 
     // Only log in development environment
@@ -149,6 +150,16 @@ const SatActCourseForm = () => {
         if (error.response?.status === 422) {
           // Handle validation errors
           const validationErrors = error.response.data.errors || {};
+
+          // Log detailed validation errors for debugging
+          if (process.env.NODE_ENV !== 'production') {
+            console.error('Validation errors:', validationErrors);
+
+            // Log more details about each validation error
+            for (const field in validationErrors) {
+              console.error(`Field: ${field}, Messages:`, validationErrors[field]);
+            }
+          }
 
           // Create a more readable error message
           const errorMessages = [];
