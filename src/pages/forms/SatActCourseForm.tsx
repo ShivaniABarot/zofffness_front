@@ -94,6 +94,25 @@ const SatActCourseForm = () => {
         amount = 5900;
     }
 
+    // Get package name based on selected package
+    let packageName = '';
+    switch (formData.packages) {
+      case '20sessions':
+        packageName = '20 session package';
+        break;
+      case '15sessions':
+        packageName = '15 session package';
+        break;
+      case '10sessions':
+        packageName = '10 session package';
+        break;
+      case '5sessions':
+        packageName = '5 session package';
+        break;
+      default:
+        packageName = '20 session package';
+    }
+
     // Create a new submission object with the field names expected by the API
     const submissionData = {
       parent_firstname: formData.parent_first_name,
@@ -110,7 +129,12 @@ const SatActCourseForm = () => {
       payment_status: 'Pending', // Set as pending until payment is completed
       course_type: formData.course_type,
       type: 'sat_act_course',
-      courses: [1] // Adding the courses field as required by the API
+      courses: [
+        {
+          name: packageName,
+          price: amount
+        }
+      ] // Adding the courses field with required name and price properties
     };
 
     // Only log in development environment
