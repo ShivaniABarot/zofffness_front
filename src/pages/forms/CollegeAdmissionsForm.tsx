@@ -9,6 +9,9 @@ import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
 import axios from 'axios';
+import SuccessScreen from '../../components/SuccessScreen';
+import PaymentModal from '../../components/PaymentModal';
+import { updatePaymentStatus } from '../../services/paymentService';
 
 // Define interface for package data
 interface Package {
@@ -27,6 +30,8 @@ const CollegeAdmissionsForm = () => {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [packages, setPackages] = useState<Package[]>([]);
   const [isLoadingPackages, setIsLoadingPackages] = useState(true);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [formSubmissionId, setFormSubmissionId] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Fallback package prices (used if API fails)
@@ -91,7 +96,7 @@ const CollegeAdmissionsForm = () => {
     package_id: '',
     package_name: 'initial',
     amount: packagePrices['initial'],
-    payment_status: 'Success',
+    payment_status: 'Pending',
     course_type: 'College Admissions Counseling'
   });
 
@@ -127,6 +132,64 @@ const CollegeAdmissionsForm = () => {
         amount: price
       }));
     }
+  };
+
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
+    try {
+      // Update payment status in the database
+      await updatePaymentStatus(formSubmissionId!, paymentIntentId);
+
+      // Show success message
+      toast({
+        title: 'Payment Successful',
+        description: 'Your payment has been processed successfully!',
+      });
+
+      // Reset form data
+      setFormData({
+        parent_first_name: '',
+        parent_last_name: '',
+        parent_phone: '',
+        parent_email: '',
+        student_first_name: '',
+        student_last_name: '',
+        student_email: '',
+        school: '',
+        grade: '',
+        graduation_year: '',
+        package_id: '',
+        package_name: 'initial',
+        amount: packagePrices['initial'],
+        payment_status: 'Pending',
+        course_type: 'College Admissions Counseling'
+      });
+
+      // Close payment modal
+      setShowPaymentModal(false);
+
+      // Set submitted state to show success screen
+      setIsSubmitted(true);
+    } catch (error) {
+      console.error('Error updating payment status:', error);
+
+      // Show error message
+      toast({
+        title: 'Error',
+        description: 'Payment was successful, but we could not update your registration. Please contact support.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handlePaymentModalClose = () => {
+    setShowPaymentModal(false);
+    setIsLoading(false);
+
+    // Show message to user
+    toast({
+      title: 'Payment Cancelled',
+      description: 'Your registration is saved but payment is pending. You can complete payment later.',
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -176,33 +239,19 @@ const CollegeAdmissionsForm = () => {
       if (response.data.success ||
           (response.data.message && response.data.message.includes('successfully')) ||
           response.data.status === 'success') {
-        // Show success toast
+
+        // Store the submission ID for payment processing
+        const submissionId = response.data.id || response.data.data?.id;
+        setFormSubmissionId(submissionId ? submissionId.toString() : null);
+
+        // Show payment modal
+        setShowPaymentModal(true);
+
+        // Show toast notification
         toast({
-          title: 'Success',
-          description: 'Registration submitted successfully!',
+          title: 'Registration Submitted',
+          description: 'Please complete payment to finalize your registration.',
           variant: 'default',
-        });
-
-        // Set form as submitted
-        setIsSubmitted(true);
-
-        // Reset form data
-        setFormData({
-          parent_first_name: '',
-          parent_last_name: '',
-          parent_phone: '',
-          parent_email: '',
-          student_first_name: '',
-          student_last_name: '',
-          student_email: '',
-          school: '',
-          grade: '',
-          graduation_year: '',
-          package_id: '',
-          package_name: 'initial',
-          amount: packagePrices['initial'],
-          payment_status: 'Success',
-          course_type: 'College Admissions Counseling'
         });
       } else {
         // Log the response for debugging
@@ -216,62 +265,36 @@ const CollegeAdmissionsForm = () => {
         // Handle case where API returns success: false but has a success message or status
         if ((response.data.message && response.data.message.includes('successfully')) ||
             response.data.status === 'success') {
+
+          // Store the submission ID for payment processing
+          const submissionId = response.data.id || response.data.data?.id;
+          setFormSubmissionId(submissionId ? submissionId.toString() : null);
+
+          // Show payment modal
+          setShowPaymentModal(true);
+
+          // Show toast notification
           toast({
-            title: 'Success',
-            description: 'Registration submitted successfully!',
+            title: 'Registration Submitted',
+            description: 'Please complete payment to finalize your registration.',
             variant: 'default',
-          });
-
-          // Set form as submitted
-          setIsSubmitted(true);
-
-          // Reset form data
-          setFormData({
-            parent_first_name: '',
-            parent_last_name: '',
-            parent_phone: '',
-            parent_email: '',
-            student_first_name: '',
-            student_last_name: '',
-            student_email: '',
-            school: '',
-            grade: '',
-            graduation_year: '',
-            package_id: '',
-            package_name: 'initial',
-            amount: packagePrices['initial'],
-            payment_status: 'Success',
-            course_type: 'College Admissions Counseling'
           });
         } else {
           // Check if we have a status field indicating success
           if (response.data.status === 'success') {
+
+            // Store the submission ID for payment processing
+            const submissionId = response.data.id || response.data.data?.id;
+            setFormSubmissionId(submissionId ? submissionId.toString() : null);
+
+            // Show payment modal
+            setShowPaymentModal(true);
+
+            // Show toast notification
             toast({
-              title: 'Success',
-              description: 'Registration submitted successfully!',
+              title: 'Registration Submitted',
+              description: 'Please complete payment to finalize your registration.',
               variant: 'default',
-            });
-
-            // Set form as submitted
-            setIsSubmitted(true);
-
-            // Reset form data
-            setFormData({
-              parent_first_name: '',
-              parent_last_name: '',
-              parent_phone: '',
-              parent_email: '',
-              student_first_name: '',
-              student_last_name: '',
-              student_email: '',
-              school: '',
-              grade: '',
-              graduation_year: '',
-              package_id: '',
-              package_name: 'initial',
-              amount: packagePrices['initial'],
-              payment_status: 'Success',
-              course_type: 'College Admissions Counseling'
             });
           } else {
             // Handle actual error
@@ -680,6 +703,23 @@ const CollegeAdmissionsForm = () => {
       </main>
 
       <Footer />
+
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={handlePaymentModalClose}
+          onSuccess={handlePaymentSuccess}
+          amount={formData.amount}
+          description={`College Admissions Counseling - ${formData.package_name}`}
+          metadata={{
+            form_id: formSubmissionId,
+            form_type: 'college_admission',
+            student_name: `${formData.student_first_name} ${formData.student_last_name}`,
+            package_id: formData.package_id || formData.package_name
+          }}
+        />
+      )}
     </div>
   );
 };
