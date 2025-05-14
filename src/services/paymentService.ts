@@ -21,29 +21,22 @@ export const createPaymentIntent = async (
   metadata: Record<string, any> = {}
 ) => {
   try {
-    // For testing purposes, we'll use a mock client secret
-    // In production, this should come from your backend
+    // Create a PaymentIntent through our backend API
+    const response = await axios.post(`${API_BASE_URL}/create-payment-intent`, {
+      amount,
+      currency: 'usd',
+      description,
+      metadata
+    });
 
-    // Generate a mock client secret that looks like a real one
-    // This is ONLY for testing the UI flow - it won't work for actual payments
-    const mockClientSecret = `pi_${Math.random().toString(36).substring(2, 15)}_secret_${Math.random().toString(36).substring(2, 15)}`;
-
-    console.log('Created mock payment intent for testing');
+    console.log('Created payment intent');
     console.log('Amount:', amount / 100);
     console.log('Description:', description);
-    console.log('Metadata:', metadata);
 
-    // In a real implementation, you would call your backend API here
-    // const response = await axios.post(`${API_BASE_URL}/create-payment-intent`, {
-    //   amount,
-    //   description,
-    //   metadata
-    // });
-
-    // Return a mock response
+    // Return the client secret from the response
     return {
       success: true,
-      clientSecret: mockClientSecret
+      clientSecret: response.data.clientSecret
     };
   } catch (error) {
     console.error('Error creating payment intent:', error);
@@ -63,21 +56,20 @@ export const updatePaymentStatus = async (
   paymentIntentId: string
 ) => {
   try {
-    // For testing purposes, we'll just log the information
-    console.log('Payment status updated (mock)');
+    // Update payment status through our backend API
+    const response = await axios.post(`${API_BASE_URL}/update-payment-status`, {
+      form_id: formId,
+      payment_intent_id: paymentIntentId
+    });
+
+    console.log('Payment status updated');
     console.log('Form ID:', formId);
     console.log('Payment Intent ID:', paymentIntentId);
 
-    // In a real implementation, you would call your backend API here
-    // const response = await axios.post(`${API_BASE_URL}/update-payment-status`, {
-    //   form_id: formId,
-    //   payment_intent_id: paymentIntentId
-    // });
-
-    // Return a mock response
+    // Return the response from the API
     return {
       success: true,
-      message: 'Payment status updated successfully (mock)'
+      message: 'Payment status updated successfully'
     };
   } catch (error) {
     console.error('Error updating payment status:', error);
