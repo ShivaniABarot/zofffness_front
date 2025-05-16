@@ -10,9 +10,9 @@ const CollegeAdmissions = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       <main>
-      <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-accent-purple/70">
+      <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-blue-400/70">
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-bold text-white font-display mb-6">
@@ -40,7 +40,7 @@ const CollegeAdmissions = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 <Card className="card-shadow card-hover">
                   <CardContent className="p-6 text-center">
-                    <Target className="h-12 w-12 text-college-accent-purple mx-auto mb-4" />
+                    <Target className="h-12 w-12 text-college-blue-500 mx-auto mb-4" />
                     <h3 className="text-xl font-bold font-display text-college-blue-500 mb-2">
                       Strategic College Selection
                     </h3>
@@ -52,7 +52,7 @@ const CollegeAdmissions = () => {
 
                 <Card className="card-shadow card-hover">
                   <CardContent className="p-6 text-center">
-                    <Calendar className="h-12 w-12 text-college-accent-purple mx-auto mb-4" />
+                    <Calendar className="h-12 w-12 text-college-blue-500 mx-auto mb-4" />
                     <h3 className="text-xl font-bold font-display text-college-blue-500 mb-2">
                       Application Management
                     </h3>
@@ -64,7 +64,7 @@ const CollegeAdmissions = () => {
 
                 <Card className="card-shadow card-hover">
                   <CardContent className="p-6 text-center">
-                    <Award className="h-12 w-12 text-college-accent-purple mx-auto mb-4" />
+                    <Award className="h-12 w-12 text-college-blue-500 mx-auto mb-4" />
                     <h3 className="text-xl font-bold font-display text-college-blue-500 mb-2">
                       Interview Preparation
                     </h3>
@@ -96,19 +96,19 @@ const CollegeAdmissions = () => {
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="flex items-center">
-                        <GraduationCap className="h-5 w-5 text-college-accent-purple mr-2" />
+                        <GraduationCap className="h-5 w-5 text-college-blue-500 mr-2" />
                         <span>NY State Certified</span>
                       </div>
                       <div className="flex items-center">
-                        <Users className="h-5 w-5 text-college-accent-purple mr-2" />
+                        <Users className="h-5 w-5 text-college-blue-500 mr-2" />
                         <span>200+ Active Students</span>
                       </div>
                       <div className="flex items-center">
-                        <Trophy className="h-5 w-5 text-college-accent-purple mr-2" />
+                        <Trophy className="h-5 w-5 text-college-blue-500 mr-2" />
                         <span>20+ Years Experience</span>
                       </div>
                       <div className="flex items-center">
-                        <Star className="h-5 w-5 text-college-accent-purple mr-2" />
+                        <Star className="h-5 w-5 text-college-blue-500 mr-2" />
                         <span>NACAC & ASCA Member</span>
                       </div>
                     </div>
@@ -120,12 +120,12 @@ const CollegeAdmissions = () => {
                 <h3 className="text-2xl font-bold font-display text-college-blue-500 mb-6 text-center">
                   Our Counseling Programs
                 </h3>
-                
+
                 <div className="space-y-6">
                   <div className="bg-white p-6 rounded-lg shadow-sm">
                     <div className="flex flex-col md:flex-row md:items-center gap-4">
                       <div className="flex-shrink-0">
-                        <GraduationCap className="h-10 w-10 text-college-accent-purple" />
+                        <GraduationCap className="h-10 w-10 text-college-blue-500" />
                       </div>
                       <div className="flex-grow">
                         <h4 className="text-xl font-bold text-college-blue-500 mb-2">
@@ -136,30 +136,30 @@ const CollegeAdmissions = () => {
                         </p>
                         <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
                           <li className="flex items-start">
-                            <CheckCircle2 className="h-5 w-5 text-college-accent-purple mr-2 mt-0.5 shrink-0" />
+                            <CheckCircle2 className="h-5 w-5 text-college-blue-500 mr-2 mt-0.5 shrink-0" />
                             <span>Unlimited counselor access</span>
                           </li>
                           <li className="flex items-start">
-                            <CheckCircle2 className="h-5 w-5 text-college-accent-purple mr-2 mt-0.5 shrink-0" />
+                            <CheckCircle2 className="h-5 w-5 text-college-blue-500 mr-2 mt-0.5 shrink-0" />
                             <span>College list development</span>
                           </li>
                           <li className="flex items-start">
-                            <CheckCircle2 className="h-5 w-5 text-college-accent-purple mr-2 mt-0.5 shrink-0" />
+                            <CheckCircle2 className="h-5 w-5 text-college-blue-500 mr-2 mt-0.5 shrink-0" />
                             <span>Essay review & feedback</span>
                           </li>
                           <li className="flex items-start">
-                            <CheckCircle2 className="h-5 w-5 text-college-accent-purple mr-2 mt-0.5 shrink-0" />
+                            <CheckCircle2 className="h-5 w-5 text-college-blue-500 mr-2 mt-0.5 shrink-0" />
                             <span>Application review</span>
                           </li>
                         </ul>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-white p-6 rounded-lg shadow-sm">
                     <div className="flex flex-col md:flex-row md:items-center gap-4">
                       <div className="flex-shrink-0">
-                        <Clock className="h-10 w-10 text-college-accent-purple" />
+                        <Clock className="h-10 w-10 text-college-blue-500" />
                       </div>
                       <div className="flex-grow">
                         <h4 className="text-xl font-bold text-college-blue-500 mb-2">
@@ -202,7 +202,7 @@ const CollegeAdmissions = () => {
           </div>
         </section>
       </main>
-      
+
       <Footer />
     </div>
   );

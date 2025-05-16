@@ -9,16 +9,16 @@ const CollegeApplicationMastery = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       <main>
-      <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-accent-purple/70">
+      <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-blue-400/70">
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-bold text-white font-display mb-6">
                 College Application Mastery
               </h1>
               <p className="text-lg md:text-xl text-white/90 mb-8">
-                A comprehensive program designed to help you navigate every step of the college application process with confidence.
+                A comprehensive program designed to help your child navigate every step of the college application process with confidence.
               </p>
             </div>
           </div>
@@ -29,10 +29,10 @@ const CollegeApplicationMastery = () => {
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
                 <h2 className="text-3xl font-bold font-display text-college-blue-500 mb-4">
-                  Master Your College Application Journey
+                  Master the College Application Journey — Together
                 </h2>
                 <p className="text-lg text-gray-700">
-                  Our College Application Mastery program provides personalized guidance, expert strategies, and comprehensive support to help you craft standout applications.
+                  Our College Application Mastery program offers your child personalized guidance, expert strategies, and comprehensive support to create standout applications for the top colleges. Give them the confidence and tools they need to navigate the admissions process successfully.
                 </p>
               </div>
 
@@ -66,9 +66,9 @@ const CollegeApplicationMastery = () => {
                 </div>
 
                 <div className="bg-gray-50 p-8 rounded-xl shadow-sm">
-                  <img 
-                    src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80" 
-                    alt="Students working on college applications" 
+                  <img
+                    src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80"
+                    alt="Students working on college applications"
                     className="w-full h-48 object-cover rounded-lg mb-6"
                   />
                   <h3 className="text-xl font-bold font-display text-college-blue-500 mb-4">
@@ -113,7 +113,7 @@ const CollegeApplicationMastery = () => {
           </div>
         </section>
       </main>
-      
+
       <Footer />
     </div>
   );

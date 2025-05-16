@@ -29,7 +29,7 @@ const Hero = () => {
           <div className="flex justify-start">
             <Button
               size="lg"
-              className="bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 text-white hover:opacity-90 px-8 py-3 rounded-full shadow-lg transform transition-transform hover:scale-105"
+              className="bg-college-blue-500 hover:bg-college-blue-600 text-white px-8 py-3 rounded-full shadow-lg transform transition-transform hover:scale-105"
               asChild
             >
               <Link to="/consultation/schedule">Schedule Consultation</Link>

@@ -9,9 +9,9 @@ const ScheduleConsultation = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       <main>
-      <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-accent-purple/70">
+      <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-blue-400/70">
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-bold text-white font-display mb-6">
@@ -209,7 +209,7 @@ const ScheduleConsultation = () => {
           </div>
         </section>
       </main>
-      
+
       <Footer />
     </div>
   );

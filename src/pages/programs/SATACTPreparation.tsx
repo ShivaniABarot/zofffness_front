@@ -12,7 +12,7 @@ const SATACTPreparation = () => {
       <Navbar />
 
       <main>
-        <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-accent-purple/70">
+        <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-blue-400/70">
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-bold text-white font-display mb-8">
@@ -20,7 +20,7 @@ const SATACTPreparation = () => {
                 SAT/ACT Course
               </h1>
               <p className="text-lg md:text-xl text-white/90 mb-10">
-                Expert coaching and proven strategies to help you maximize your standardized test scores.
+                Expert coaching and proven strategies to help your child maximize their standardized test scores.
               </p>
             </div>
           </div>
@@ -34,7 +34,7 @@ const SATACTPreparation = () => {
                   Comprehensive Test Preparation
                 </h2>
                 <p className="text-lg text-gray-700">
-                  Our specialized SAT/ACT preparation programs combine content mastery, strategic test-taking techniques, and extensive practice to help you achieve your highest potential score.
+                  Our specialized SAT/ACT preparation programs combine content mastery, strategic test-taking techniques, and extensive practice to help your child achieve their highest potential score.
                 </p>
               </div>
 
@@ -148,23 +148,27 @@ const SATACTPreparation = () => {
                       </div>
                     </div>
                     <CardContent className="p-8">
-                      <h4 className="text-2xl font-bold font-display text-college-blue-500 mb-4 text-center">Private Tutoring</h4>
+                      <h4 className="text-2xl font-bold font-display text-college-blue-500 mb-4 text-center">One-on-one Instructions for Your Child's Success</h4>
                       <p className="text-gray-700 mb-6 text-center">
-                        One-on-one instruction tailored to your specific needs, learning style, and pace.
+                        We provide one-on-one instruction tailored to your child's unique learning style, pace, and academic needs.
                       </p>
                       <div className="bg-gray-50 p-6 rounded-lg mb-6">
                         <ul className="space-y-4">
                           <li className="flex items-start">
                             <CheckCircle2 className="h-6 w-6 text-college-accent-purple mr-3 mt-0.5 shrink-0" />
-                            <span className="text-gray-800">Customized study plan based on your diagnostic results</span>
+                            <span className="text-gray-800">Customized study plans based on diagnostic assessments</span>
                           </li>
                           <li className="flex items-start">
                             <CheckCircle2 className="h-6 w-6 text-college-accent-purple mr-3 mt-0.5 shrink-0" />
-                            <span className="text-gray-800">Flexible scheduling to accommodate your busy calendar</span>
+                            <span className="text-gray-800">Flexible scheduling to fit your family's busy calendar</span>
                           </li>
                           <li className="flex items-start">
                             <CheckCircle2 className="h-6 w-6 text-college-accent-purple mr-3 mt-0.5 shrink-0" />
-                            <span className="text-gray-800">Targeted focus on your specific challenges and learning style</span>
+                            <span className="text-gray-800">Focused attention on your child's specific challenges and strengths</span>
+                          </li>
+                          <li className="flex items-start">
+                            <CheckCircle2 className="h-6 w-6 text-college-accent-purple mr-3 mt-0.5 shrink-0" />
+                            <span className="text-gray-800">Give your child the individualized support they need to thrive — and the confidence to succeed</span>
                           </li>
                         </ul>
                       </div>

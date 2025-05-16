@@ -21,7 +21,7 @@ const PageTemplate = () => {
 
       <main>
         {/* Hero Section */}
-        <section className="pt-00 pb-16 md:pt-48 md:pb-20 bg-gradient-to-r from-college-blue-500/90 to-college-accent-purple/70 relative">
+        <section className="pt-00 pb-16 md:pt-48 md:pb-20 bg-gradient-to-r from-college-blue-500/90 to-college-blue-400/70 relative">
           <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-black/20"></div>
           <div className="max-w-3xl mx-auto text-center relative z-10">
             <h1 className="text-4xl md:text-5xl font-bold text-white font-display mb-6 drop-shadow-lg" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>

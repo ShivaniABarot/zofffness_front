@@ -9,9 +9,9 @@ const SummerIntensive = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       <main>
-      <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-accent-purple/70">
+      <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-blue-400/70">
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-bold text-white font-display mb-6">
@@ -66,9 +66,9 @@ const SummerIntensive = () => {
                 </div>
 
                 <div className="bg-gray-50 p-8 rounded-xl shadow-sm">
-                  <img 
-                    src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80" 
-                    alt="Summer intensive session" 
+                  <img
+                    src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80"
+                    alt="Summer intensive session"
                     className="w-full h-48 object-cover rounded-lg mb-6"
                   />
                   <h3 className="text-xl font-bold font-display text-college-blue-500 mb-4">
@@ -157,7 +157,7 @@ const SummerIntensive = () => {
           </div>
         </section>
       </main>
-      
+
       <Footer />
     </div>
   );

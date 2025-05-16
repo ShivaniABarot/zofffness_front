@@ -69,7 +69,7 @@ const Blog = () => {
       <Navbar />
 
       <main>
-      <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-accent-purple/70 relative">
+      <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-blue-400/70 relative">
           <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-black/20"></div>
           <div className="container mx-auto px-4 md:px-6 relative z-10">
             <div className="max-w-3xl mx-auto text-center">

@@ -79,7 +79,7 @@ export default {
 						900: '#0B131A',
 					},
 					accent: {
-						purple: '#8B5CF6',
+						purple: '#1E3A8A', /* Changed from #8B5CF6 to match the blue color */
 						gold: '#F6AD55',
 					}
 				}
@@ -139,7 +139,7 @@ export default {
 			},
 			backgroundImage: {
 				'hero-pattern': 'linear-gradient(to right, rgba(30, 58, 138, 0.9), rgba(30, 58, 138, 0.7)), url("/hero-bg.jpg")',
-				'cta-pattern': 'linear-gradient(to right, rgba(139, 92, 246, 0.9), rgba(30, 58, 138, 0.8))',
+				'cta-pattern': 'linear-gradient(to right, rgba(30, 58, 138, 0.9), rgba(30, 58, 138, 0.7))',
 				'testimonial-pattern': 'linear-gradient(to bottom, #F9FAFB, #F3F4F6)',
 			}
 		}

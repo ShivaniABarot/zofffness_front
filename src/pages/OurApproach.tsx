@@ -9,9 +9,9 @@ const OurApproach = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       <main>
-      <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-accent-purple/70">
+      <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-blue-400/70">
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-bold text-white font-display mb-6">
@@ -33,7 +33,7 @@ const OurApproach = () => {
                     Our Philosophy
                   </h2>
                 </div>
-                
+
                 <div className="bg-gray-50 p-8 rounded-xl shadow-sm">
                   <p className="text-lg text-gray-700 mb-6">
                     At Zoffness College Prep, we believe that successful college preparation goes beyond simply getting into a prestigious university. Our approach focuses on helping students discover their authentic selves, develop their unique strengths, and find the colleges where they will truly thrive.
@@ -68,7 +68,7 @@ const OurApproach = () => {
                     We've developed a comprehensive, four-phase approach to college preparation that has proven successful for thousands of students.
                   </p>
                 </div>
-                
+
                 <div className="space-y-12">
                   <div className="bg-college-blue-50 p-8 rounded-xl">
                     <div className="flex flex-col md:flex-row gap-6">
@@ -99,7 +99,7 @@ const OurApproach = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-college-blue-50 p-8 rounded-xl">
                     <div className="flex flex-col md:flex-row gap-6">
                       <div className="md:w-1/4 flex justify-center">
@@ -129,7 +129,7 @@ const OurApproach = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-college-blue-50 p-8 rounded-xl">
                     <div className="flex flex-col md:flex-row gap-6">
                       <div className="md:w-1/4 flex justify-center">
@@ -159,7 +159,7 @@ const OurApproach = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-college-blue-50 p-8 rounded-xl">
                     <div className="flex flex-col md:flex-row gap-6">
                       <div className="md:w-1/4 flex justify-center">
@@ -263,7 +263,7 @@ const OurApproach = () => {
                     Core Principles
                   </h2>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div className="flex items-start">
@@ -280,7 +280,7 @@ const OurApproach = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div className="flex items-start">
                       <div className="mr-4 mt-1">
@@ -296,7 +296,7 @@ const OurApproach = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div className="flex items-start">
                       <div className="mr-4 mt-1">
@@ -312,7 +312,7 @@ const OurApproach = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div className="flex items-start">
                       <div className="mr-4 mt-1">
@@ -341,7 +341,7 @@ const OurApproach = () => {
           </div>
         </section>
       </main>
-      
+
       <Footer />
     </div>
   );

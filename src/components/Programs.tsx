@@ -8,20 +8,6 @@ import { CheckCircle2, GraduationCap, FileText, Users, Clock, BookOpen } from 'l
 const programsData = [
   {
     id: 1,
-    title: "College Application Mastery",
-    description: "Comprehensive guidance through the entire college application process, from school selection to acceptance letters.",
-    icon: <FileText className="h-10 w-10 text-college-blue-500" />,
-    features: [
-      "Strategic college selection guidance",
-      "Essay writing and personal statement support",
-      "Application review and optimization",
-      "Interview preparation",
-    ],
-    popular: true,
-    url: "/programs/college-application-mastery"
-  },
-  {
-    id: 2,
     title: "SAT/ACT Test Preparation",
     description: "Proven strategies and personalized coaching to maximize your standardized test scores.",
     icon: <BookOpen className="h-10 w-10 text-college-blue-500" />,
@@ -31,8 +17,22 @@ const programsData = [
       "Practice tests with detailed analysis",
       "Score improvement strategies",
     ],
-    popular: false,
+    popular: true,
     url: "/programs/sat-act-preparation"
+  },
+  {
+    id: 2,
+    title: "College Application Mastery",
+    description: "Comprehensive guidance through the entire college application process, from school selection to acceptance letters.",
+    icon: <FileText className="h-10 w-10 text-college-blue-500" />,
+    features: [
+      "Strategic college selection guidance",
+      "Essay writing and personal statement support",
+      "Application review and optimization",
+      "Interview preparation",
+    ],
+    popular: false,
+    url: "/programs/college-application-mastery"
   },
   {
     id: 3,
@@ -77,9 +77,9 @@ const Programs = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {programsData.map((program) => (
-            <Card key={program.id} className={`card-shadow card-hover flex flex-col ${program.popular ? 'border-2 border-college-accent-purple' : ''}`}>
+            <Card key={program.id} className="card-shadow card-hover flex flex-col transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:border-2 hover:border-college-blue-500">
               {program.popular && (
-                <div className="bg-college-accent-purple text-white text-sm font-semibold py-1 px-3 absolute right-4 top-4 rounded-full">
+                <div className="bg-college-blue-500 text-white text-sm font-semibold py-1 px-3 absolute right-4 top-4 rounded-full">
                   Popular Choice
                 </div>
               )}
@@ -92,14 +92,14 @@ const Programs = () => {
                 <ul className="space-y-3">
                   {program.features.map((feature, index) => (
                     <li key={index} className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-college-accent-purple mr-2 shrink-0 mt-0.5" />
+                      <CheckCircle2 className="h-5 w-5 text-college-blue-500 mr-2 shrink-0 mt-0.5" />
                       <span className="text-gray-700">{feature}</span>
                     </li>
                   ))}
                 </ul>
               </CardContent>
               <CardFooter className="mt-auto">
-                <Button className="w-full bg-college-blue-500 hover:bg-college-blue-600" asChild>
+                <Button className="w-full bg-college-blue-500 hover:bg-college-blue-600 transition-all duration-300 hover:shadow-md" asChild>
                   <Link to={program.url}>Learn More</Link>
                 </Button>
               </CardFooter>
