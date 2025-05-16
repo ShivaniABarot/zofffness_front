@@ -15,10 +15,10 @@ const ScheduleConsultation = () => {
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-bold text-white font-display mb-6">
-                Schedule a Consultation
+                Schedule Your 60-Minute Consultation
               </h1>
               <p className="text-lg md:text-xl text-white/90">
-                Discover how we can help you achieve your college admissions goals.
+                Discover how we can help your child achieve their college admissions goals.
               </p>
             </div>
           </div>
@@ -29,17 +29,18 @@ const ScheduleConsultation = () => {
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
                 <h2 className="text-3xl font-bold font-display text-college-blue-500 mb-4">
-                  Take the First Step Toward College Success
+                  Schedule Your 60-Minute Consultation
                 </h2>
                 <p className="text-lg text-gray-700">
-                  Our 60-minute consultations are designed to understand your unique needs and show you how our programs can help you achieve your goals. Call us at (914) 462-7797 to schedule your consultation.
+                  Our consultation is designed to understand your child's unique needs and show how our expert programs can guide them toward top college admissions — while giving you peace of mind.
+                  Fill out the form below or call us at (914) 462-7797 to get started.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                 <div className="bg-gray-50 p-8 rounded-xl shadow-sm">
                   <h3 className="text-xl font-bold font-display text-college-blue-500 mb-4">
-                    During Your Consultation
+                    What to Expect During Your Consultation
                   </h3>
                   <ul className="space-y-4">
                     <li className="flex items-start">
@@ -47,8 +48,8 @@ const ScheduleConsultation = () => {
                         <HelpCircle className="h-5 w-5 text-college-blue-500" />
                       </div>
                       <div>
-                        <h4 className="font-semibold">Discuss Your Goals</h4>
-                        <p className="text-gray-700">Share your academic background, extracurricular activities, and college aspirations.</p>
+                        <h4 className="font-semibold">Understand Your Child's Goals</h4>
+                        <p className="text-gray-700">We'll discuss your child's academic background, extracurricular involvement, and college aspirations to understand their unique journey.</p>
                       </div>
                     </li>
                     <li className="flex items-start">
@@ -56,8 +57,8 @@ const ScheduleConsultation = () => {
                         <HelpCircle className="h-5 w-5 text-college-blue-500" />
                       </div>
                       <div>
-                        <h4 className="font-semibold">Identify Your Needs</h4>
-                        <p className="text-gray-700">We'll help pinpoint areas where specialized support would be most beneficial.</p>
+                        <h4 className="font-semibold">Identify Where Support is Needed Most</h4>
+                        <p className="text-gray-700">Together, we'll pinpoint the areas where personalized guidance can make the greatest impact.</p>
                       </div>
                     </li>
                     <li className="flex items-start">
@@ -65,8 +66,8 @@ const ScheduleConsultation = () => {
                         <HelpCircle className="h-5 w-5 text-college-blue-500" />
                       </div>
                       <div>
-                        <h4 className="font-semibold">Explore Our Programs</h4>
-                        <p className="text-gray-700">Learn about our services and how they align with your specific goals.</p>
+                        <h4 className="font-semibold">Discover the Right Program Fit</h4>
+                        <p className="text-gray-700">Explore how our tailored services align with your child's needs and long-term goals.</p>
                       </div>
                     </li>
                     <li className="flex items-start">
@@ -74,8 +75,8 @@ const ScheduleConsultation = () => {
                         <HelpCircle className="h-5 w-5 text-college-blue-500" />
                       </div>
                       <div>
-                        <h4 className="font-semibold">Get Your Questions Answered</h4>
-                        <p className="text-gray-700">Ask anything about the college admissions process or our approach.</p>
+                        <h4 className="font-semibold">Get Peace of Mind</h4>
+                        <p className="text-gray-700">Ask us anything about the admissions process — we're here to provide clarity and confidence every step of the way.</p>
                       </div>
                     </li>
                   </ul>
@@ -83,7 +84,7 @@ const ScheduleConsultation = () => {
 
                 <div className="bg-gray-50 p-8 rounded-xl shadow-sm">
                   <h3 className="text-xl font-bold font-display text-college-blue-500 mb-4">
-                    Book Your Consultation
+                    Get Started Today
                   </h3>
                   <form className="space-y-4">
                     <div>
@@ -98,7 +99,7 @@ const ScheduleConsultation = () => {
                           type="text"
                           id="name"
                           className="w-full pl-10 px-4 py-2 border border-gray-300 rounded-md focus:ring-college-blue-500 focus:border-college-blue-500"
-                          placeholder="Your name"
+                          placeholder="Parent/Guardian name"
                         />
                       </div>
                     </div>
@@ -160,13 +161,13 @@ const ScheduleConsultation = () => {
                     </div>
                     <div>
                       <label htmlFor="interest" className="block text-sm font-medium text-gray-700 mb-1">
-                        Primary Interest
+                        Primary Interest for Your Child
                       </label>
                       <select
                         id="interest"
                         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-college-blue-500 focus:border-college-blue-500"
                       >
-                        <option value="">Select your primary interest</option>
+                        <option value="">Select your child's primary interest</option>
                         <option value="application">College Application Support</option>
                         <option value="essays">Essay Coaching</option>
                         <option value="test">SAT/ACT Test Preparation</option>
@@ -176,7 +177,7 @@ const ScheduleConsultation = () => {
                       </select>
                     </div>
                     <Button className="w-full bg-college-blue-500 hover:bg-college-blue-600">
-                      Book Your Consultation
+                      Schedule Your Consultation
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   </form>
@@ -202,7 +203,7 @@ const ScheduleConsultation = () => {
                   </div>
                 </div>
                 <p className="text-gray-700 italic">
-                  "My initial consultation gave me clarity about what I needed to focus on for my applications. It was the first step in a journey that led to acceptance at my dream school." — Marcus T., Stanford '25
+                  "Our initial consultation gave us clarity about what our son needed to focus on for his applications. It was the first step in a journey that led to his acceptance at his dream school." — Jennifer T., Parent of Stanford '25 Student
                 </p>
               </div>
             </div>
