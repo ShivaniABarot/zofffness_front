@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { FileText, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const CollegeEssays = () => {
   return (
@@ -195,11 +196,12 @@ const CollegeEssays = () => {
               </div>
 
               <div className="text-center">
-                <Button size="lg" className="bg-college-blue-500 hover:bg-college-blue-600">
-                  Schedule a Consultation
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                <Button size="lg" className="bg-college-blue-500 hover:bg-college-blue-600" asChild>
+                  <Link to="/forms/college-essays">
+                    Schedule a Consultation
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
                 </Button>
-
               </div>
             </div>
           </div>

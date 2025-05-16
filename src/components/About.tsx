@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Award, Users, BookOpen, TrendingUp } from 'lucide-react';
 
@@ -13,16 +14,16 @@ const About = () => {
               About Zoffness College Prep
             </h2>
             <p className="text-lg text-gray-700 mb-6">
-              Since 2005, Zoffness College Prep has been dedicated to helping students navigate the complex college 
-              admissions process and achieve their academic dreams. We believe every student deserves personalized 
+              Since 2005, Zoffness College Prep has been dedicated to helping students navigate the complex college
+              admissions process and achieve their academic dreams. We believe every student deserves personalized
               guidance to unleash their full potential.
             </p>
             <p className="text-lg text-gray-700 mb-6">
-              Our team of experienced educators and admissions specialists provides expert guidance, 
-              practical strategies, and unwavering support to ensure our students stand out among thousands 
+              Our team of experienced educators and admissions specialists provides expert guidance,
+              practical strategies, and unwavering support to ensure our students stand out among thousands
               of applicants and secure spots at their dream schools.
             </p>
-            
+
             <div className="grid grid-cols-2 gap-6 mb-8">
               <div className="flex items-start">
                 <Award className="h-6 w-6 text-college-accent-purple mr-3 mt-1 shrink-0" />
@@ -53,12 +54,14 @@ const About = () => {
                 </div>
               </div>
             </div>
-            
-            <Button className="bg-college-blue-500 hover:bg-college-blue-600">
-              Meet Our Team
+
+            <Button className="bg-college-blue-500 hover:bg-college-blue-600" asChild>
+              <Link to="/our-team">
+                Meet Our Team
+              </Link>
             </Button>
           </div>
-          
+
           <div className="order-1 lg:order-2 relative">
             <div className="aspect-square overflow-hidden rounded-2xl shadow-xl relative group">
               <div className="absolute inset-0 bg-gradient-to-br from-college-blue-500/10 to-college-blue-500/0"></div>

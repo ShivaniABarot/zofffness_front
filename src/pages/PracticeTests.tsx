@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { BookOpen, BarChart, CheckCircle2, ArrowRight, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const PracticeTests = () => {
   return (
@@ -72,8 +73,10 @@ const PracticeTests = () => {
                       <span>Personalized study plan</span>
                     </li>
                   </ul>
-                  <Button className="w-full bg-college-blue-500 hover:bg-college-blue-600">
-                    Register for SAT Practice
+                  <Button className="w-full bg-college-blue-500 hover:bg-college-blue-600" asChild>
+                    <Link to="/forms/sat-act-practice-test">
+                      Register for SAT Practice
+                    </Link>
                   </Button>
                 </div>
 
@@ -103,8 +106,10 @@ const PracticeTests = () => {
                       <span>Targeted improvement strategies</span>
                     </li>
                   </ul>
-                  <Button className="w-full bg-college-blue-500 hover:bg-college-blue-600">
-                    Register for ACT Practice
+                  <Button className="w-full bg-college-blue-500 hover:bg-college-blue-600" asChild>
+                    <Link to="/forms/sat-act-practice-test">
+                      Register for ACT Practice
+                    </Link>
                   </Button>
                 </div>
               </div>
@@ -171,9 +176,11 @@ const PracticeTests = () => {
               </div>
 
               <div className="text-center">
-                <Button size="lg" className="bg-college-blue-500 hover:bg-college-blue-600">
-                  View Upcoming Test Dates
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                <Button size="lg" className="bg-college-blue-500 hover:bg-college-blue-600" asChild>
+                  <Link to="/forms/sat-act-practice-test">
+                    View Upcoming Test Dates
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
                 </Button>
               </div>
             </div>

@@ -5,12 +5,13 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { BrainCircuit, CheckCircle2, ArrowRight, Clock, Calendar, Lightbulb } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const ExecutiveCoaching = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       <main>
       <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-accent-purple/70">
           <div className="container mx-auto px-4 md:px-6">
@@ -192,7 +193,7 @@ const ExecutiveCoaching = () => {
                 <h3 className="text-2xl font-bold font-display text-college-blue-500 mb-6 text-center">
                   Our Coaching Approach
                 </h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
                     <h4 className="text-xl font-bold text-college-blue-500 mb-4">
@@ -216,7 +217,7 @@ const ExecutiveCoaching = () => {
                       </li>
                     </ul>
                   </div>
-                  
+
                   <div>
                     <h4 className="text-xl font-bold text-college-blue-500 mb-4">
                       Customized Coaching Plan
@@ -243,16 +244,18 @@ const ExecutiveCoaching = () => {
               </div>
 
               <div className="text-center">
-                <Button size="lg" className="bg-college-blue-500 hover:bg-college-blue-600">
-                  Schedule a Coaching Consultation
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                <Button size="lg" className="bg-college-blue-500 hover:bg-college-blue-600" asChild>
+                  <Link to="/forms/executive-function">
+                    Schedule a Coaching Consultation
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
                 </Button>
               </div>
             </div>
           </div>
         </section>
       </main>
-      
+
       <Footer />
     </div>
   );

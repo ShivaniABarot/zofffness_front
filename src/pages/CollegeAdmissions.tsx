@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { GraduationCap, Calendar, CheckCircle2, ArrowRight, Award, Target, Clock, Users, Trophy, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const CollegeAdmissions = () => {
   return (
@@ -193,9 +194,11 @@ const CollegeAdmissions = () => {
               </div>
 
               <div className="text-center">
-                <Button size="lg" className="bg-college-blue-500 hover:bg-college-blue-600">
-                  Schedule a Consultation (914) 462-7797
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                <Button size="lg" className="bg-college-blue-500 hover:bg-college-blue-600" asChild>
+                  <Link to="/forms/college-admissions">
+                    Schedule a Consultation (914) 462-7797
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
                 </Button>
               </div>
             </div>
