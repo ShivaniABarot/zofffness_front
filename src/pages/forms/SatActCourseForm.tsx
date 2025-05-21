@@ -47,15 +47,8 @@ const SatActCourseForm = () => {
         if (response.data.success && Array.isArray(response.data.data)) {
           setPackages(response.data.data);
 
-          // If packages are available, set the default package to the first one
-          if (response.data.data.length > 0) {
-            const defaultPackage = response.data.data[0];
-            setFormData(prev => ({
-              ...prev,
-              packages: defaultPackage.id.toString(),
-              total_amount: defaultPackage.price
-            }));
-          }
+          // No longer setting a default package
+          // We want users to explicitly select a package
         } else {
           console.error('Failed to fetch packages or invalid data format');
           toast({
@@ -96,8 +89,8 @@ const SatActCourseForm = () => {
     student_email: '',
     school: '',
     grade: '',
-    packages: '20sessions',
-    total_amount: 5900,
+    packages: '',
+    total_amount: 0,
     payment_status: 'Success',
     course_type: 'SAT/ACT Course'
   });
@@ -193,8 +186,8 @@ const SatActCourseForm = () => {
           student_email: '',
           school: '',
           grade: '',
-          packages: '20sessions',
-          total_amount: 5900,
+          packages: '',
+          total_amount: 0,
           payment_status: 'Success',
           course_type: 'SAT/ACT Course'
         });
@@ -305,7 +298,6 @@ const SatActCourseForm = () => {
                       </div>
                     ) : packages.length > 0 ? (
                       <RadioGroup
-                        defaultValue={packages[0]?.id.toString()}
                         onValueChange={handleRadioChange}
                         value={formData.packages}
                       >
@@ -327,7 +319,7 @@ const SatActCourseForm = () => {
                       </RadioGroup>
                     ) : (
                       // Fallback to hardcoded packages if API fails
-                      <RadioGroup defaultValue="20sessions" onValueChange={handleRadioChange}>
+                      <RadioGroup onValueChange={handleRadioChange}>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="20sessions" id="20sessions" />
                           <Label htmlFor="20sessions">20 session package - $5,900</Label>

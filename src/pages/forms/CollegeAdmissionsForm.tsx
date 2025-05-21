@@ -394,7 +394,6 @@ const CollegeAdmissionsForm = () => {
                       </div>
                     ) : (
                       <RadioGroup
-                        defaultValue={packages.length > 0 ? packages[0].id.toString() : "initial"}
                         onValueChange={handlePackageChange}
                       >
                         {packages.length > 0 ? (

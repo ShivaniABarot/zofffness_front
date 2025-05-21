@@ -424,7 +424,6 @@ const SatActPracticeTestForm = () => {
                       ) : (
                         <Select
                           onValueChange={handleTestTypeChange}
-                          defaultValue={sessions.length > 0 ? sessions[0].id.toString() : "no-options"}
                         >
                           <SelectTrigger id="test_type">
                             <SelectValue placeholder="Select test type" />

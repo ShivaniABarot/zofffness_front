@@ -1,18 +1,6 @@
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Zoffness hexagon logo with gradient -->
-  <defs>
-    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1E40AF" />
-      <stop offset="100%" stop-color="#1E3A8A" />
-    </linearGradient>
-  </defs>
-
-  <!-- Hexagon with slight rotation for better appearance -->
-  <path d="M16 2L28 9V23L16 30L4 23V9L16 2Z" fill="url(#blueGradient)" transform="rotate(0, 16, 16)"/>
-
-  <!-- Z letter - more stylized -->
-  <path d="M11 10H21L11 22H21" stroke="#60A5FA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-
-  <!-- Subtle highlight -->
-  <path d="M16 2L28 9L16 16L4 9L16 2Z" fill="white" fill-opacity="0.1"/>
+  <!-- Zoffness hexagon logo -->
+  <path d="M16 2L28 9V23L16 30L4 23V9L16 2Z" fill="#1E3A8A"/>
+  <!-- Z letter -->
+  <path d="M10 10H22L10 22H22" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

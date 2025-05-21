@@ -64,16 +64,17 @@ const CollegeEssaysForm = () => {
           console.log('API Response:', response.data);
         }
 
-        if (response.data.success && Array.isArray(response.data.data) && response.data.data.length > 0) {
+        if (response.data.success && Array.isArray(response.data.data)) {
           setPackages(response.data.data);
 
-          // Set the default package to the first one
-          const defaultPackage = response.data.data[0];
-          setFormData(prev => ({
-            ...prev,
-            packages: defaultPackage.id.toString(),
-            sessions: defaultPackage.price
-          }));
+          if (response.data.data.length === 0) {
+            console.error('No packages returned from API');
+            toast({
+              title: 'Warning',
+              description: 'Could not load package options from server. Please try again later.',
+              variant: 'destructive',
+            });
+          }
         } else {
           console.error('Failed to fetch packages or no packages available');
           toast({
@@ -389,7 +390,6 @@ const CollegeEssaysForm = () => {
                       </div>
                     ) : packages.length > 0 ? (
                       <RadioGroup
-                        defaultValue={packages[0]?.id.toString()}
                         onValueChange={handlePackageChange}
                         value={formData.packages}
                       >

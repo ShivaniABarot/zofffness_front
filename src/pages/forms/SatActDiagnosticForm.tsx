@@ -211,7 +211,6 @@ const SatActDiagnosticForm = () => {
                       </div>
                     ) : (
                       <RadioGroup
-                        defaultValue={sessions.length > 0 ? sessions[0].id.toString() : ""}
                         onValueChange={handleRadioChange}
                       >
                         {sessions.length > 0 ? (

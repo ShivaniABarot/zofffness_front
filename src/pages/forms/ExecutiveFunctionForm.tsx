@@ -70,21 +70,13 @@ const ExecutiveFunctionForm = () => {
         if (response.data.success && Array.isArray(response.data.data)) {
           setPackages(response.data.data);
 
-          // If packages are available, set the default package to the first one
-          if (response.data.data.length > 0) {
-            const defaultPackage = response.data.data[0];
-            setFormData(prev => ({
-              ...prev,
-              package_name: defaultPackage.id.toString(),
-              amount: defaultPackage.price
-            }));
-          } else {
-            // If no packages are returned, use fallback
-            setFormData(prev => ({
-              ...prev,
-              package_name: 'five-sessions',
-              amount: fallbackPackagePrices['five-sessions']
-            }));
+          if (response.data.data.length === 0) {
+            console.error('No packages returned from API');
+            toast({
+              title: 'Warning',
+              description: 'Could not load package options from server. Using default options.',
+              variant: 'destructive',
+            });
           }
         } else {
           console.error('Failed to fetch packages or invalid data format');
@@ -93,13 +85,6 @@ const ExecutiveFunctionForm = () => {
             description: 'Could not load package options from server. Using default options.',
             variant: 'destructive',
           });
-
-          // Use fallback packages
-          setFormData(prev => ({
-            ...prev,
-            package_name: 'five-sessions',
-            amount: fallbackPackagePrices['five-sessions']
-          }));
         }
       } catch (error) {
         console.error('Error fetching packages:', error);
@@ -116,12 +101,7 @@ const ExecutiveFunctionForm = () => {
           variant: 'destructive',
         });
 
-        // Use fallback packages
-        setFormData(prev => ({
-          ...prev,
-          package_name: 'five-sessions',
-          amount: fallbackPackagePrices['five-sessions']
-        }));
+        // Do not set any default package in error case
       } finally {
         setIsLoadingPackages(false);
       }
@@ -438,7 +418,6 @@ const ExecutiveFunctionForm = () => {
                       </div>
                     ) : packages.length > 0 ? (
                       <RadioGroup
-                        defaultValue={packages[0]?.id.toString()}
                         onValueChange={handlePackageChange}
                         value={formData.package_name}
                       >
@@ -460,7 +439,7 @@ const ExecutiveFunctionForm = () => {
                       </RadioGroup>
                     ) : (
                       // Fallback to hardcoded packages if API fails
-                      <RadioGroup defaultValue="five-sessions" onValueChange={handlePackageChange}>
+                      <RadioGroup onValueChange={handlePackageChange}>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="five-sessions" id="five-sessions" />
                           <Label htmlFor="five-sessions">Five individual 30-minute sessions package - $450</Label>
