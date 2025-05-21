@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate Favicon</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    #favicon-preview {
+      margin: 20px 0;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #1E3A8A;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 10px 0;
+    }
+    button:hover {
+      background-color: #152C52;
+    }
+    .instructions {
+      max-width: 600px;
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Zoffness Favicon Generator</h1>
+  
+  <div class="container">
+    <div id="favicon-preview">
+      <svg width="64" height="64" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Zoffness hexagon logo -->
+        <path d="M16 2L28 9V23L16 30L4 23V9L16 2Z" fill="#1E3A8A"/>
+        
+        <!-- Z letter -->
+        <path d="M10 10H22L10 22H22" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    
+    <button id="download-favicon">Download Favicon</button>
+  </div>
+  
+  <div class="instructions">
+    <h3>Instructions:</h3>
+    <ol>
+      <li>Click the "Download Favicon" button to download the favicon as a PNG file</li>
+      <li>Use an online converter like <a href="https://convertio.co/png-ico/" target="_blank">Convertio</a> to convert the PNG to ICO format</li>
+      <li>Replace the existing favicon.ico file in the public folder with the new one</li>
+    </ol>
+  </div>
+  
+  <script>
+    document.getElementById('download-favicon').addEventListener('click', function() {
+      const element = document.getElementById('favicon-preview');
+      
+      htmlToImage.toPng(element, { pixelRatio: 2 })
+        .then(function (dataUrl) {
+          const link = document.createElement('a');
+          link.download = 'zoffness-favicon.png';
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch(function (error) {
+          console.error('Error generating favicon:', error);
+        });
+    });
+  </script>
+</body>
+</html>
