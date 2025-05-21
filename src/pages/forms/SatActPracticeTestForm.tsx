@@ -94,7 +94,6 @@ const SatActPracticeTestForm = () => {
     student_last_name: '',
     student_email: '',
     school: '',
-    grade: '',
     test_type: '',
     session_id: '',
     test_date: '',
@@ -174,8 +173,7 @@ const SatActPracticeTestForm = () => {
       'student_first_name',
       'student_last_name',
       'student_email',
-      'school',
-      'grade'
+      'school'
       // test_type is not included as it has a default value
     ];
 
@@ -216,7 +214,6 @@ const SatActPracticeTestForm = () => {
       student_last_name: formData.student_last_name,
       student_email: formData.student_email,
       school: formData.school,
-      grade: parseInt(formData.grade, 10) || 0,
       // Include session_id from API if available
       session_id: formData.session_id || null,
       // Format test_type as an array of integers
@@ -275,7 +272,6 @@ const SatActPracticeTestForm = () => {
           student_last_name: '',
           student_email: '',
           school: '',
-          grade: '',
           test_type: '',
           session_id: '',
           test_date: '',
@@ -304,20 +300,19 @@ const SatActPracticeTestForm = () => {
           // Reset form data
           setFormData({
             parent_first_name: '',
-            parent_last_name: '',
-            parent_phone: '',
-            parent_email: '',
-            student_first_name: '',
-            student_last_name: '',
-            student_email: '',
-            school: '',
-            grade: '',
-            test_type: '',
-            session_id: '',
-            test_date: '',
-            amount: '0',
-            payment_status: 'Success',
-            course_type: 'SAT/ACT Practice Test'
+          parent_last_name: '',
+          parent_phone: '',
+          parent_email: '',
+          student_first_name: '',
+          student_last_name: '',
+          student_email: '',
+          school: '',
+          test_type: '',
+          session_id: '',
+          test_date: '',
+          amount: '0',
+          payment_status: 'Success',
+          course_type: 'SAT/ACT Practice Test'
           });
         } else {
           // Handle actual error
@@ -625,19 +620,7 @@ const SatActPracticeTestForm = () => {
                       )}
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="grade">Current Grade *</Label>
-                      <Input
-                        id="grade"
-                        value={formData.grade}
-                        onChange={handleInputChange}
-                        className={errors.grade ? 'border-red-500' : ''}
-                        required
-                      />
-                      {errors.grade && (
-                        <p className="text-red-500 text-xs mt-1">This field is required</p>
-                      )}
-                    </div>
+
                   </div>
 
                   {/* Submit Button */}

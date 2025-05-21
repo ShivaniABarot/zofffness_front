@@ -87,7 +87,6 @@ const CollegeAdmissionsForm = () => {
     student_last_name: '',
     student_email: '',
     school: '',
-    grade: '',
     graduation_year: '',
     package_id: '',
     package_name: 'initial',
@@ -147,7 +146,7 @@ const CollegeAdmissionsForm = () => {
       student_last_name: formData.student_last_name,
       student_email: formData.student_email,
       school: formData.school,
-      grade: formData.grade,
+
       graduation_year: formData.graduation_year,
       package_id: formData.package_id, // Add package_id from API
       package_type: formData.package_name,
@@ -197,7 +196,7 @@ const CollegeAdmissionsForm = () => {
           student_last_name: '',
           student_email: '',
           school: '',
-          grade: '',
+
           graduation_year: '',
           package_id: '',
           package_name: 'initial',
@@ -238,7 +237,7 @@ const CollegeAdmissionsForm = () => {
             student_last_name: '',
             student_email: '',
             school: '',
-            grade: '',
+  
             graduation_year: '',
             package_id: '',
             package_name: 'initial',
@@ -609,15 +608,7 @@ const CollegeAdmissionsForm = () => {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="grade">Current Grade *</Label>
-                      <Input
-                        id="grade"
-                        value={formData.grade}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
+                   
 
                     <div className="space-y-2">
                       <Label htmlFor="graduation_year">Expected Graduation Year *</Label>

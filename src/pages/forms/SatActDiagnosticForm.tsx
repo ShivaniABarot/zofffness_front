@@ -86,7 +86,6 @@ const SatActDiagnosticForm = () => {
     student_last_name: '',
     student_email: '',
     school: '',
-    grade: '',
     packages: '',
     session_id: '',
     total_amount: 0,
@@ -147,7 +146,6 @@ const SatActDiagnosticForm = () => {
           student_last_name: '',
           student_email: '',
           school: '',
-          grade: '',
           packages: '',
           session_id: '',
           total_amount: 0,
@@ -329,15 +327,7 @@ const SatActDiagnosticForm = () => {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="grade">Current Grade *</Label>
-                      <Input
-                        id="grade"
-                        value={formData.grade}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
+
                   </div>
 
 

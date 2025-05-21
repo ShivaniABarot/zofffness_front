@@ -436,15 +436,7 @@ const SatActCourseForm = () => {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="grade">Current Grade *</Label>
-                      <Input
-                        id="grade"
-                        value={formData.grade}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
+
                   </div>
 
                   {/* Submit Button */}

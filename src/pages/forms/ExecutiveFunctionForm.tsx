@@ -48,7 +48,6 @@ const ExecutiveFunctionForm = () => {
     student_last_name: '',
     student_email: '',
     school: '',
-    grade: '',
     package_name: '',
     amount: 0,
     payment_status: 'Success', // Changed from 'Pending' to 'Success' since we're removing payment
@@ -168,7 +167,7 @@ const ExecutiveFunctionForm = () => {
       student_last_name: formData.student_last_name,
       student_email: formData.student_email,
       school: formData.school,
-      grade: formData.grade,
+     
       package_type: formData.package_name,
       subtotal: formData.amount,
       payment_status: formData.payment_status,
@@ -216,7 +215,7 @@ const ExecutiveFunctionForm = () => {
           student_last_name: '',
           student_email: '',
           school: '',
-          grade: '',
+
           package_name: packages.length > 0 ? packages[0].id.toString() : 'five-sessions',
           amount: packages.length > 0 ? packages[0].price : fallbackPackagePrices['five-sessions'],
           payment_status: 'Success',
@@ -255,7 +254,7 @@ const ExecutiveFunctionForm = () => {
             student_last_name: '',
             student_email: '',
             school: '',
-            grade: '',
+  
             package_name: packages.length > 0 ? packages[0].id.toString() : 'five-sessions',
             amount: packages.length > 0 ? packages[0].price : fallbackPackagePrices['five-sessions'],
             payment_status: 'Success',
@@ -581,15 +580,7 @@ const ExecutiveFunctionForm = () => {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="grade">Current Grade *</Label>
-                      <Input
-                        id="grade"
-                        value={formData.grade}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
+                 
                   </div>
 
                   {/* Submit Button */}
