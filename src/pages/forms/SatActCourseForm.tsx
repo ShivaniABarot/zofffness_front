@@ -9,8 +9,6 @@ import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
 import axios from 'axios';
-import PaymentModal from '../../components/PaymentModal';
-import { updatePaymentStatus } from '../../services/paymentService';
 import SuccessScreen from '../../components/SuccessScreen';
 
 // Define interface for package data
@@ -30,8 +28,6 @@ interface Package {
 const SatActCourseForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [formSubmissionId, setFormSubmissionId] = useState<string | null>(null);
   const [packages, setPackages] = useState<Package[]>([]);
   const [isLoadingPackages, setIsLoadingPackages] = useState(true);
   const { toast } = useToast();
@@ -160,7 +156,7 @@ const SatActCourseForm = () => {
       grade: formData.grade,
       package_name: formData.packages,
       amount: amount,
-      payment_status: 'Pending', // Set as pending until payment is completed
+      payment_status: 'Success', // Changed from 'Pending' to 'Success' since we're removing payment
       course_type: formData.course_type,
       type: 'sat_act_course',
       courses: [
@@ -180,23 +176,31 @@ const SatActCourseForm = () => {
       const response = await axios.post('https://zoffness.academy/api/new_sat_act', submissionData);
 
       if (response.data.success) {
-        // Store the form submission ID for payment processing
-        if (response.data.id) {
-          setFormSubmissionId(response.data.id.toString());
-        } else if (response.data.form_id) {
-          setFormSubmissionId(response.data.form_id.toString());
-        } else {
-          // If no ID is provided, generate a temporary one
-          setFormSubmissionId(`temp_${Date.now()}`);
-        }
-
-        // Show payment modal
-        setShowPaymentModal(true);
-
+        // Show success message
         toast({
-          title: 'Form Submitted',
-          description: 'Please complete the payment to finalize your registration.',
+          title: 'Registration Successful',
+          description: 'Your registration has been submitted successfully!',
         });
+
+        // Reset form
+        setFormData({
+          parent_first_name: '',
+          parent_last_name: '',
+          parent_phone: '',
+          parent_email: '',
+          student_first_name: '',
+          student_last_name: '',
+          student_email: '',
+          school: '',
+          grade: '',
+          packages: '20sessions',
+          total_amount: 5900,
+          payment_status: 'Success',
+          course_type: 'SAT/ACT Course'
+        });
+
+        // Set form as submitted
+        setIsSubmitted(true);
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -261,57 +265,7 @@ const SatActCourseForm = () => {
     }
   };
 
-  // Handle payment success
-  const handlePaymentSuccess = async (paymentIntentId: string) => {
-    try {
-      // Update payment status in your backend
-      if (formSubmissionId) {
-        await updatePaymentStatus(formSubmissionId, paymentIntentId);
-      }
-
-      // Close payment modal
-      setShowPaymentModal(false);
-
-      // Show success message
-      toast({
-        title: 'Payment Successful',
-        description: 'Your registration and payment have been completed successfully!',
-      });
-
-      // Reset form
-      setFormData({
-        parent_first_name: '',
-        parent_last_name: '',
-        parent_phone: '',
-        parent_email: '',
-        student_first_name: '',
-        student_last_name: '',
-        student_email: '',
-        school: '',
-        grade: '',
-        packages: '20sessions',
-        total_amount: 5900,
-        payment_status: 'Success',
-        course_type: 'SAT/ACT Course'
-      });
-
-      // Set form as submitted
-      setIsSubmitted(true);
-    } catch (error) {
-      console.error('Error updating payment status:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Your payment was successful, but we encountered an error updating your registration. Please contact support.',
-      });
-    }
-  };
-
-  // Handle payment modal close
-  const handlePaymentModalClose = () => {
-    setShowPaymentModal(false);
-    setIsLoading(false);
-  };
+  // Payment-related functions have been removed
 
   return (
     <div className="min-h-screen">
@@ -525,21 +479,6 @@ const SatActCourseForm = () => {
       </main>
 
       <Footer />
-
-      {/* Payment Modal */}
-      <PaymentModal
-        isOpen={showPaymentModal}
-        onClose={handlePaymentModalClose}
-        onSuccess={handlePaymentSuccess}
-        amount={formData.total_amount}
-        description={`SAT/ACT Course - ${formData.packages}`}
-        metadata={{
-          form_id: formSubmissionId,
-          course_type: 'SAT/ACT Course',
-          package: formData.packages,
-          student_name: `${formData.student_first_name} ${formData.student_last_name}`
-        }}
-      />
     </div>
   );
 };
