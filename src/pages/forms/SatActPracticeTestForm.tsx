@@ -11,8 +11,8 @@ import { useToast } from '../../components/ui/use-toast';
 import axios from 'axios';
 import SuccessScreen from '../../components/SuccessScreen';
 import PaymentModal from '../../components/PaymentModal';
-import { mockApiService } from '../../services/mockApiService';
 import { updatePaymentStatus } from '../../services/paymentService';
+import { emailService } from '../../services/emailService';
 
 // Define interface for session data
 interface Session {
@@ -30,15 +30,12 @@ const SatActPracticeTestForm = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [isLoadingSessions, setIsLoadingSessions] = useState(true);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [pendingSubmissionData, setPendingSubmissionData] = useState<any>(null);
   const { toast } = useToast();
 
   // Fetch sessions from API
   useEffect(() => {
     const fetchSessions = async () => {
       try {
-        // Try to fetch from real API first
         const response = await axios.get('https://zoffness.academy/api/get_sessions');
         // Log the API response for debugging
         if (process.env.NODE_ENV !== 'production') {
@@ -56,8 +53,11 @@ const SatActPracticeTestForm = () => {
           setSessions(practiceTestSessions);
         } else {
           console.error('Failed to fetch sessions or invalid data format');
-          // Fall back to mock API
-          await useMockSessions();
+          toast({
+            title: 'Warning',
+            description: 'Could not load test options from server. Using default options.',
+            variant: 'destructive',
+          });
         }
       } catch (error) {
         console.error('Error fetching sessions:', error);
@@ -68,32 +68,13 @@ const SatActPracticeTestForm = () => {
           console.error('API Error Status:', error.response?.status);
         }
 
-        // Fall back to mock API
-        await useMockSessions();
-      } finally {
-        setIsLoadingSessions(false);
-      }
-    };
-
-    const useMockSessions = async () => {
-      try {
-        console.log('Using mock API for practice test sessions');
-        const mockResponse = await mockApiService.getSessions('practice');
-
-        if (mockResponse.success && Array.isArray(mockResponse.data)) {
-          setSessions(mockResponse.data);
-          toast({
-            title: 'Demo Mode',
-            description: 'Using demo test options. Real API not available.',
-          });
-        }
-      } catch (mockError) {
-        console.error('Error with mock API:', mockError);
         toast({
-          title: 'Error',
-          description: 'Could not load test options. Please try again later.',
+          title: 'Warning',
+          description: 'Could not load test options from server. Using default options.',
           variant: 'destructive',
         });
+      } finally {
+        setIsLoadingSessions(false);
       }
     };
 
@@ -177,163 +158,6 @@ const SatActPracticeTestForm = () => {
     }));
   };
 
-  const handlePaymentSuccess = async (paymentIntentId: string) => {
-    setShowPaymentModal(false);
-
-    if (!pendingSubmissionData) {
-      toast({
-        title: 'Error',
-        description: 'No submission data found. Please try again.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Update the submission data with successful payment status
-    const submissionDataWithPayment = {
-      ...pendingSubmissionData,
-      payment_status: 'Success',
-      payment_intent_id: paymentIntentId
-    };
-
-    await submitFormData(submissionDataWithPayment);
-  };
-
-  const submitFormData = async (submissionData: any) => {
-    setIsLoading(true);
-
-    try {
-      // Try to submit to real API first
-      const response = await axios.post('https://zoffness.academy/api/practice_tests', submissionData, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      });
-
-      if (response.data.success ||
-          (response.data.message && response.data.message.includes('successfully')) ||
-          response.data.status === 'success') {
-        toast({
-          title: 'Registration Successful',
-          description: 'Your registration and payment have been processed successfully!',
-        });
-
-        // Set form as submitted
-        setIsSubmitted(true);
-
-        // Reset form
-        setFormData({
-          parent_first_name: '',
-          parent_last_name: '',
-          parent_phone: '',
-          parent_email: '',
-          student_first_name: '',
-          student_last_name: '',
-          student_email: '',
-          school: '',
-          test_type: '',
-          session_id: '',
-          test_date: '',
-          amount: '0',
-          payment_status: 'Pending',
-          course_type: 'SAT/ACT Practice Test'
-        });
-
-        // Clear pending submission data
-        setPendingSubmissionData(null);
-      } else {
-        toast({
-          title: 'Error',
-          description: response.data.message || 'Something went wrong. Please try again.',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
-      console.error('Error submitting to real API:', error);
-
-      // Fall back to mock API
-      try {
-        console.log('Using mock API for form submission');
-        const mockResponse = await mockApiService.submitForm('practice_tests', submissionData);
-
-        if (mockResponse.success) {
-          toast({
-            title: 'Registration Successful (Demo)',
-            description: 'Your registration has been processed successfully in demo mode!',
-          });
-
-          // Set form as submitted
-          setIsSubmitted(true);
-
-          // Reset form
-          setFormData({
-            parent_first_name: '',
-            parent_last_name: '',
-            parent_phone: '',
-            parent_email: '',
-            student_first_name: '',
-            student_last_name: '',
-            student_email: '',
-            school: '',
-            test_type: '',
-            session_id: '',
-            test_date: '',
-            amount: '0',
-            payment_status: 'Pending',
-            course_type: 'SAT/ACT Practice Test'
-          });
-
-          // Clear pending submission data
-          setPendingSubmissionData(null);
-        } else {
-          throw new Error('Mock API submission failed');
-        }
-      } catch (mockError) {
-        console.error('Error with mock API submission:', mockError);
-
-        if (axios.isAxiosError(error)) {
-          if (error.response?.status === 422) {
-            // Handle validation errors
-            const validationErrors = error.response.data.errors || {};
-            const errorMessages = [];
-
-            for (const field in validationErrors) {
-              const messages = validationErrors[field];
-              if (Array.isArray(messages)) {
-                errorMessages.push(`${field}: ${messages.join(', ')}`);
-              }
-            }
-
-            const errorMessage = errorMessages.length > 0
-              ? errorMessages.join('\n')
-              : 'Please check your form inputs.';
-
-            toast({
-              variant: 'destructive',
-              title: 'Validation Error',
-              description: errorMessage,
-            });
-          } else {
-            toast({
-              variant: 'destructive',
-              title: 'Error',
-              description: 'Failed to submit registration. Please try again later.',
-            });
-          }
-        } else {
-          toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: 'An unexpected error occurred. Please try again.',
-          });
-        }
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -351,6 +175,7 @@ const SatActPracticeTestForm = () => {
       'student_last_name',
       'student_email',
       'school'
+      // test_type is not included as it has a default value
     ];
 
     requiredFields.forEach(field => {
@@ -360,19 +185,10 @@ const SatActPracticeTestForm = () => {
       }
     });
 
-    // Check test date and amount
+    // Check test date
     if (!formData.test_date) {
       newErrors.test_date = true;
       hasErrors = true;
-    }
-
-    if (!formData.amount || parseFloat(formData.amount) <= 0) {
-      toast({
-        title: 'Validation Error',
-        description: 'Please select a test type before proceeding.',
-        variant: 'destructive',
-      });
-      return;
     }
 
     // Update error state
@@ -387,7 +203,9 @@ const SatActPracticeTestForm = () => {
       return;
     }
 
-    // Create submission data object
+    setIsLoading(true);
+
+    // Create submission data object based on the API format shown in Postman
     const submissionData = {
       parent_first_name: formData.parent_first_name,
       parent_last_name: formData.parent_last_name,
@@ -397,7 +215,9 @@ const SatActPracticeTestForm = () => {
       student_last_name: formData.student_last_name,
       student_email: formData.student_email,
       school: formData.school,
+      // Include session_id from API if available
       session_id: formData.session_id || null,
+      // Format test_type as an array of integers
       test_type: [parseInt(formData.test_type, 10)],
       date: formData.test_date,
       test_time: '09:00:00',
@@ -408,14 +228,207 @@ const SatActPracticeTestForm = () => {
       type: 'practice_test'
     };
 
-    // Store submission data for after payment
-    setPendingSubmissionData(submissionData);
+    // Log the submission data in development environment
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Submitting data:', submissionData);
+    }
 
-    // Show payment modal
-    setShowPaymentModal(true);
+    try {
+      // Log the submission data in development environment
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Final submission data:', submissionData);
+        console.log('test_type value:', submissionData.test_type);
+      }
+
+      // Make a direct API call with the JSON data
+      const response = await axios.post(
+        'https://zoffness.academy/api/practice_tests',
+        submissionData,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      // Check if the response contains a success message
+      if (response.data.success || (response.data.message && response.data.message.includes('successfully'))) {
+        // Send registration confirmation email
+        try {
+          const selectedSession = sessions.find(s => s.id.toString() === formData.session_id);
+          const emailResult = await emailService.sendRegistrationConfirmation({
+            parent_email: formData.parent_email,
+            student_email: formData.student_email,
+            parent_name: `${formData.parent_first_name} ${formData.parent_last_name}`,
+            student_name: `${formData.student_first_name} ${formData.student_last_name}`,
+            course_type: formData.course_type,
+            package_name: selectedSession?.title || 'SAT/ACT Practice Test',
+            amount: parseInt(formData.amount)
+          });
+
+          if (emailResult.success) {
+            console.log('Registration confirmation email sent successfully');
+          } else {
+            console.warn('Email sending failed:', emailResult.message);
+          }
+        } catch (emailError) {
+          console.error('Error sending registration email:', emailError);
+        }
+
+        // Show success toast
+        toast({
+          title: 'Success',
+          description: 'Registration submitted successfully! A confirmation email has been sent.',
+          variant: 'default',
+        });
+
+        // Set form as submitted
+        setIsSubmitted(true);
+
+        // Reset form data
+        setFormData({
+          parent_first_name: '',
+          parent_last_name: '',
+          parent_phone: '',
+          parent_email: '',
+          student_first_name: '',
+          student_last_name: '',
+          student_email: '',
+          school: '',
+          test_type: '',
+          session_id: '',
+          test_date: '',
+          amount: '0',
+          payment_status: 'Success',
+          course_type: 'SAT/ACT Practice Test'
+        });
+      } else {
+        // Log the response for debugging
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('API Response:', response.data);
+        }
+
+        // Handle case where API returns success: false but has a success message
+        // This handles the case where the API returns { success: false, message: "Practice test created successfully" }
+        if (response.data.message && response.data.message.includes('successfully')) {
+          // Send registration confirmation email
+          try {
+            const selectedSession = sessions.find(s => s.id.toString() === formData.session_id);
+            const emailResult = await emailService.sendRegistrationConfirmation({
+              parent_email: formData.parent_email,
+              student_email: formData.student_email,
+              parent_name: `${formData.parent_first_name} ${formData.parent_last_name}`,
+              student_name: `${formData.student_first_name} ${formData.student_last_name}`,
+              course_type: formData.course_type,
+              package_name: selectedSession?.title || 'SAT/ACT Practice Test',
+              amount: parseInt(formData.amount)
+            });
+
+            if (emailResult.success) {
+              console.log('Registration confirmation email sent successfully');
+            } else {
+              console.warn('Email sending failed:', emailResult.message);
+            }
+          } catch (emailError) {
+            console.error('Error sending registration email:', emailError);
+          }
+
+          toast({
+            title: 'Success',
+            description: 'Registration submitted successfully! A confirmation email has been sent.',
+            variant: 'default',
+          });
+
+          // Set form as submitted
+          setIsSubmitted(true);
+
+          // Reset form data
+          setFormData({
+            parent_first_name: '',
+          parent_last_name: '',
+          parent_phone: '',
+          parent_email: '',
+          student_first_name: '',
+          student_last_name: '',
+          student_email: '',
+          school: '',
+          test_type: '',
+          session_id: '',
+          test_date: '',
+          amount: '0',
+          payment_status: 'Success',
+          course_type: 'SAT/ACT Practice Test'
+          });
+        } else {
+          // Handle actual error
+          toast({
+            title: 'Error',
+            description: response.data.message || 'Something went wrong. Please try again.',
+            variant: 'destructive',
+          });
+        }
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // Log detailed error information in development environment
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('API Error Response:', error.response?.data);
+          console.error('Full error object:', error);
+
+          // Log more details about the validation errors
+          if (error.response?.data?.errors) {
+            console.error('Detailed validation errors:');
+            for (const [field, messages] of Object.entries(error.response.data.errors)) {
+              console.error(`Field: ${field}, Messages:`, messages);
+            }
+          }
+        }
+
+        if (error.response?.status === 422) {
+          // Handle validation errors
+          const validationErrors = error.response.data.errors || {};
+          const errorMessages = [];
+
+          for (const field in validationErrors) {
+            const messages = validationErrors[field];
+            if (Array.isArray(messages)) {
+              errorMessages.push(`${field}: ${messages.join(', ')}`);
+            }
+          }
+
+          const errorMessage = errorMessages.length > 0
+            ? errorMessages.join('\n')
+            : 'Please check your form inputs.';
+
+          toast({
+            variant: 'destructive',
+            title: 'Validation Error',
+            description: errorMessage,
+          });
+        } else {
+          // Handle other HTTP errors
+          toast({
+            variant: 'destructive',
+            title: `Error (${error.response?.status || 'Unknown'})`,
+            description: error.response?.data?.message || 'Failed to submit registration. Please try again.',
+          });
+        }
+      } else {
+        // Handle non-Axios errors
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Non-Axios Error:', error);
+        }
+
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'An unexpected error occurred. Please try again.',
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-
 
   return (
     <div className="min-h-screen">
@@ -667,7 +680,7 @@ const SatActPracticeTestForm = () => {
                         Submitting...
                       </>
                     ) : (
-                      'Proceed to Payment'
+                      'Submit Registration'
                     )}
                   </Button>
                 </form>
@@ -679,22 +692,6 @@ const SatActPracticeTestForm = () => {
       </main>
 
       <Footer />
-
-      {/* Payment Modal */}
-      <PaymentModal
-        isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        onSuccess={handlePaymentSuccess}
-        amount={parseFloat(formData.amount)}
-        description={`SAT/ACT Practice Test - ${sessions.find(s => s.id.toString() === formData.session_id)?.title || 'Practice Test'}`}
-        metadata={{
-          form_type: 'practice_test',
-          session_id: formData.session_id,
-          student_name: `${formData.student_first_name} ${formData.student_last_name}`,
-          parent_email: formData.parent_email,
-          test_date: formData.test_date
-        }}
-      />
     </div>
   );
 };

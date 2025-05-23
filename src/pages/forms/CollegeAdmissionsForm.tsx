@@ -12,6 +12,7 @@ import axios from 'axios';
 import SuccessScreen from '../../components/SuccessScreen';
 import PaymentModal from '../../components/PaymentModal';
 import { mockApiService } from '../../services/mockApiService';
+import { emailService } from '../../services/emailService';
 
 // Define interface for package data
 interface Package {
@@ -171,9 +172,32 @@ const CollegeAdmissionsForm = () => {
       if (response.data.success ||
           (response.data.message && response.data.message.includes('successfully')) ||
           response.data.status === 'success') {
+
+        // Send registration confirmation email
+        try {
+          const emailResult = await emailService.sendRegistrationConfirmation({
+            parent_email: submissionData.parent_email,
+            student_email: submissionData.student_email,
+            parent_name: `${submissionData.parent_first_name} ${submissionData.parent_last_name}`,
+            student_name: `${submissionData.student_first_name} ${submissionData.student_last_name}`,
+            course_type: submissionData.course_type,
+            package_name: submissionData.package_type,
+            amount: submissionData.subtotal,
+            payment_intent_id: submissionData.payment_intent_id
+          });
+
+          if (emailResult.success) {
+            console.log('Registration confirmation email sent successfully');
+          } else {
+            console.warn('Email sending failed:', emailResult.message);
+          }
+        } catch (emailError) {
+          console.error('Error sending registration email:', emailError);
+        }
+
         toast({
           title: 'Registration Successful',
-          description: 'Your registration and payment have been processed successfully!',
+          description: 'Your registration and payment have been processed successfully! A confirmation email has been sent.',
         });
 
         // Set form as submitted
@@ -215,9 +239,31 @@ const CollegeAdmissionsForm = () => {
         const mockResponse = await mockApiService.submitForm('college_admission', submissionData);
 
         if (mockResponse.success) {
+          // Send registration confirmation email
+          try {
+            const emailResult = await emailService.sendRegistrationConfirmation({
+              parent_email: submissionData.parent_email,
+              student_email: submissionData.student_email,
+              parent_name: `${submissionData.parent_first_name} ${submissionData.parent_last_name}`,
+              student_name: `${submissionData.student_first_name} ${submissionData.student_last_name}`,
+              course_type: submissionData.course_type,
+              package_name: submissionData.package_type,
+              amount: submissionData.subtotal,
+              payment_intent_id: submissionData.payment_intent_id
+            });
+
+            if (emailResult.success) {
+              console.log('Registration confirmation email sent successfully');
+            } else {
+              console.warn('Email sending failed:', emailResult.message);
+            }
+          } catch (emailError) {
+            console.error('Error sending registration email:', emailError);
+          }
+
           toast({
             title: 'Registration Successful (Demo)',
-            description: 'Your registration has been processed successfully in demo mode!',
+            description: 'Your registration has been processed successfully in demo mode! A confirmation email has been sent.',
           });
 
           // Set form as submitted
