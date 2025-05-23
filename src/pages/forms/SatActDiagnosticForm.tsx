@@ -163,10 +163,18 @@ const SatActDiagnosticForm = () => {
     setIsLoading(true);
 
     try {
-      // Try to submit to real API first
-      const response = await axios.post('https://zoffness.academy/api/diagnostic_tests', submissionData, {
+      // Log the data being sent for debugging
+      console.log('Submitting data to /enroll API:', submissionData);
+
+      // Try to submit to real API first - try form data format
+      const formData = new FormData();
+      Object.keys(submissionData).forEach(key => {
+        formData.append(key, submissionData[key].toString());
+      });
+
+      const response = await axios.post('https://zoffness.academy/api/enroll', formData, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
           'Accept': 'application/json'
         }
       });
@@ -209,6 +217,21 @@ const SatActDiagnosticForm = () => {
       }
     } catch (error) {
       console.error('Error submitting to real API:', error);
+
+      // Log the specific error details
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('API Error Status:', error.response.status);
+        console.error('API Error Data:', error.response.data);
+        console.error('Validation Errors:', error.response.data.errors);
+        console.error('API Error Headers:', error.response.headers);
+
+        // Also log each validation error individually
+        if (error.response.data.errors) {
+          Object.entries(error.response.data.errors).forEach(([field, messages]) => {
+            console.error(`Validation Error for ${field}:`, messages);
+          });
+        }
+      }
 
       // Fall back to mock API
       try {
@@ -254,10 +277,14 @@ const SatActDiagnosticForm = () => {
             const validationErrors = error.response.data.errors || {};
             const errorMessages = [];
 
+            console.log('Validation errors from API:', validationErrors);
+
             for (const field in validationErrors) {
               const messages = validationErrors[field];
               if (Array.isArray(messages)) {
                 errorMessages.push(`${field}: ${messages.join(', ')}`);
+              } else {
+                errorMessages.push(`${field}: ${messages}`);
               }
             }
 
@@ -271,10 +298,11 @@ const SatActDiagnosticForm = () => {
               description: errorMessage,
             });
           } else {
+            console.log('API Error Response:', error.response?.data);
             toast({
               variant: 'destructive',
-              title: 'Error',
-              description: 'Failed to submit registration. Please try again later.',
+              title: `Error (${error.response?.status || 'Unknown'})`,
+              description: error.response?.data?.message || 'Failed to submit registration. Please try again later.',
             });
           }
         } else {
@@ -303,22 +331,23 @@ const SatActDiagnosticForm = () => {
       return;
     }
 
-    // Create submission data object
+    // Create submission data object for /enroll API
     const submissionData = {
-      parent_first_name: formData.parent_first_name,
-      parent_last_name: formData.parent_last_name,
+      // Fix field names to match API expectations
+      parent_firstname: formData.parent_first_name,  // API expects 'parent_firstname'
+      parent_lastname: formData.parent_last_name,    // API expects 'parent_lastname'
       parent_phone: formData.parent_phone,
       parent_email: formData.parent_email,
-      student_first_name: formData.student_first_name,
-      student_last_name: formData.student_last_name,
+      student_firstname: formData.student_first_name, // API expects 'student_firstname'
+      student_lastname: formData.student_last_name,   // API expects 'student_lastname'
       student_email: formData.student_email,
       school: formData.school,
-      session_id: formData.session_id,
-      packages: formData.packages,
-      amount: formData.total_amount,
+      session_id: parseInt(formData.session_id, 10),
+      // Fix the field names based on validation errors
+      total_amount: parseInt(formData.total_amount.toString(), 10), // API expects 'total_amount' not 'amount'
+      packages: formData.session_id, // API expects 'packages' field
       payment_status: formData.payment_status,
-      course_type: 'SAT/ACT Diagnostic Test',
-      type: 'diagnostic_test'
+      course_type: 'SAT/ACT Diagnostic Test'
     };
 
     // Store submission data for after payment

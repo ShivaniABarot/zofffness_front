@@ -12,7 +12,6 @@ import axios from 'axios';
 import SuccessScreen from '../../components/SuccessScreen';
 import PaymentModal from '../../components/PaymentModal';
 import { mockApiService } from '../../services/mockApiService';
-import { emailService } from '../../services/emailService';
 
 // Define interface for package data
 interface Package {
@@ -161,10 +160,19 @@ const CollegeAdmissionsForm = () => {
     setValidationErrors({});
 
     try {
+      // Log the data being sent for debugging
+      console.log('Submitting data to /college_admission API:', submissionData);
+
+      // Try form data format like the diagnostic form
+      const formData = new FormData();
+      Object.keys(submissionData).forEach(key => {
+        formData.append(key, submissionData[key].toString());
+      });
+
       // Try to submit to real API first
-      const response = await axios.post('https://zoffness.academy/api/college_admission', submissionData, {
+      const response = await axios.post('https://zoffness.academy/api/college_admission', formData, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
           'Accept': 'application/json'
         }
       });
@@ -172,32 +180,9 @@ const CollegeAdmissionsForm = () => {
       if (response.data.success ||
           (response.data.message && response.data.message.includes('successfully')) ||
           response.data.status === 'success') {
-
-        // Send registration confirmation email with Gmail SMTP
-        try {
-          const emailResult = await emailService.sendRegistrationConfirmation({
-            parent_email: submissionData.parent_email,
-            student_email: submissionData.student_email,
-            parent_name: `${submissionData.parent_first_name} ${submissionData.parent_last_name}`,
-            student_name: `${submissionData.student_first_name} ${submissionData.student_last_name}`,
-            course_type: submissionData.course_type,
-            package_name: submissionData.package_type,
-            amount: submissionData.subtotal,
-            payment_intent_id: submissionData.payment_intent_id
-          });
-
-          if (emailResult.success) {
-            console.log('Registration confirmation email sent successfully via Gmail SMTP');
-          } else {
-            console.warn('Email sending failed:', emailResult.message);
-          }
-        } catch (emailError) {
-          console.error('Error sending registration email:', emailError);
-        }
-
         toast({
           title: 'Registration Successful',
-          description: 'Your registration and payment have been processed successfully! A confirmation email has been sent.',
+          description: 'Your registration and payment have been processed successfully!',
         });
 
         // Set form as submitted
@@ -233,37 +218,29 @@ const CollegeAdmissionsForm = () => {
     } catch (error) {
       console.error('Error submitting to real API:', error);
 
+      // Log the specific error details for College Admissions
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('College Admissions API Error Status:', error.response.status);
+        console.error('College Admissions API Error Data:', error.response.data);
+        console.error('College Admissions Validation Errors:', error.response.data.errors);
+
+        // Also log each validation error individually
+        if (error.response.data.errors) {
+          Object.entries(error.response.data.errors).forEach(([field, messages]) => {
+            console.error(`College Admissions Validation Error for ${field}:`, messages);
+          });
+        }
+      }
+
       // Fall back to mock API
       try {
         console.log('Using mock API for form submission');
         const mockResponse = await mockApiService.submitForm('college_admission', submissionData);
 
         if (mockResponse.success) {
-          // Send registration confirmation email with Gmail SMTP
-          try {
-            const emailResult = await emailService.sendRegistrationConfirmation({
-              parent_email: submissionData.parent_email,
-              student_email: submissionData.student_email,
-              parent_name: `${submissionData.parent_first_name} ${submissionData.parent_last_name}`,
-              student_name: `${submissionData.student_first_name} ${submissionData.student_last_name}`,
-              course_type: submissionData.course_type,
-              package_name: submissionData.package_type,
-              amount: submissionData.subtotal,
-              payment_intent_id: submissionData.payment_intent_id
-            });
-
-            if (emailResult.success) {
-              console.log('Registration confirmation email sent successfully via Gmail SMTP (Demo mode)');
-            } else {
-              console.warn('Email sending failed:', emailResult.message);
-            }
-          } catch (emailError) {
-            console.error('Error sending registration email:', emailError);
-          }
-
           toast({
             title: 'Registration Successful (Demo)',
-            description: 'Your registration has been processed successfully in demo mode! A confirmation email has been sent.',
+            description: 'Your registration has been processed successfully in demo mode!',
           });
 
           // Set form as submitted
@@ -355,6 +332,7 @@ const CollegeAdmissionsForm = () => {
 
     // Create a submission object with the field names expected by the API
     const submissionData = {
+      // College Admissions API expects original field names (like Practice Test API)
       parent_first_name: formData.parent_first_name,
       parent_last_name: formData.parent_last_name,
       parent_phone: formData.parent_phone,
@@ -393,33 +371,10 @@ const CollegeAdmissionsForm = () => {
             </h1>
 
             {isSubmitted ? (
-              <Card className="border-green-500">
-                <CardContent className="p-6">
-                  <div className="text-center py-8 space-y-4">
-                    <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <h2 className="text-2xl font-bold text-green-600">Registration Successful!</h2>
-                    <p className="text-gray-600 font-medium">
-                      Registration successful!
-                    </p>
-                    <p className="text-gray-600">
-                      Thank you for registering for College Admissions Counseling. We have received your information.
-                    </p>
-                    <p className="text-gray-600">
-                      You will receive a confirmation email shortly with additional details.
-                    </p>
-                    <Button
-                      className="mt-4 bg-college-blue-500 hover:bg-college-blue-600"
-                      onClick={() => setIsSubmitted(false)}
-                    >
-                      Register Another Student
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <SuccessScreen
+                serviceName="College Admissions Counseling"
+                onRegisterAnother={() => setIsSubmitted(false)}
+              />
             ) : (
               <Card>
                 <CardContent className="p-6">

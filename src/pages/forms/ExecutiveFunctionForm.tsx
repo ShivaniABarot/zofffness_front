@@ -207,10 +207,19 @@ const ExecutiveFunctionForm = () => {
     setValidationErrors({});
 
     try {
+      // Log the data being sent for debugging
+      console.log('Submitting data to /executive_coaching API:', submissionData);
+
+      // Try form data format like the diagnostic form
+      const formData = new FormData();
+      Object.keys(submissionData).forEach(key => {
+        formData.append(key, submissionData[key].toString());
+      });
+
       // Try to submit to real API first
-      const response = await axios.post('https://zoffness.academy/api/executive_coaching', submissionData, {
+      const response = await axios.post('https://zoffness.academy/api/executive_coaching', formData, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
           'Accept': 'application/json'
         }
       });

@@ -178,10 +178,19 @@ const CollegeEssaysForm = () => {
     setValidationErrors({});
 
     try {
+      // Log the data being sent for debugging
+      console.log('Submitting data to /college_essays API:', submissionData);
+
+      // Try form data format like the diagnostic form
+      const formData = new FormData();
+      Object.keys(submissionData).forEach(key => {
+        formData.append(key, submissionData[key].toString());
+      });
+
       // Try to submit to real API first
-      const response = await axios.post('https://zoffness.academy/api/college_essays', submissionData, {
+      const response = await axios.post('https://zoffness.academy/api/college_essays', formData, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
           'Accept': 'application/json'
         }
       });

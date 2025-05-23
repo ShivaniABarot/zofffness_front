@@ -203,10 +203,32 @@ const SatActPracticeTestForm = () => {
     setIsLoading(true);
 
     try {
+      // Log the data being sent for debugging
+      console.log('Submitting data to /practice_tests API:', submissionData);
+
+      // Use URLSearchParams format like the working api.ts implementation
+      const params = new URLSearchParams();
+
+      console.log('Converting to URLSearchParams...');
+
+      // Add all fields from submissionData
+      Object.entries(submissionData).forEach(([key, value]) => {
+        if (key === 'test_type' && Array.isArray(value)) {
+          // Handle test_type array specially with [] notation
+          value.forEach((type: any) => {
+            params.append('test_type[]', type.toString());
+          });
+        } else if (value !== undefined && value !== null) {
+          params.append(key, value.toString());
+        }
+      });
+
+      console.log('Final URLSearchParams string:', params.toString());
+
       // Try to submit to real API first
-      const response = await axios.post('https://zoffness.academy/api/practice_tests', submissionData, {
+      const response = await axios.post('https://zoffness.academy/api/practice_tests', params.toString(), {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
           'Accept': 'application/json'
         }
       });
@@ -251,6 +273,20 @@ const SatActPracticeTestForm = () => {
       }
     } catch (error) {
       console.error('Error submitting to real API:', error);
+
+      // Log the specific error details for Practice Test
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('Practice Test API Error Status:', error.response.status);
+        console.error('Practice Test API Error Data:', error.response.data);
+        console.error('Practice Test Validation Errors:', error.response.data.errors);
+
+        // Also log each validation error individually
+        if (error.response.data.errors) {
+          Object.entries(error.response.data.errors).forEach(([field, messages]) => {
+            console.error(`Practice Test Validation Error for ${field}:`, messages);
+          });
+        }
+      }
 
       // Fall back to mock API
       try {
@@ -389,6 +425,7 @@ const SatActPracticeTestForm = () => {
 
     // Create submission data object
     const submissionData = {
+      // Practice Test API expects original field names (different from other APIs)
       parent_first_name: formData.parent_first_name,
       parent_last_name: formData.parent_last_name,
       parent_phone: formData.parent_phone,
