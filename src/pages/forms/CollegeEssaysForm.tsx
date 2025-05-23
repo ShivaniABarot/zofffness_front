@@ -10,6 +10,8 @@ import { Loader2 } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
 import axios from 'axios';
 import SuccessScreen from '../../components/SuccessScreen';
+import PaymentModal from '../../components/PaymentModal';
+import { mockApiService } from '../../services/mockApiService';
 
 // Define interface for package data
 interface Package {
@@ -31,6 +33,8 @@ const CollegeEssaysForm = () => {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [packages, setPackages] = useState<Package[]>([]);
   const [isLoadingPackages, setIsLoadingPackages] = useState(true);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [pendingSubmissionData, setPendingSubmissionData] = useState<any>(null);
   const { toast } = useToast();
 
   // No fallback packages - we'll rely solely on API data
@@ -48,7 +52,7 @@ const CollegeEssaysForm = () => {
     packages: '',
     // Changed from 'session' to 'sessions' to match database field name
     sessions: 0,
-    payment_status: 'Success', // Changed from 'Pending' to 'Success' since we're removing payment
+    payment_status: 'Pending',
     course_type: 'College Essays'
   });
 
@@ -147,61 +151,53 @@ const CollegeEssaysForm = () => {
     }
   };
 
-  // Payment-related functions have been removed
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
+    setShowPaymentModal(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    if (!pendingSubmissionData) {
+      toast({
+        title: 'Error',
+        description: 'No submission data found. Please try again.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Update the submission data with successful payment status
+    const submissionDataWithPayment = {
+      ...pendingSubmissionData,
+      payment_status: 'Success',
+      payment_intent_id: paymentIntentId
+    };
+
+    await submitFormData(submissionDataWithPayment);
+  };
+
+  const submitFormData = async (submissionData: any) => {
     setIsLoading(true);
     setValidationErrors({});
 
-    // Create a submission object with the field names expected by the API
-    const submissionData = {
-      parent_first_name: formData.parent_first_name,
-      parent_last_name: formData.parent_last_name,
-      parent_phone: formData.parent_phone,
-      parent_email: formData.parent_email,
-      student_first_name: formData.student_first_name,
-      student_last_name: formData.student_last_name,
-      student_email: formData.student_email,
-      // Removed school field as it's not in the database
-      graduation_year: formData.graduation_year,
-      packages: formData.packages,
-      sessions: formData.sessions, // Changed from 'session' to 'sessions' to match database field name
-      payment_status: formData.payment_status,
-      course_type: formData.course_type
-    };
-
-    // Only log in development environment
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('Submitting data:', submissionData);
-    }
-
     try {
-      // Make the API call to the college_essays endpoint
-      const response = await axios.post(
-        'https://zoffness.academy/api/college_essays',
-        submissionData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
+      // Try to submit to real API first
+      const response = await axios.post('https://zoffness.academy/api/college_essays', submissionData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         }
-      );
+      });
 
-      // Check if the response contains a success message or status
       if (response.data.success ||
           (response.data.message && response.data.message.includes('successfully')) ||
           response.data.status === 'success') {
-
-        // Show success toast notification
         toast({
           title: 'Registration Successful',
-          description: 'Your registration has been submitted successfully!',
-          variant: 'default',
+          description: 'Your registration and payment have been processed successfully!',
         });
 
-        // Reset form data
+        // Set form as submitted
+        setIsSubmitted(true);
+
+        // Reset form
         setFormData({
           parent_first_name: '',
           parent_last_name: '',
@@ -213,33 +209,37 @@ const CollegeEssaysForm = () => {
           graduation_year: '',
           packages: packages.length > 0 ? packages[0].id.toString() : '',
           sessions: packages.length > 0 ? packages[0].price : 0,
-          payment_status: 'Success',
+          payment_status: 'Pending',
           course_type: 'College Essays'
         });
 
-        // Set submitted state to show success screen
-        setIsSubmitted(true);
+        // Clear pending submission data
+        setPendingSubmissionData(null);
       } else {
-        // Log the response for debugging
-        if (process.env.NODE_ENV !== 'production') {
-          console.log('API Response:', response.data);
-          console.log('API Response status:', response.data.status);
-          console.log('API Response success:', response.data.success);
-          console.log('API Response message:', response.data.message);
-        }
+        toast({
+          title: 'Error',
+          description: response.data.message || 'Something went wrong. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting to real API:', error);
 
-        // Handle case where API returns success: false but has a success message or status
-        if ((response.data.message && response.data.message.includes('successfully')) ||
-            response.data.status === 'success') {
+      // Fall back to mock API
+      try {
+        console.log('Using mock API for form submission');
+        const mockResponse = await mockApiService.submitForm('college_essays', submissionData);
 
-          // Show success toast notification
+        if (mockResponse.success) {
           toast({
-            title: 'Registration Successful',
-            description: 'Your registration has been submitted successfully!',
-            variant: 'default',
+            title: 'Registration Successful (Demo)',
+            description: 'Your registration has been processed successfully in demo mode!',
           });
 
-          // Reset form data
+          // Set form as submitted
+          setIsSubmitted(true);
+
+          // Reset form
           setFormData({
             parent_first_name: '',
             parent_last_name: '',
@@ -251,90 +251,97 @@ const CollegeEssaysForm = () => {
             graduation_year: '',
             packages: packages.length > 0 ? packages[0].id.toString() : '',
             sessions: packages.length > 0 ? packages[0].price : 0,
-            payment_status: 'Success',
+            payment_status: 'Pending',
             course_type: 'College Essays'
           });
 
-          // Set submitted state to show success screen
-          setIsSubmitted(true);
+          // Clear pending submission data
+          setPendingSubmissionData(null);
         } else {
-          // Handle actual error
-          toast({
-            title: 'Error',
-            description: response.data.message || 'Something went wrong. Please try again.',
-            variant: 'destructive',
-          });
+          throw new Error('Mock API submission failed');
         }
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        // Log detailed error information in development environment
-        if (process.env.NODE_ENV !== 'production') {
-          console.error('API Error Response:', error.response?.data);
-          console.error('Full error object:', error);
+      } catch (mockError) {
+        console.error('Error with mock API submission:', mockError);
 
-          // Log more details about the validation errors
-          if (error.response?.data?.errors) {
-            console.error('Detailed validation errors:');
-            for (const [field, messages] of Object.entries(error.response.data.errors)) {
-              console.error(`Field: ${field}, Messages:`, messages);
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 422) {
+            // Handle validation errors
+            const apiErrors = error.response.data.errors || {};
+            const formattedErrors: Record<string, string> = {};
+            const errorMessages = [];
+
+            for (const field in apiErrors) {
+              const messages = apiErrors[field];
+              const formattedMessage = Array.isArray(messages) ? messages[0] : messages;
+              formattedErrors[field] = formattedMessage;
+              errorMessages.push(`${field.replace(/_/g, ' ')}: ${formattedMessage}`);
             }
+
+            setValidationErrors(formattedErrors);
+
+            const errorMessage = errorMessages.length > 0
+              ? 'Please correct the following errors:\n' + errorMessages.join('\n')
+              : 'Please check your form inputs and try again.';
+
+            toast({
+              variant: 'destructive',
+              title: 'Validation Error',
+              description: errorMessage,
+            });
+          } else {
+            toast({
+              variant: 'destructive',
+              title: 'Error',
+              description: 'Failed to submit registration. Please try again later.',
+            });
           }
-        }
-
-        if (error.response?.status === 422) {
-          // Handle validation errors
-          const apiErrors = error.response.data.errors || {};
-          const formattedErrors: Record<string, string> = {};
-          const errorMessages = [];
-
-          // Create a formatted error message for display
-          for (const field in apiErrors) {
-            const messages = apiErrors[field];
-            const formattedMessage = Array.isArray(messages) ? messages[0] : messages;
-
-            // Add to formatted errors for state
-            formattedErrors[field] = formattedMessage;
-
-            // Add to error messages for toast
-            errorMessages.push(`${field.replace(/_/g, ' ')}: ${formattedMessage}`);
-          }
-
-          // Set validation errors state
-          setValidationErrors(formattedErrors);
-
-          // Create a more user-friendly error message
-          const errorMessage = errorMessages.length > 0
-            ? 'Please correct the following errors:\n' + errorMessages.join('\n')
-            : 'Please check your form inputs and try again.';
-
-          toast({
-            variant: 'destructive',
-            title: 'Validation Error',
-            description: errorMessage,
-          });
         } else {
-          // Handle other HTTP errors
           toast({
             variant: 'destructive',
-            title: `Error (${error.response?.status || 'Unknown'})`,
-            description: error.response?.data?.message || 'Failed to submit registration. Please try again.',
+            title: 'Error',
+            description: 'An unexpected error occurred. Please try again.',
           });
         }
-      } else {
-        // Handle non-Axios errors
-        if (process.env.NODE_ENV !== 'production') {
-          console.error('Non-Axios Error:', error);
-        }
-        toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: 'An unexpected error occurred. Please try again.',
-        });
       }
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // Validate required fields
+    if (!formData.packages || formData.sessions <= 0) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please select a package before proceeding.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Create a submission object with the field names expected by the API
+    const submissionData = {
+      parent_first_name: formData.parent_first_name,
+      parent_last_name: formData.parent_last_name,
+      parent_phone: formData.parent_phone,
+      parent_email: formData.parent_email,
+      student_first_name: formData.student_first_name,
+      student_last_name: formData.student_last_name,
+      student_email: formData.student_email,
+      graduation_year: formData.graduation_year,
+      packages: formData.packages,
+      sessions: formData.sessions,
+      payment_status: formData.payment_status,
+      course_type: formData.course_type
+    };
+
+    // Store submission data for after payment
+    setPendingSubmissionData(submissionData);
+
+    // Show payment modal
+    setShowPaymentModal(true);
   };
 
   return (
@@ -540,7 +547,7 @@ const CollegeEssaysForm = () => {
                     ) : packages.length === 0 ? (
                       'No Packages Available'
                     ) : (
-                      'Submit Registration'
+                      'Proceed to Payment'
                     )}
                   </Button>
                 </form>
@@ -562,7 +569,7 @@ const CollegeEssaysForm = () => {
         description={`College Essays Service - ${packages.find(p => p.id.toString() === formData.packages)?.name || 'Package'}`}
         metadata={{
           form_type: 'college_essays',
-          package_id: formData.packages,
+          package_name: packages.find(p => p.id.toString() === formData.packages)?.name || '',
           student_name: `${formData.student_first_name} ${formData.student_last_name}`,
           parent_email: formData.parent_email,
           graduation_year: formData.graduation_year

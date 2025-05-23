@@ -4,7 +4,7 @@ import { loadStripe } from '@stripe/stripe-js';
 const API_BASE_URL = 'https://zoffness.academy/api';
 
 // Load Stripe instance with your publishable key
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_51ROYo1DntLurPiLQg63tUfffyMIAt9jDH2A6FlkHWjv2Aoyj51ywcFTtZvzVi6FlbxZs3ohnn1aTWYCh2Tp6lb0u004yU3kH67');
+const stripePromise = loadStripe('pk_test_51ROYo1DntLurPiLQg63tUfffyMIAt9jDH2A6FlkHWjv2Aoyj51ywcFTtZvzVi6FlbxZs3ohnn1aTWYCh2Tp6lb0u004yU3kH67');
 
 /**
  * Create a payment intent with Stripe
@@ -63,7 +63,7 @@ export const createPaymentIntent = async (
         }),
         {
           headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_STRIPE_SECRET_KEY || 'sk_test_your_stripe_secret_key_here'}`,
+            'Authorization': `Bearer sk_test_51ROYo1DntLurPiLQNVPhPvuhxDoWD9BjS0q5lSbqO3xAeBxGsyjZLSItcgCVCfW9EjCMSKFe7kuOT6mhCgJeX9Gl00B6Kl2CIc`,
             'Content-Type': 'application/x-www-form-urlencoded',
             'Stripe-Version': '2023-10-16'
           }
