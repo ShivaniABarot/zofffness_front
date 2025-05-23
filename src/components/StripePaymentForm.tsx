@@ -174,38 +174,42 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
     }
 
     try {
-      // For testing purposes, we'll simulate a successful payment
-      // In a real implementation, this would use the client secret to confirm the payment
-      console.log('Simulating payment confirmation with client secret:', clientSecret);
+      // Check if this is a mock payment
+      if (clientSecret.startsWith('pi_mock_')) {
+        console.log('Processing mock payment for demo purposes');
+        console.log('Client secret:', clientSecret);
+        console.log('Billing details:', billingDetails);
+
+        // Simulate payment processing delay
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Simulate successful payment
+        const mockPaymentIntentId = clientSecret.split('_secret_')[0];
+        console.log('Mock payment successful with ID:', mockPaymentIntentId);
+
+        setError(null);
+        setSucceeded(true);
+        setProcessing(false);
+        onSuccess(mockPaymentIntentId);
+        return;
+      }
+
+      // Use real Stripe payment confirmation for real payment intents
+      console.log('Processing real payment with client secret:', clientSecret);
       console.log('Billing details:', billingDetails);
 
-      // Simulate a delay to make it feel more realistic
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Simulate a successful payment
-      const mockPaymentIntentId = `pi_${Math.random().toString(36).substring(2, 15)}`;
-
-      setError(null);
-      setSucceeded(true);
-      setProcessing(false);
-      onSuccess(mockPaymentIntentId);
-
-      console.log('Mock payment successful with ID:', mockPaymentIntentId);
-
-      /*
-      // This is the real implementation that would be used with a valid client secret
       const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: cardElement,
           billing_details: {
             name: billingDetails.name,
             email: billingDetails.email,
-            phone: billingDetails.phone,
+            phone: billingDetails.phone || undefined,
             address: {
               line1: billingDetails.address.line1,
               line2: billingDetails.address.line2 || undefined,
               city: billingDetails.address.city,
-              state: billingDetails.address.state,
+              state: billingDetails.address.state || undefined,
               postal_code: billingDetails.address.postal_code,
               country: billingDetails.address.country,
             }
@@ -214,18 +218,20 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
       });
 
       if (error) {
+        console.error('Stripe payment error:', error);
         setError(error.message || 'An error occurred during payment processing');
         setProcessing(false);
       } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+        console.log('Payment successful! Payment Intent ID:', paymentIntent.id);
         setError(null);
         setSucceeded(true);
         setProcessing(false);
         onSuccess(paymentIntent.id);
       } else {
+        console.error('Payment failed with status:', paymentIntent?.status);
         setError('Payment failed. Please try again.');
         setProcessing(false);
       }
-      */
     } catch (err) {
       console.error('Error processing payment:', err);
       setError('An unexpected error occurred. Please try again.');

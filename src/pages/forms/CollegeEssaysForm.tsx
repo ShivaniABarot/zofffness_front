@@ -552,6 +552,22 @@ const CollegeEssaysForm = () => {
       </main>
 
       <Footer />
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSuccess={handlePaymentSuccess}
+        amount={formData.sessions}
+        description={`College Essays Service - ${packages.find(p => p.id.toString() === formData.packages)?.name || 'Package'}`}
+        metadata={{
+          form_type: 'college_essays',
+          package_id: formData.packages,
+          student_name: `${formData.student_first_name} ${formData.student_last_name}`,
+          parent_email: formData.parent_email,
+          graduation_year: formData.graduation_year
+        }}
+      />
     </div>
   );
 };

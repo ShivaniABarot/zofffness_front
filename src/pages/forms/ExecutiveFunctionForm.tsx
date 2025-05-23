@@ -10,6 +10,8 @@ import { Loader2 } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
 import axios from 'axios';
 import SuccessScreen from '../../components/SuccessScreen';
+import PaymentModal from '../../components/PaymentModal';
+import { mockApiService } from '../../services/mockApiService';
 
 // Define interface for package data
 interface Package {
@@ -31,6 +33,8 @@ const ExecutiveFunctionForm = () => {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [packages, setPackages] = useState<Package[]>([]);
   const [isLoadingPackages, setIsLoadingPackages] = useState(true);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [pendingSubmissionData, setPendingSubmissionData] = useState<any>(null);
   const { toast } = useToast();
 
   // Fallback package prices in case API fails
@@ -50,7 +54,7 @@ const ExecutiveFunctionForm = () => {
     school: '',
     package_name: '',
     amount: 0,
-    payment_status: 'Success', // Changed from 'Pending' to 'Success' since we're removing payment
+    payment_status: 'Pending',
     course_type: 'Executive Function Coaching'
   });
 
@@ -79,11 +83,8 @@ const ExecutiveFunctionForm = () => {
           }
         } else {
           console.error('Failed to fetch packages or invalid data format');
-          toast({
-            title: 'Warning',
-            description: 'Could not load package options from server. Using default options.',
-            variant: 'destructive',
-          });
+          // Fall back to mock API
+          await useMockPackages();
         }
       } catch (error) {
         console.error('Error fetching packages:', error);
@@ -94,15 +95,44 @@ const ExecutiveFunctionForm = () => {
           console.error('API Error Status:', error.response?.status);
         }
 
-        toast({
-          title: 'Warning',
-          description: 'Could not load package options from server. Using default options.',
-          variant: 'destructive',
-        });
-
-        // Do not set any default package in error case
+        // Fall back to mock API
+        await useMockPackages();
       } finally {
         setIsLoadingPackages(false);
+      }
+    };
+
+    const useMockPackages = async () => {
+      try {
+        console.log('Using mock packages for Executive Function');
+        // Create mock packages for Executive Function
+        const mockPackages: Package[] = [
+          {
+            id: 1,
+            name: "Five individual 30-minute sessions package",
+            price: 450,
+            description: "Comprehensive package of five personalized sessions"
+          },
+          {
+            id: 2,
+            name: "Individualized 30 minute sessions",
+            price: 90,
+            description: "Single personalized session"
+          }
+        ];
+
+        setPackages(mockPackages);
+        toast({
+          title: 'Demo Mode',
+          description: 'Using demo package options. Real API not available.',
+        });
+      } catch (mockError) {
+        console.error('Error with mock packages:', mockError);
+        toast({
+          title: 'Error',
+          description: 'Could not load package options. Please try again later.',
+          variant: 'destructive',
+        });
       }
     };
 
@@ -150,12 +180,175 @@ const ExecutiveFunctionForm = () => {
     }
   };
 
-  // Payment-related functions have been removed
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
+    setShowPaymentModal(false);
+
+    if (!pendingSubmissionData) {
+      toast({
+        title: 'Error',
+        description: 'No submission data found. Please try again.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Update the submission data with successful payment status
+    const submissionDataWithPayment = {
+      ...pendingSubmissionData,
+      payment_status: 'Success',
+      payment_intent_id: paymentIntentId
+    };
+
+    await submitFormData(submissionDataWithPayment);
+  };
+
+  const submitFormData = async (submissionData: any) => {
+    setIsLoading(true);
+    setValidationErrors({});
+
+    try {
+      // Try to submit to real API first
+      const response = await axios.post('https://zoffness.academy/api/executive_coaching', submissionData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.data.success ||
+          (response.data.message && response.data.message.includes('successfully')) ||
+          response.data.status === 'success') {
+        toast({
+          title: 'Registration Successful',
+          description: 'Your registration and payment have been processed successfully!',
+        });
+
+        // Set form as submitted
+        setIsSubmitted(true);
+
+        // Reset form
+        setFormData({
+          parent_first_name: '',
+          parent_last_name: '',
+          parent_phone: '',
+          parent_email: '',
+          student_first_name: '',
+          student_last_name: '',
+          student_email: '',
+          school: '',
+          package_name: '',
+          amount: 0,
+          payment_status: 'Pending',
+          course_type: 'Executive Function Coaching'
+        });
+
+        // Clear pending submission data
+        setPendingSubmissionData(null);
+      } else {
+        toast({
+          title: 'Error',
+          description: response.data.message || 'Something went wrong. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting to real API:', error);
+
+      // Fall back to mock API
+      try {
+        console.log('Using mock API for form submission');
+        const mockResponse = await mockApiService.submitForm('executive_coaching', submissionData);
+
+        if (mockResponse.success) {
+          toast({
+            title: 'Registration Successful (Demo)',
+            description: 'Your registration has been processed successfully in demo mode!',
+          });
+
+          // Set form as submitted
+          setIsSubmitted(true);
+
+          // Reset form
+          setFormData({
+            parent_first_name: '',
+            parent_last_name: '',
+            parent_phone: '',
+            parent_email: '',
+            student_first_name: '',
+            student_last_name: '',
+            student_email: '',
+            school: '',
+            package_name: '',
+            amount: 0,
+            payment_status: 'Pending',
+            course_type: 'Executive Function Coaching'
+          });
+
+          // Clear pending submission data
+          setPendingSubmissionData(null);
+        } else {
+          throw new Error('Mock API submission failed');
+        }
+      } catch (mockError) {
+        console.error('Error with mock API submission:', mockError);
+
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 422) {
+            // Handle validation errors
+            const apiErrors = error.response.data.errors || {};
+            const formattedErrors: Record<string, string> = {};
+            const errorMessages = [];
+
+            for (const field in apiErrors) {
+              const messages = apiErrors[field];
+              const formattedMessage = Array.isArray(messages) ? messages[0] : messages;
+              formattedErrors[field] = formattedMessage;
+              errorMessages.push(`${field.replace(/_/g, ' ')}: ${formattedMessage}`);
+            }
+
+            setValidationErrors(formattedErrors);
+
+            const errorMessage = errorMessages.length > 0
+              ? 'Please correct the following errors:\n' + errorMessages.join('\n')
+              : 'Please check your form inputs and try again.';
+
+            toast({
+              variant: 'destructive',
+              title: 'Validation Error',
+              description: errorMessage,
+            });
+          } else {
+            toast({
+              variant: 'destructive',
+              title: 'Error',
+              description: 'Failed to submit registration. Please try again later.',
+            });
+          }
+        } else {
+          toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'An unexpected error occurred. Please try again.',
+          });
+        }
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
-    setValidationErrors({});
+
+    // Validate required fields
+    if (!formData.package_name || formData.amount <= 0) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please select a package before proceeding.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     // Create a submission object with the field names expected by the API
     const submissionData = {
@@ -167,7 +360,6 @@ const ExecutiveFunctionForm = () => {
       student_last_name: formData.student_last_name,
       student_email: formData.student_email,
       school: formData.school,
-     
       package_type: formData.package_name,
       subtotal: formData.amount,
       payment_status: formData.payment_status,
@@ -175,173 +367,14 @@ const ExecutiveFunctionForm = () => {
       type: 'executive_function'
     };
 
-    // Only log in development environment
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('Submitting data:', submissionData);
-    }
+    // Store submission data for after payment
+    setPendingSubmissionData(submissionData);
 
-    try {
-      // Make the API call to the executive_coaching endpoint
-      const response = await axios.post(
-        'https://zoffness.academy/api/executive_coaching',
-        submissionData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        }
-      );
-
-      // Check if the response contains a success message or status
-      if (response.data.success ||
-          (response.data.message && response.data.message.includes('successfully')) ||
-          response.data.status === 'success') {
-
-        // Show success toast notification
-        toast({
-          title: 'Registration Successful',
-          description: 'Your registration has been submitted successfully!',
-          variant: 'default',
-        });
-
-        // Reset form data
-        setFormData({
-          parent_first_name: '',
-          parent_last_name: '',
-          parent_phone: '',
-          parent_email: '',
-          student_first_name: '',
-          student_last_name: '',
-          student_email: '',
-          school: '',
-
-          package_name: packages.length > 0 ? packages[0].id.toString() : 'five-sessions',
-          amount: packages.length > 0 ? packages[0].price : fallbackPackagePrices['five-sessions'],
-          payment_status: 'Success',
-          course_type: 'Executive Function Coaching'
-        });
-
-        // Set submitted state to show success screen
-        setIsSubmitted(true);
-      } else {
-        // Log the response for debugging
-        if (process.env.NODE_ENV !== 'production') {
-          console.log('API Response:', response.data);
-          console.log('API Response status:', response.data.status);
-          console.log('API Response success:', response.data.success);
-          console.log('API Response message:', response.data.message);
-        }
-
-        // Handle case where API returns success: false but has a success message or status
-        if ((response.data.message && response.data.message.includes('successfully')) ||
-            response.data.status === 'success') {
-
-          // Show success toast notification
-          toast({
-            title: 'Registration Successful',
-            description: 'Your registration has been submitted successfully!',
-            variant: 'default',
-          });
-
-          // Reset form data
-          setFormData({
-            parent_first_name: '',
-            parent_last_name: '',
-            parent_phone: '',
-            parent_email: '',
-            student_first_name: '',
-            student_last_name: '',
-            student_email: '',
-            school: '',
-  
-            package_name: packages.length > 0 ? packages[0].id.toString() : 'five-sessions',
-            amount: packages.length > 0 ? packages[0].price : fallbackPackagePrices['five-sessions'],
-            payment_status: 'Success',
-            course_type: 'Executive Function Coaching'
-          });
-
-          // Set submitted state to show success screen
-          setIsSubmitted(true);
-        } else {
-          // Handle actual error
-          toast({
-            title: 'Error',
-            description: response.data.message || 'Something went wrong. Please try again.',
-            variant: 'destructive',
-          });
-        }
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        // Log detailed error information in development environment
-        if (process.env.NODE_ENV !== 'production') {
-          console.error('API Error Response:', error.response?.data);
-          console.error('Full error object:', error);
-
-          // Log more details about the validation errors
-          if (error.response?.data?.errors) {
-            console.error('Detailed validation errors:');
-            for (const [field, messages] of Object.entries(error.response.data.errors)) {
-              console.error(`Field: ${field}, Messages:`, messages);
-            }
-          }
-        }
-
-        if (error.response?.status === 422) {
-          // Handle validation errors
-          const apiErrors = error.response.data.errors || {};
-          const formattedErrors: Record<string, string> = {};
-          const errorMessages = [];
-
-          // Create a formatted error message for display
-          for (const field in apiErrors) {
-            const messages = apiErrors[field];
-            const formattedMessage = Array.isArray(messages) ? messages[0] : messages;
-
-            // Add to formatted errors for state
-            formattedErrors[field] = formattedMessage;
-
-            // Add to error messages for toast
-            errorMessages.push(`${field.replace(/_/g, ' ')}: ${formattedMessage}`);
-          }
-
-          // Set validation errors state
-          setValidationErrors(formattedErrors);
-
-          // Create a more user-friendly error message
-          const errorMessage = errorMessages.length > 0
-            ? 'Please correct the following errors:\n' + errorMessages.join('\n')
-            : 'Please check your form inputs and try again.';
-
-          toast({
-            variant: 'destructive',
-            title: 'Validation Error',
-            description: errorMessage,
-          });
-        } else {
-          // Handle other HTTP errors
-          toast({
-            variant: 'destructive',
-            title: `Error (${error.response?.status || 'Unknown'})`,
-            description: error.response?.data?.message || 'Failed to submit registration. Please try again.',
-          });
-        }
-      } else {
-        // Handle non-Axios errors
-        if (process.env.NODE_ENV !== 'production') {
-          console.error('Non-Axios Error:', error);
-        }
-        toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: 'An unexpected error occurred. Please try again.',
-        });
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    // Show payment modal
+    setShowPaymentModal(true);
   };
+
+
 
   return (
     <div className="min-h-screen">
@@ -580,7 +613,7 @@ const ExecutiveFunctionForm = () => {
                       />
                     </div>
 
-                 
+
                   </div>
 
                   {/* Submit Button */}
@@ -595,7 +628,7 @@ const ExecutiveFunctionForm = () => {
                         Submitting...
                       </>
                     ) : (
-                      'Submit Registration'
+                      'Proceed to Payment'
                     )}
                   </Button>
                 </form>
@@ -607,6 +640,21 @@ const ExecutiveFunctionForm = () => {
       </main>
 
       <Footer />
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSuccess={handlePaymentSuccess}
+        amount={formData.amount}
+        description={`Executive Function Coaching - ${packages.find(p => p.id.toString() === formData.package_name)?.name || 'Package'}`}
+        metadata={{
+          form_type: 'executive_function',
+          package_id: formData.package_name,
+          student_name: `${formData.student_first_name} ${formData.student_last_name}`,
+          parent_email: formData.parent_email
+        }}
+      />
     </div>
   );
 };
