@@ -11,7 +11,6 @@ import { useToast } from '../../components/ui/use-toast';
 import axios from 'axios';
 import SuccessScreen from '../../components/SuccessScreen';
 import PaymentModal from '../../components/PaymentModal';
-import { emailService } from '../../services/emailService';
 
 // Define interface for package data
 interface Package {
@@ -32,6 +31,8 @@ const SatActCourseForm = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [packages, setPackages] = useState<Package[]>([]);
   const [isLoadingPackages, setIsLoadingPackages] = useState(true);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [pendingSubmissionData, setPendingSubmissionData] = useState<any>(null);
   const { toast } = useToast();
 
   // Fetch packages from API
@@ -93,7 +94,7 @@ const SatActCourseForm = () => {
     grade: '',
     packages: '',
     total_amount: 0,
-    payment_status: 'Success',
+    payment_status: 'Pending',
     course_type: 'SAT/ACT Course'
   });
 
@@ -127,76 +128,39 @@ const SatActCourseForm = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
+    setShowPaymentModal(false);
 
-    // Find the selected package from the packages array
-    const selectedPackage = packages.find(pkg => pkg.id.toString() === formData.packages);
+    if (!pendingSubmissionData) {
+      toast({
+        title: 'Error',
+        description: 'No submission data found. Please try again.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
-    // Get amount and package name from the selected package
-    const amount = selectedPackage ? selectedPackage.price : formData.total_amount;
-    const packageName = selectedPackage ? selectedPackage.name : 'SAT/ACT Course Package';
-
-    // Create a new submission object with the field names expected by the API
-    const submissionData = {
-      parent_firstname: formData.parent_first_name,
-      parent_lastname: formData.parent_last_name,
-      parent_phone: formData.parent_phone,
-      parent_email: formData.parent_email,
-      student_firstname: formData.student_first_name,
-      student_lastname: formData.student_last_name,
-      student_email: formData.student_email,
-      school: formData.school,
-      grade: formData.grade,
-      package_name: formData.packages,
-      amount: amount,
-      payment_status: 'Success', // Changed from 'Pending' to 'Success' since we're removing payment
-      course_type: formData.course_type,
-      type: 'sat_act_course',
-      courses: [
-        {
-          name: packageName,
-          price: amount
-        }
-      ] // Adding the courses field with required name and price properties
+    // Update the submission data with successful payment status
+    const submissionDataWithPayment = {
+      ...pendingSubmissionData,
+      payment_status: 'Success',
+      payment_intent_id: paymentIntentId
     };
 
-    // Only log in development environment
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('Submitting data:', submissionData);
-    }
+    await submitFormData(submissionDataWithPayment);
+  };
+
+  const submitFormData = async (submissionData: any) => {
+    setIsLoading(true);
 
     try {
       const response = await axios.post('https://zoffness.academy/api/new_sat_act', submissionData);
 
       if (response.data.success) {
-        // Send registration confirmation email
-        try {
-          const selectedPackage = packages.find(pkg => pkg.id.toString() === formData.packages);
-          const emailResult = await emailService.sendRegistrationConfirmation({
-            parent_email: formData.parent_email,
-            student_email: formData.student_email,
-            parent_name: `${formData.parent_first_name} ${formData.parent_last_name}`,
-            student_name: `${formData.student_first_name} ${formData.student_last_name}`,
-            course_type: formData.course_type,
-            package_name: selectedPackage?.name || 'SAT/ACT Course Package',
-            amount: formData.total_amount
-          });
-
-          if (emailResult.success) {
-            console.log('Registration confirmation email sent successfully');
-          } else {
-            console.warn('Email sending failed:', emailResult.message);
-          }
-        } catch (emailError) {
-          console.error('Error sending registration email:', emailError);
-        }
-
         // Show success message
         toast({
           title: 'Registration Successful',
-          description: 'Your registration has been submitted successfully! A confirmation email has been sent.',
+          description: 'Your registration and payment have been processed successfully!',
         });
 
         // Reset form
@@ -212,33 +176,21 @@ const SatActCourseForm = () => {
           grade: '',
           packages: '',
           total_amount: 0,
-          payment_status: 'Success',
+          payment_status: 'Pending',
           course_type: 'SAT/ACT Course'
         });
+
+        // Clear pending submission data
+        setPendingSubmissionData(null);
 
         // Set form as submitted
         setIsSubmitted(true);
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        // Only log errors in development environment
-        if (process.env.NODE_ENV !== 'production') {
-          console.error('API Error Response:', error.response?.data);
-        }
-
         if (error.response?.status === 422) {
           // Handle validation errors
           const validationErrors = error.response.data.errors || {};
-
-          // Log detailed validation errors for debugging
-          if (process.env.NODE_ENV !== 'production') {
-            console.error('Validation errors:', validationErrors);
-
-            // Log more details about each validation error
-            for (const field in validationErrors) {
-              console.error(`Field: ${field}, Messages:`, validationErrors[field]);
-            }
-          }
 
           // Create a more readable error message
           const errorMessages = [];
@@ -268,9 +220,6 @@ const SatActCourseForm = () => {
         }
       } else {
         // Handle non-Axios errors
-        if (process.env.NODE_ENV !== 'production') {
-          console.error('Non-Axios Error:', error);
-        }
         toast({
           variant: 'destructive',
           title: 'Error',
@@ -280,6 +229,57 @@ const SatActCourseForm = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // Validate required fields
+    if (!formData.packages || formData.total_amount <= 0) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please select a package before proceeding.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Find the selected package from the packages array
+    const selectedPackage = packages.find(pkg => pkg.id.toString() === formData.packages);
+
+    // Get amount and package name from the selected package
+    const amount = selectedPackage ? selectedPackage.price : formData.total_amount;
+    const packageName = selectedPackage ? selectedPackage.name : 'SAT/ACT Course Package';
+
+    // Create a new submission object with the field names expected by the API
+    const submissionData = {
+      parent_firstname: formData.parent_first_name,
+      parent_lastname: formData.parent_last_name,
+      parent_phone: formData.parent_phone,
+      parent_email: formData.parent_email,
+      student_firstname: formData.student_first_name,
+      student_lastname: formData.student_last_name,
+      student_email: formData.student_email,
+      school: formData.school,
+      grade: formData.grade,
+      package_name: formData.packages,
+      amount: amount,
+      payment_status: formData.payment_status,
+      course_type: formData.course_type,
+      type: 'sat_act_course',
+      courses: [
+        {
+          name: packageName,
+          price: amount
+        }
+      ] // Adding the courses field with required name and price properties
+    };
+
+    // Store submission data for after payment
+    setPendingSubmissionData(submissionData);
+
+    // Show payment modal
+    setShowPaymentModal(true);
   };
 
   // Payment-related functions have been removed
@@ -475,7 +475,7 @@ const SatActCourseForm = () => {
                         Submitting...
                       </>
                     ) : (
-                      'Submit Registration'
+                      'Proceed to Payment'
                     )}
                   </Button>
                 </form>
@@ -487,6 +487,21 @@ const SatActCourseForm = () => {
       </main>
 
       <Footer />
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSuccess={handlePaymentSuccess}
+        amount={formData.total_amount}
+        description={`SAT/ACT Course - ${packages.find(pkg => pkg.id.toString() === formData.packages)?.name || 'Package'}`}
+        metadata={{
+          form_type: 'sat_act_course',
+          package_id: formData.packages,
+          student_name: `${formData.student_first_name} ${formData.student_last_name}`,
+          parent_email: formData.parent_email
+        }}
+      />
     </div>
   );
 };

@@ -173,7 +173,7 @@ const CollegeAdmissionsForm = () => {
           (response.data.message && response.data.message.includes('successfully')) ||
           response.data.status === 'success') {
 
-        // Send registration confirmation email
+        // Send registration confirmation email with Gmail SMTP
         try {
           const emailResult = await emailService.sendRegistrationConfirmation({
             parent_email: submissionData.parent_email,
@@ -187,7 +187,7 @@ const CollegeAdmissionsForm = () => {
           });
 
           if (emailResult.success) {
-            console.log('Registration confirmation email sent successfully');
+            console.log('Registration confirmation email sent successfully via Gmail SMTP');
           } else {
             console.warn('Email sending failed:', emailResult.message);
           }
@@ -239,7 +239,7 @@ const CollegeAdmissionsForm = () => {
         const mockResponse = await mockApiService.submitForm('college_admission', submissionData);
 
         if (mockResponse.success) {
-          // Send registration confirmation email
+          // Send registration confirmation email with Gmail SMTP
           try {
             const emailResult = await emailService.sendRegistrationConfirmation({
               parent_email: submissionData.parent_email,
@@ -253,7 +253,7 @@ const CollegeAdmissionsForm = () => {
             });
 
             if (emailResult.success) {
-              console.log('Registration confirmation email sent successfully');
+              console.log('Registration confirmation email sent successfully via Gmail SMTP (Demo mode)');
             } else {
               console.warn('Email sending failed:', emailResult.message);
             }
