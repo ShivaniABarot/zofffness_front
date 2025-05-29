@@ -114,13 +114,27 @@ const SatActPracticeTestForm = () => {
     student_last_name: '',
     student_email: '',
     school: '',
-    test_type: '',
-    session_id: '',
-    test_date: '',
+    test_types: [] as string[], // Changed to array for multiple selections
+    session_ids: [] as string[], // Changed to array for multiple selections
+    test_dates: [] as string[], // Changed to array for multiple selections
     amount: '0',
     payment_status: 'Success',
     course_type: 'SAT/ACT Practice Test'
   });
+
+  // State for selected items with details
+  const [selectedTests, setSelectedTests] = useState<Array<{
+    sessionId: string;
+    testType: string;
+    price: number;
+    title: string;
+  }>>([]);
+
+  const [selectedDates, setSelectedDates] = useState<Array<{
+    key: string;
+    date: string;
+    display: string;
+  }>>([]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -145,11 +159,40 @@ const SatActPracticeTestForm = () => {
     const selectedSession = sessions.find(session => session.id.toString() === value);
 
     if (selectedSession) {
+      // Check if already selected
+      const isAlreadySelected = selectedTests.some(test => test.sessionId === value);
+
+      if (!isAlreadySelected) {
+        const newTest = {
+          sessionId: selectedSession.id.toString(),
+          testType: selectedSession.id.toString(),
+          price: parseFloat(selectedSession.price_per_slot),
+          title: selectedSession.title
+        };
+
+        setSelectedTests(prev => [...prev, newTest]);
+
+        // Update form data
+        setFormData(prev => ({
+          ...prev,
+          test_types: [...prev.test_types, selectedSession.id.toString()],
+          session_ids: [...prev.session_ids, selectedSession.id.toString()],
+          amount: (parseFloat(prev.amount) + parseFloat(selectedSession.price_per_slot)).toString()
+        }));
+      }
+    }
+  };
+
+  const removeTestType = (sessionId: string) => {
+    const testToRemove = selectedTests.find(test => test.sessionId === sessionId);
+    if (testToRemove) {
+      setSelectedTests(prev => prev.filter(test => test.sessionId !== sessionId));
+
       setFormData(prev => ({
         ...prev,
-        session_id: selectedSession.id.toString(),
-        test_type: selectedSession.id.toString(), // Use session ID as test_type
-        amount: parseFloat(selectedSession.price_per_slot).toString()
+        test_types: prev.test_types.filter(id => id !== sessionId),
+        session_ids: prev.session_ids.filter(id => id !== sessionId),
+        amount: (parseFloat(prev.amount) - testToRemove.price).toString()
       }));
     }
   };
@@ -171,10 +214,56 @@ const SatActPracticeTestForm = () => {
   };
 
   const handleTestDateChange = (value: string) => {
+    const dateValue = testDateMap[value];
+    if (!dateValue) return;
+
+    // Check if already selected
+    const isAlreadySelected = selectedDates.some(date => date.key === value);
+
+    if (!isAlreadySelected) {
+      const dateDisplay = getDateDisplay(value);
+      const newDate = {
+        key: value,
+        date: dateValue,
+        display: dateDisplay
+      };
+
+      setSelectedDates(prev => [...prev, newDate]);
+
+      setFormData(prev => ({
+        ...prev,
+        test_dates: [...prev.test_dates, dateValue]
+      }));
+    }
+  };
+
+  const removeTestDate = (dateKey: string) => {
+    setSelectedDates(prev => prev.filter(date => date.key !== dateKey));
+
+    const dateValue = testDateMap[dateKey];
     setFormData(prev => ({
       ...prev,
-      test_date: testDateMap[value] || ''
+      test_dates: prev.test_dates.filter(date => date !== dateValue)
     }));
+  };
+
+  const getDateDisplay = (key: string): string => {
+    const dateDisplayMap: { [key: string]: string } = {
+      april5: 'Saturday, April 5th @ 9am',
+      april12: 'Saturday, April 12th @ 9am',
+      april19: 'Saturday, April 19th @ 9am',
+      april26: 'Saturday, April 26th @ 9am',
+      may3: 'Saturday, May 3rd @ 9am',
+      may10: 'Saturday, May 10th @ 9am',
+      may17: 'Saturday, May 17th @ 9am',
+      may24: 'Saturday, May 24th @ 9am',
+      may31: 'Saturday, May 31st @ 9am',
+      june7: 'Saturday, June 7th @ 9am',
+      june14: 'Saturday, June 14th @ 9am',
+      june21: 'Saturday, June 21st @ 9am',
+      june28: 'Saturday, June 28th @ 9am',
+    };
+    return dateDisplayMap[key] || '';
   };
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
@@ -254,13 +343,17 @@ const SatActPracticeTestForm = () => {
           student_last_name: '',
           student_email: '',
           school: '',
-          test_type: '',
-          session_id: '',
-          test_date: '',
+          test_types: [],
+          session_ids: [],
+          test_dates: [],
           amount: '0',
           payment_status: 'Pending',
           course_type: 'SAT/ACT Practice Test'
         });
+
+        // Reset selected items
+        setSelectedTests([]);
+        setSelectedDates([]);
 
         // Clear pending submission data
         setPendingSubmissionData(null);
@@ -312,13 +405,17 @@ const SatActPracticeTestForm = () => {
             student_last_name: '',
             student_email: '',
             school: '',
-            test_type: '',
-            session_id: '',
-            test_date: '',
+            test_types: [],
+            session_ids: [],
+            test_dates: [],
             amount: '0',
             payment_status: 'Pending',
             course_type: 'SAT/ACT Practice Test'
           });
+
+          // Reset selected items
+          setSelectedTests([]);
+          setSelectedDates([]);
 
           // Clear pending submission data
           setPendingSubmissionData(null);
@@ -396,16 +493,16 @@ const SatActPracticeTestForm = () => {
       }
     });
 
-    // Check test date and amount
-    if (!formData.test_date) {
-      newErrors.test_date = true;
+    // Check test dates and amount
+    if (formData.test_dates.length === 0) {
+      newErrors.test_dates = true;
       hasErrors = true;
     }
 
-    if (!formData.amount || parseFloat(formData.amount) <= 0) {
+    if (formData.test_types.length === 0 || !formData.amount || parseFloat(formData.amount) <= 0) {
       toast({
         title: 'Validation Error',
-        description: 'Please select a test type before proceeding.',
+        description: 'Please select at least one test type and test date before proceeding.',
         variant: 'destructive',
       });
       return;
@@ -423,7 +520,7 @@ const SatActPracticeTestForm = () => {
       return;
     }
 
-    // Create submission data object
+    // Create submission data object for multiple selections
     const submissionData = {
       // Practice Test API expects original field names (different from other APIs)
       parent_first_name: formData.parent_first_name,
@@ -434,9 +531,9 @@ const SatActPracticeTestForm = () => {
       student_last_name: formData.student_last_name,
       student_email: formData.student_email,
       school: formData.school,
-      session_id: formData.session_id || null,
-      test_type: [parseInt(formData.test_type, 10)],
-      date: formData.test_date,
+      session_ids: formData.session_ids,
+      test_types: formData.test_types.map(id => parseInt(id, 10)),
+      test_dates: formData.test_dates,
       test_time: '09:00:00',
       location: '510 West Boston Post Road',
       amount: parseInt(formData.amount, 10),
@@ -460,7 +557,7 @@ const SatActPracticeTestForm = () => {
 
       <main className="py-32 bg-gray-52">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <h1 className="text-3xl font-bold font-display text-college-blue-500 mb-8 text-center">
               SAT/ACT Practice Test Registration
             </h1>
@@ -471,95 +568,146 @@ const SatActPracticeTestForm = () => {
                 onRegisterAnother={() => setIsSubmitted(false)}
               />
             ) : (
-              <Card>
-                <CardContent className="p-6">
-                  <form className="space-y-8" onSubmit={handleSubmit}>
-                  {/* Test Selection */}
-                  <div className="space-y-4">
-                    <h2 className="text-xl font-semibold text-college-blue-500">Test Selection</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Form Section - Left Side */}
+                <div className="lg:col-span-2">
+                  <Card>
+                    <CardContent className="p-6">
+                      <form className="space-y-8" onSubmit={handleSubmit}>
+                        {/* Test Selection */}
+                        <div className="space-y-4">
+                          <h2 className="text-xl font-semibold text-college-blue-500">Test Selection</h2>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="test_type">Select Test Type *</Label>
-                      {isLoadingSessions ? (
-                        <div className="flex items-center py-2">
-                          <Loader2 className="h-4 w-4 animate-spin text-college-blue-500 mr-2" />
-                          <span className="text-sm text-college-blue-500">Loading test options...</span>
-                        </div>
-                      ) : (
-                        <Select
-                          onValueChange={handleTestTypeChange}
-                        >
-                          <SelectTrigger id="test_type">
-                            <SelectValue placeholder="Select test type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {sessions.length > 0 ? (
-                              // Render sessions from API
-                              sessions.map((session) => (
-                                <SelectItem key={session.id} value={session.id.toString()}>
-                                  {session.title} - ${parseFloat(session.price_per_slot).toFixed(2)}
-                                </SelectItem>
-                              ))
+                          <div className="space-y-2">
+                            <Label htmlFor="test_type">Select Test Type *</Label>
+                            {isLoadingSessions ? (
+                              <div className="flex items-center py-2">
+                                <Loader2 className="h-4 w-4 animate-spin text-college-blue-500 mr-2" />
+                                <span className="text-sm text-college-blue-500">Loading test options...</span>
+                              </div>
                             ) : (
-                              // Show message when no sessions are available
-                              <SelectItem value="no-options" disabled>
-                                No test options available. Please try again later.
-                              </SelectItem>
+                              <Select
+                                onValueChange={handleTestTypeChange}
+                              >
+                                <SelectTrigger id="test_type">
+                                  <SelectValue placeholder="Select test type to add" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {sessions.length > 0 ? (
+                                    // Render sessions from API
+                                    sessions.map((session) => (
+                                      <SelectItem key={session.id} value={session.id.toString()}>
+                                        {session.title} - ${parseFloat(session.price_per_slot).toFixed(2)}
+                                      </SelectItem>
+                                    ))
+                                  ) : (
+                                    // Show message when no sessions are available
+                                    <SelectItem value="no-options" disabled>
+                                      No test options available. Please try again later.
+                                    </SelectItem>
+                                  )}
+                                </SelectContent>
+                              </Select>
                             )}
-                          </SelectContent>
-                        </Select>
-                      )}
-                    </div>
-                  </div>
+                          </div>
 
-                  {/* Practice Test Dates */}
-                  <div className="space-y-4">
-                    <h2 className="text-xl font-semibold text-college-blue-500">Practice Test Dates and Times</h2>
-                    <p className="text-sm font-semibold text-college-blue-500 mb-2">ACT/SAT Courses*</p>
+                          {/* Selected Tests Display */}
+                          {selectedTests.length > 0 && (
+                            <div className="space-y-2">
+                              <Label>Selected Tests:</Label>
+                              <div className="space-y-2">
+                                {selectedTests.map((test) => (
+                                  <div key={test.sessionId} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
+                                    <div>
+                                      <p className="font-medium text-sm">{test.title}</p>
+                                      <p className="text-sm text-gray-600">${test.price.toFixed(2)}</p>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => removeTestType(test.sessionId)}
+                                      className="text-red-500 hover:text-red-700 text-sm font-medium"
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="test_date">Select Test Date *</Label>
-                      <Select
-                        onValueChange={(value) => {
-                          handleTestDateChange(value);
-                          // Clear error when user selects a date
-                          if (errors.test_date) {
-                            setErrors(prev => ({
-                              ...prev,
-                              test_date: false
-                            }));
-                          }
-                        }}
-                        required
-                      >
-                        <SelectTrigger
-                          id="test_date"
-                          className={errors.test_date ? 'border-red-500' : ''}
-                        >
-                          <SelectValue placeholder="Select test date" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="april5">Saturday, April 5th @ 9am at Zoffness College Prep</SelectItem>
-                          <SelectItem value="april12">Saturday, April 12th @ 9am at Zoffness College Prep</SelectItem>
-                          <SelectItem value="april19">Saturday, April 19th @ 9am at Zoffness College Prep</SelectItem>
-                          <SelectItem value="april26">Saturday, April 26th @ 9am at Zoffness College Prep</SelectItem>
-                          <SelectItem value="may3">Saturday, May 3rd @ 9am at Zoffness College Prep</SelectItem>
-                          <SelectItem value="may10">Saturday, May 10th @ 9am at Zoffness College Prep</SelectItem>
-                          <SelectItem value="may17">Saturday, May 17th @ 9am at Zoffness College Prep</SelectItem>
-                          <SelectItem value="may24">Saturday, May 24th @ 9am at Zoffness College Prep</SelectItem>
-                          <SelectItem value="may31">Saturday, May 31st @ 9am at Zoffness College Prep</SelectItem>
-                          <SelectItem value="june7">Saturday, June 7th @ 9am at Zoffness College Prep</SelectItem>
-                          <SelectItem value="june14">Saturday, June 14th @ 9am at Zoffness College Prep</SelectItem>
-                          <SelectItem value="june21">Saturday, June 21st @ 9am at Zoffness College Prep</SelectItem>
-                          <SelectItem value="june28">Saturday, June 28th @ 9am at Zoffness College Prep</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {errors.test_date && (
-                        <p className="text-red-500 text-xs mt-1">Please select a test date</p>
-                      )}
-                      <p className="text-xs text-gray-500 mt-1">All tests are held at 510 West Boston Post Road</p>
-                    </div>
-                  </div>
+                        {/* Practice Test Dates */}
+                        <div className="space-y-4">
+                          <h2 className="text-xl font-semibold text-college-blue-500">Practice Test Dates and Times</h2>
+                          <p className="text-sm font-semibold text-college-blue-500 mb-2">ACT/SAT Courses*</p>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="test_date">Select Test Date *</Label>
+                            <Select
+                              onValueChange={(value) => {
+                                handleTestDateChange(value);
+                                // Clear error when user selects a date
+                                if (errors.test_dates) {
+                                  setErrors(prev => ({
+                                    ...prev,
+                                    test_dates: false
+                                  }));
+                                }
+                              }}
+                              required
+                            >
+                              <SelectTrigger
+                                id="test_date"
+                                className={errors.test_dates ? 'border-red-500' : ''}
+                              >
+                                <SelectValue placeholder="Select test date to add" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="april5">Saturday, April 5th @ 9am at Zoffness College Prep</SelectItem>
+                                <SelectItem value="april12">Saturday, April 12th @ 9am at Zoffness College Prep</SelectItem>
+                                <SelectItem value="april19">Saturday, April 19th @ 9am at Zoffness College Prep</SelectItem>
+                                <SelectItem value="april26">Saturday, April 26th @ 9am at Zoffness College Prep</SelectItem>
+                                <SelectItem value="may3">Saturday, May 3rd @ 9am at Zoffness College Prep</SelectItem>
+                                <SelectItem value="may10">Saturday, May 10th @ 9am at Zoffness College Prep</SelectItem>
+                                <SelectItem value="may17">Saturday, May 17th @ 9am at Zoffness College Prep</SelectItem>
+                                <SelectItem value="may24">Saturday, May 24th @ 9am at Zoffness College Prep</SelectItem>
+                                <SelectItem value="may31">Saturday, May 31st @ 9am at Zoffness College Prep</SelectItem>
+                                <SelectItem value="june7">Saturday, June 7th @ 9am at Zoffness College Prep</SelectItem>
+                                <SelectItem value="june14">Saturday, June 14th @ 9am at Zoffness College Prep</SelectItem>
+                                <SelectItem value="june21">Saturday, June 21st @ 9am at Zoffness College Prep</SelectItem>
+                                <SelectItem value="june28">Saturday, June 28th @ 9am at Zoffness College Prep</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            {errors.test_dates && (
+                              <p className="text-red-500 text-xs mt-1">Please select at least one test date</p>
+                            )}
+                            <p className="text-xs text-gray-500 mt-1">All tests are held at 510 West Boston Post Road</p>
+                          </div>
+
+                          {/* Selected Dates Display */}
+                          {selectedDates.length > 0 && (
+                            <div className="space-y-2">
+                              <Label>Selected Dates:</Label>
+                              <div className="space-y-2">
+                                {selectedDates.map((date) => (
+                                  <div key={date.key} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border">
+                                    <div>
+                                      <p className="font-medium text-sm">{date.display}</p>
+                                      <p className="text-sm text-gray-600">at Zoffness College Prep</p>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => removeTestDate(date.key)}
+                                      className="text-red-500 hover:text-red-700 text-sm font-medium"
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
 
                   {/* Parent Information */}
                   <div className="space-y-4">
@@ -707,9 +855,79 @@ const SatActPracticeTestForm = () => {
                       'Proceed to Payment'
                     )}
                   </Button>
-                </form>
-              </CardContent>
-            </Card>
+                      </form>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Summary Panel - Right Side */}
+                <div className="lg:col-span-1">
+                  <Card className="sticky top-8">
+                    <CardContent className="p-6">
+                      <h3 className="text-lg font-semibold text-college-blue-500 mb-4">Registration Summary</h3>
+
+                      {/* Selected Tests Summary */}
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">Selected Tests</h4>
+                          {selectedTests.length > 0 ? (
+                            <div className="space-y-2">
+                              {selectedTests.map((test) => (
+                                <div key={test.sessionId} className="text-sm">
+                                  <p className="font-medium">{test.title}</p>
+                                  <p className="text-gray-600">${test.price.toFixed(2)}</p>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-500">No tests selected</p>
+                          )}
+                        </div>
+
+                        {/* Selected Dates Summary */}
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">Selected Dates</h4>
+                          {selectedDates.length > 0 ? (
+                            <div className="space-y-1">
+                              {selectedDates.map((date) => (
+                                <p key={date.key} className="text-sm text-gray-600">{date.display}</p>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-500">No dates selected</p>
+                          )}
+                        </div>
+
+                        {/* Total Summary */}
+                        <div className="border-t pt-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium">Total Tests:</span>
+                            <span className="font-bold text-college-blue-500">{selectedTests.length}</span>
+                          </div>
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium">Total Dates:</span>
+                            <span className="font-bold text-college-blue-500">{selectedDates.length}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-lg">
+                            <span className="font-bold">Total Amount:</span>
+                            <span className="font-bold text-college-blue-500">${parseFloat(formData.amount || '0').toFixed(2)}</span>
+                          </div>
+                        </div>
+
+                        {/* Registration Note */}
+                        {selectedTests.length > 0 && selectedDates.length > 0 && (
+                          <div className="bg-blue-50 p-3 rounded-lg">
+                            <p className="text-sm text-blue-800">
+                              <strong>Note:</strong> You will be registered for {selectedTests.length} test type(s) across {selectedDates.length} date(s).
+                              Each test-date combination will be scheduled separately.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -723,13 +941,15 @@ const SatActPracticeTestForm = () => {
         onClose={() => setShowPaymentModal(false)}
         onSuccess={handlePaymentSuccess}
         amount={parseFloat(formData.amount)}
-        description={`SAT/ACT Practice Test - ${sessions.find(s => s.id.toString() === formData.session_id)?.title || 'Practice Test'}`}
+        description={`SAT/ACT Practice Test - ${selectedTests.length} test(s) selected`}
         metadata={{
           form_type: 'practice_test',
-          session_id: formData.session_id,
+          session_ids: formData.session_ids.join(','),
           student_name: `${formData.student_first_name} ${formData.student_last_name}`,
           parent_email: formData.parent_email,
-          test_date: formData.test_date
+          test_dates: formData.test_dates.join(','),
+          test_count: selectedTests.length,
+          date_count: selectedDates.length
         }}
       />
     </div>
