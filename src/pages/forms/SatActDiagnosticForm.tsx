@@ -5,7 +5,8 @@ import { Button } from '../../components/ui/button';
 import { Card, CardContent } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
+import { Checkbox } from '../../components/ui/checkbox';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
 import axios from 'axios';
@@ -22,6 +23,14 @@ interface Session {
   session_type: string;
   created_at: string;
   updated_at: string;
+}
+
+// Define interface for package data
+interface Package {
+  id: string;
+  name: string;
+  price: number;
+  description?: string;
 }
 
 const SatActDiagnosticForm = () => {
@@ -107,11 +116,30 @@ const SatActDiagnosticForm = () => {
     student_last_name: '',
     student_email: '',
     school: '',
-    packages: '',
+    packages: [] as string[],
     session_id: '',
     total_amount: 0,
     payment_status: 'Pending'
   });
+
+  // Available packages for diagnostic tests
+  const availablePackages: Package[] = [
+    {
+      id: 'sat_diagnostic',
+      name: 'SAT Diagnostic Test',
+      price: 150,
+      description: 'Complete SAT diagnostic test with detailed analysis'
+    },
+    {
+      id: 'act_diagnostic',
+      name: 'ACT Diagnostic Test',
+      price: 150,
+      description: 'Complete ACT diagnostic test with detailed analysis'
+    }
+  ];
+
+  // State for selected packages
+  const [selectedPackages, setSelectedPackages] = useState<Package[]>([]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -131,8 +159,40 @@ const SatActDiagnosticForm = () => {
       setFormData(prev => ({
         ...prev,
         session_id: selectedSession.id.toString(),
-        packages: selectedSession.title,
-        total_amount: parseFloat(selectedSession.price_per_slot)
+        total_amount: parseFloat(selectedSession.price_per_slot) + calculatePackageTotal()
+      }));
+    }
+  };
+
+  // Calculate total from selected packages
+  const calculatePackageTotal = () => {
+    return selectedPackages.reduce((total, pkg) => total + pkg.price, 0);
+  };
+
+  // Handle package selection
+  const handlePackageChange = (packageId: string, checked: boolean) => {
+    const packageToToggle = availablePackages.find(pkg => pkg.id === packageId);
+    if (!packageToToggle) return;
+
+    if (checked) {
+      // Add package
+      const newSelectedPackages = [...selectedPackages, packageToToggle];
+      setSelectedPackages(newSelectedPackages);
+
+      setFormData(prev => ({
+        ...prev,
+        packages: [...prev.packages, packageToToggle.name],
+        total_amount: prev.total_amount + packageToToggle.price
+      }));
+    } else {
+      // Remove package
+      const newSelectedPackages = selectedPackages.filter(pkg => pkg.id !== packageId);
+      setSelectedPackages(newSelectedPackages);
+
+      setFormData(prev => ({
+        ...prev,
+        packages: prev.packages.filter(name => name !== packageToToggle.name),
+        total_amount: prev.total_amount - packageToToggle.price
       }));
     }
   };
@@ -200,11 +260,14 @@ const SatActDiagnosticForm = () => {
           student_last_name: '',
           student_email: '',
           school: '',
-          packages: '',
+          packages: [],
           session_id: '',
           total_amount: 0,
           payment_status: 'Pending'
         });
+
+        // Reset selected packages
+        setSelectedPackages([]);
 
         // Clear pending submission data
         setPendingSubmissionData(null);
@@ -257,11 +320,14 @@ const SatActDiagnosticForm = () => {
             student_last_name: '',
             student_email: '',
             school: '',
-            packages: '',
+            packages: [],
             session_id: '',
             total_amount: 0,
             payment_status: 'Pending'
           });
+
+          // Reset selected packages
+          setSelectedPackages([]);
 
           // Clear pending submission data
           setPendingSubmissionData(null);
@@ -322,10 +388,10 @@ const SatActDiagnosticForm = () => {
     e.preventDefault();
 
     // Validate required fields
-    if (!formData.session_id || formData.total_amount <= 0) {
+    if (selectedPackages.length === 0 || formData.total_amount <= 0) {
       toast({
         title: 'Validation Error',
-        description: 'Please select a test option before proceeding.',
+        description: 'Please select at least one package before proceeding.',
         variant: 'destructive',
       });
       return;
@@ -342,10 +408,10 @@ const SatActDiagnosticForm = () => {
       student_lastname: formData.student_last_name,   // API expects 'student_lastname'
       student_email: formData.student_email,
       school: formData.school,
-      session_id: parseInt(formData.session_id, 10),
+      session_id: formData.session_id || '',
       // Fix the field names based on validation errors
       total_amount: parseInt(formData.total_amount.toString(), 10), // API expects 'total_amount' not 'amount'
-      packages: formData.session_id, // API expects 'packages' field
+      packages: formData.packages.join(', '), // API expects 'packages' field
       payment_status: formData.payment_status,
       course_type: 'SAT/ACT Diagnostic Test'
     };
@@ -362,7 +428,7 @@ const SatActDiagnosticForm = () => {
 
       <main className="py-32 bg-gray-52">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <h1 className="text-3xl font-bold font-display text-college-blue-500 mb-8 text-center">
               SAT/ACT Diagnostic Test Registration
             </h1>
@@ -373,46 +439,65 @@ const SatActDiagnosticForm = () => {
                 onRegisterAnother={() => setIsSubmitted(false)}
               />
             ) : (
-              <Card>
-                <CardContent className="p-6">
-                  <form className="space-y-8" onSubmit={handleSubmit}>
-                  {/* Test Selection */}
-                  <div className="space-y-4">
-                    <h2 className="text-xl font-semibold text-college-blue-500">Test Selection</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Form Section - Left Side */}
+                <div className="lg:col-span-2">
+                  <Card>
+                    <CardContent className="p-6">
+                      <form className="space-y-8" onSubmit={handleSubmit}>
+                        {/* Package Selection */}
+                        <div className="space-y-4">
+                          <h2 className="text-xl font-semibold text-college-blue-500">Package Selection</h2>
 
-                    <div className="mb-6">
-                      <p className="text-gray-700">Complete two full-length proctored diagnostic tests to determine which test is the best fit. Our software provides comprehensive online analysis with statistical data and insights into strengths and weaknesses.</p>
-                      <p className="text-sm text-gray-600 mt-2">Scores will be scaled and results analyzed to assess which test may be the better fit for each student. This essential first step allows students to become familiar with both tests and gain a decisive advantage before test prep begins.</p>
-                    </div>
-
-                    {isLoadingSessions ? (
-                      <div className="flex justify-center items-center py-4">
-                        <Loader2 className="h-6 w-6 animate-spin text-college-blue-500" />
-                        <span className="ml-2 text-college-blue-500">Loading test options...</span>
-                      </div>
-                    ) : (
-                      <RadioGroup
-                        onValueChange={handleRadioChange}
-                      >
-                        {sessions.length > 0 ? (
-                          // Render sessions from API
-                          sessions.map((session) => (
-                            <div key={session.id} className="flex items-center space-x-2">
-                              <RadioGroupItem value={session.id.toString()} id={`session-${session.id}`} />
-                              <Label htmlFor={`session-${session.id}`}>
-                                {session.title} - ${parseFloat(session.price_per_slot).toFixed(2)}
-                              </Label>
-                            </div>
-                          ))
-                        ) : (
-                          // Show message when no sessions are available
-                          <div className="text-center py-2 text-gray-500">
-                            No test options available. Please try again later.
+                          <div className="mb-6">
+                            <p className="text-gray-700">Complete two full-length proctored diagnostic tests to determine which test is the best fit. Our software provides comprehensive online analysis with statistical data and insights into strengths and weaknesses.</p>
+                            <p className="text-sm text-gray-600 mt-2">Scores will be scaled and results analyzed to assess which test may be the better fit for each student. This essential first step allows students to become familiar with both tests and gain a decisive advantage before test prep begins.</p>
                           </div>
-                        )}
-                      </RadioGroup>
-                    )}
-                  </div>
+
+                          <div className="space-y-4">
+                            <Label>Select Diagnostic Test Package(s) *</Label>
+                            <div className="space-y-3">
+                              {availablePackages.map((pkg) => (
+                                <div key={pkg.id} className="flex items-start space-x-3 p-4 border rounded-lg hover:border-college-blue-300 transition-colors">
+                                  <Checkbox
+                                    id={pkg.id}
+                                    checked={selectedPackages.some(selected => selected.id === pkg.id)}
+                                    onCheckedChange={(checked) => handlePackageChange(pkg.id, checked as boolean)}
+                                  />
+                                  <div className="flex-1">
+                                    <Label htmlFor={pkg.id} className="text-base font-medium cursor-pointer">
+                                      {pkg.name} - ${pkg.price.toFixed(2)}
+                                    </Label>
+                                    {pkg.description && (
+                                      <p className="text-sm text-gray-600 mt-1">{pkg.description}</p>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Selected Packages Display */}
+                          {selectedPackages.length > 0 && (
+                            <div className="space-y-2">
+                              <Label>Selected Packages:</Label>
+                              <div className="space-y-2">
+                                {selectedPackages.map((pkg) => (
+                                  <div key={pkg.id} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
+                                    <div>
+                                      <p className="font-medium text-sm">{pkg.name}</p>
+                                      <p className="text-sm text-gray-600">${pkg.price.toFixed(2)}</p>
+                                      {pkg.description && (
+                                        <p className="text-xs text-gray-500 mt-1">{pkg.description}</p>
+                                      )}
+                                    </div>
+                                    <span className="text-green-600 text-sm font-medium">Selected</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
 
                   {/* Parent Information */}
                   <div className="space-y-4">
@@ -529,10 +614,75 @@ const SatActDiagnosticForm = () => {
                     ) : (
                       'Proceed to Payment'
                     )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
+                        </Button>
+                      </form>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Summary Panel - Right Side */}
+                <div className="lg:col-span-1">
+                  <Card className="sticky top-8">
+                    <CardContent className="p-6">
+                      <h3 className="text-lg font-semibold text-college-blue-500 mb-4">Registration Summary</h3>
+
+                      {/* Selected Packages Summary */}
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">Selected Packages</h4>
+                          {selectedPackages.length > 0 ? (
+                            <div className="space-y-2">
+                              {selectedPackages.map((pkg) => (
+                                <div key={pkg.id} className="text-sm">
+                                  <p className="font-medium">{pkg.name}</p>
+                                  <p className="text-gray-600">${pkg.price.toFixed(2)}</p>
+                                  {pkg.description && (
+                                    <p className="text-xs text-gray-500 mt-1">{pkg.description}</p>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-500">No packages selected</p>
+                          )}
+                        </div>
+
+                        {/* Total Summary */}
+                        <div className="border-t pt-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium">Total Packages:</span>
+                            <span className="font-bold text-college-blue-500">{selectedPackages.length}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-lg">
+                            <span className="font-bold">Total Amount:</span>
+                            <span className="font-bold text-college-blue-500">${formData.total_amount.toFixed(2)}</span>
+                          </div>
+                        </div>
+
+                        {/* Registration Note */}
+                        {selectedPackages.length > 0 && (
+                          <div className="bg-blue-50 p-3 rounded-lg">
+                            <p className="text-sm text-blue-800">
+                              <strong>Note:</strong> You will be registered for {selectedPackages.length} diagnostic package(s).
+                              Each provides comprehensive analysis to help determine the best test fit.
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Package Details */}
+                        {selectedPackages.length > 0 && (
+                          <div className="bg-gray-50 p-3 rounded-lg">
+                            <p className="text-xs text-gray-600">
+                              <strong>What's included:</strong> Full-length proctored diagnostic tests, comprehensive online analysis,
+                              statistical data insights, strengths and weaknesses assessment, and scaled score results.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -546,12 +696,14 @@ const SatActDiagnosticForm = () => {
         onClose={() => setShowPaymentModal(false)}
         onSuccess={handlePaymentSuccess}
         amount={formData.total_amount}
-        description={`SAT/ACT Diagnostic Test - ${formData.packages}`}
+        description={`SAT/ACT Diagnostic Test - ${selectedPackages.length} package(s) selected`}
         metadata={{
           form_type: 'diagnostic_test',
-          session_id: formData.session_id,
+          package_names: selectedPackages.map(pkg => pkg.name).join(','),
           student_name: `${formData.student_first_name} ${formData.student_last_name}`,
-          parent_email: formData.parent_email
+          parent_email: formData.parent_email,
+          package_count: selectedPackages.length,
+          total_packages: selectedPackages.length
         }}
       />
     </div>
