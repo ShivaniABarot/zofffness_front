@@ -293,31 +293,22 @@ const SatActPracticeTestForm = () => {
 
     try {
       // Log the data being sent for debugging
-      console.log('Submitting data to /practice_tests API:', submissionData);
+      console.log('Submitting data to /new_sat_act API:', submissionData);
 
-      // Use URLSearchParams format like the working api.ts implementation
-      const params = new URLSearchParams();
-
-      console.log('Converting to URLSearchParams...');
-
-      // Add all fields from submissionData
-      Object.entries(submissionData).forEach(([key, value]) => {
-        if (key === 'test_type' && Array.isArray(value)) {
-          // Handle test_type array specially with [] notation
-          value.forEach((type: any) => {
-            params.append('test_type[]', type.toString());
-          });
-        } else if (value !== undefined && value !== null) {
-          params.append(key, value.toString());
+      // Use FormData format like the working SatActCourseForm
+      const formData = new FormData();
+      Object.keys(submissionData).forEach(key => {
+        if (submissionData[key] !== undefined && submissionData[key] !== null) {
+          formData.append(key, submissionData[key].toString());
         }
       });
 
-      console.log('Final URLSearchParams string:', params.toString());
+      console.log('FormData prepared for submission');
 
       // Try to submit to real API first
-      const response = await axios.post('https://zoffness.academy/api/practice_tests', params.toString(), {
+      const response = await axios.post('https://zoffness.academy/api/new_sat_act', formData, {
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'multipart/form-data',
           'Accept': 'application/json'
         }
       });
@@ -347,7 +338,7 @@ const SatActPracticeTestForm = () => {
           session_ids: [],
           test_dates: [],
           amount: '0',
-          payment_status: 'Pending',
+          payment_status: 'Success',
           course_type: 'SAT/ACT Practice Test'
         });
 
@@ -365,18 +356,18 @@ const SatActPracticeTestForm = () => {
         });
       }
     } catch (error) {
-      console.error('Error submitting to real API:', error);
+      console.error('Error submitting to /new_sat_act API:', error);
 
       // Log the specific error details for Practice Test
       if (axios.isAxiosError(error) && error.response) {
-        console.error('Practice Test API Error Status:', error.response.status);
-        console.error('Practice Test API Error Data:', error.response.data);
-        console.error('Practice Test Validation Errors:', error.response.data.errors);
+        console.error('new_sat_act API Error Status:', error.response.status);
+        console.error('new_sat_act API Error Data:', error.response.data);
+        console.error('new_sat_act Validation Errors:', error.response.data.errors);
 
         // Also log each validation error individually
         if (error.response.data.errors) {
           Object.entries(error.response.data.errors).forEach(([field, messages]) => {
-            console.error(`Practice Test Validation Error for ${field}:`, messages);
+            console.error(`new_sat_act Validation Error for ${field}:`, messages);
           });
         }
       }
@@ -409,7 +400,7 @@ const SatActPracticeTestForm = () => {
             session_ids: [],
             test_dates: [],
             amount: '0',
-            payment_status: 'Pending',
+            payment_status: 'Success',
             course_type: 'SAT/ACT Practice Test'
           });
 
@@ -522,21 +513,26 @@ const SatActPracticeTestForm = () => {
 
     // Create submission data object for multiple selections
     const submissionData = {
-      // Practice Test API expects original field names (different from other APIs)
-      parent_first_name: formData.parent_first_name,
-      parent_last_name: formData.parent_last_name,
+      // Fix field names to match /new_sat_act API expectations (like SatActCourseForm)
+      parent_firstname: formData.parent_first_name,  // API expects 'parent_firstname'
+      parent_lastname: formData.parent_last_name,    // API expects 'parent_lastname'
       parent_phone: formData.parent_phone,
       parent_email: formData.parent_email,
-      student_first_name: formData.student_first_name,
-      student_last_name: formData.student_last_name,
+      student_firstname: formData.student_first_name, // API expects 'student_firstname'
+      student_lastname: formData.student_last_name,   // API expects 'student_lastname'
       student_email: formData.student_email,
       school: formData.school,
-      session_ids: formData.session_ids,
-      test_types: formData.test_types.map(id => parseInt(id, 10)),
-      test_dates: formData.test_dates,
+      grade: 'High School', // Add grade field (required by some API endpoints)
+      // Required package_name field for /new_sat_act API
+      package_name: 'SAT/ACT Practice Test Package', // Required field for API validation
+      packages: selectedTests.map(test => test.title).join(', '), // Add packages field as well
+      // For practice tests, we need to send test type and date information
+      test_type: formData.test_types.join(','), // Send as comma-separated string
+      date: formData.test_dates.join(','), // Send dates as comma-separated string
+      session_ids: formData.session_ids.join(','), // Send session IDs as comma-separated string
       test_time: '09:00:00',
       location: '510 West Boston Post Road',
-      amount: parseInt(formData.amount, 10),
+      subtotal: parseInt(formData.amount, 10), // API expects 'subtotal' not 'amount'
       payment_status: formData.payment_status,
       course_type: formData.course_type,
       type: 'practice_test'
