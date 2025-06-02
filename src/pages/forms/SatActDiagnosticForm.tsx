@@ -640,6 +640,43 @@ const SatActDiagnosticForm = () => {
                             </p>
                           </div>
                         )}
+
+                        {/* Other Services */}
+                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                          <h4 className="font-medium text-blue-900 mb-3">We Also Provide Other Services</h4>
+                          <div className="space-y-2">
+                            <a
+                              href="/forms/sat-act-course"
+                              className="block text-sm text-blue-700 hover:text-blue-900 hover:underline transition-colors"
+                            >
+                              📚 SAT/ACT Course Registration - Comprehensive test preparation
+                            </a>
+                            <a
+                              href="/forms/sat-act-practice-test"
+                              className="block text-sm text-blue-700 hover:text-blue-900 hover:underline transition-colors"
+                            >
+                              📝 SAT/ACT Practice Test Registration - Practice with real test conditions
+                            </a>
+                            <a
+                              href="/forms/executive-function"
+                              className="block text-sm text-blue-700 hover:text-blue-900 hover:underline transition-colors"
+                            >
+                              🧠 Executive Function Coaching - Develop thinking and learning skills
+                            </a>
+                            <a
+                              href="/forms/college-admissions"
+                              className="block text-sm text-blue-700 hover:text-blue-900 hover:underline transition-colors"
+                            >
+                              🎓 College Admissions Counseling - Professional guidance for college applications
+                            </a>
+                            <a
+                              href="/forms/college-essays"
+                              className="block text-sm text-blue-700 hover:text-blue-900 hover:underline transition-colors"
+                            >
+                              ✍️ College Essays Service - Personalized essay writing guidance
+                            </a>
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
