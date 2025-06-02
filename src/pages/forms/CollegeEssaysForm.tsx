@@ -359,7 +359,7 @@ const CollegeEssaysForm = () => {
 
       <main className="py-32 bg-gray-52">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <h1 className="text-3xl font-bold font-display text-college-blue-500 mb-8 text-center">
               College Essays Service Registration
             </h1>
@@ -370,8 +370,11 @@ const CollegeEssaysForm = () => {
                 onRegisterAnother={() => setIsSubmitted(false)}
               />
             ) : (
-              <Card>
-                <CardContent className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Form Section - Left Side */}
+                <div className="lg:col-span-2">
+                  <Card>
+                    <CardContent className="p-6">
                   <form className="space-y-8" onSubmit={handleSubmit}>
                     {/* Validation Errors */}
                     {Object.keys(validationErrors).length > 0 && (
@@ -559,9 +562,76 @@ const CollegeEssaysForm = () => {
                       'Proceed to Payment'
                     )}
                   </Button>
-                </form>
-              </CardContent>
-            </Card>
+                      </form>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Summary Panel - Right Side */}
+                <div className="lg:col-span-1">
+                  <Card className="sticky top-8">
+                    <CardContent className="p-6">
+                      <h3 className="text-lg font-semibold text-college-blue-500 mb-4">Registration Summary</h3>
+
+                      {/* Selected Package Summary */}
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">Selected Package</h4>
+                          {formData.packages ? (
+                            <div className="space-y-2">
+                              <div className="text-sm">
+                                <p className="font-medium">
+                                  {packages.find(p => p.id.toString() === formData.packages)?.name || 'Package'}
+                                </p>
+                                <p className="text-gray-600">${formData.sessions.toLocaleString()}</p>
+                                {packages.find(p => p.id.toString() === formData.packages)?.description && (
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    {packages.find(p => p.id.toString() === formData.packages)?.description}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-500">No package selected</p>
+                          )}
+                        </div>
+
+                        {/* Total Summary */}
+                        <div className="border-t pt-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium">Total Packages:</span>
+                            <span className="font-bold text-college-blue-500">{formData.packages ? 1 : 0}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-lg">
+                            <span className="font-bold">Total Amount:</span>
+                            <span className="font-bold text-college-blue-500">${formData.sessions.toLocaleString()}</span>
+                          </div>
+                        </div>
+
+                        {/* Registration Note */}
+                        {formData.packages && (
+                          <div className="bg-blue-50 p-3 rounded-lg">
+                            <p className="text-sm text-blue-800">
+                              <strong>Note:</strong> You will be registered for College Essays Service.
+                              Personalized guidance through the college essay writing process.
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Package Details */}
+                        {formData.packages && (
+                          <div className="bg-gray-50 p-3 rounded-lg">
+                            <p className="text-xs text-gray-600">
+                              <strong>What's included:</strong> Essay topic development, writing guidance,
+                              editing support, and personalized feedback to showcase your unique voice.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
             )}
           </div>
         </div>

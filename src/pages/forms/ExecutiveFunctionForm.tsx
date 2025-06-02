@@ -391,42 +391,22 @@ const ExecutiveFunctionForm = () => {
 
       <main className="py-32 bg-gray-52">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <h1 className="text-3xl font-bold font-display text-college-blue-500 mb-8 text-center">
               Executive Function Coaching Registration
             </h1>
 
             {isSubmitted ? (
-              <Card className="border-green-500">
-                <CardContent className="p-6">
-                  <div className="text-center py-8 space-y-4">
-                    <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <h2 className="text-2xl font-bold text-green-600">Registration Successful!</h2>
-                    <p className="text-gray-600 font-medium">
-                      Registration successful!
-                    </p>
-                    <p className="text-gray-600">
-                      Thank you for registering for Executive Function Coaching. We have received your information.
-                    </p>
-                    <p className="text-gray-600">
-                      You will receive a confirmation email shortly with additional details.
-                    </p>
-                    <Button
-                      className="mt-4 bg-college-blue-500 hover:bg-college-blue-600"
-                      onClick={() => setIsSubmitted(false)}
-                    >
-                      Register Another Student
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <SuccessScreen
+                serviceName="Executive Function Coaching"
+                onRegisterAnother={() => setIsSubmitted(false)}
+              />
             ) : (
-              <Card>
-                <CardContent className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Form Section - Left Side */}
+                <div className="lg:col-span-2">
+                  <Card>
+                    <CardContent className="p-6">
                   <form className="space-y-8" onSubmit={handleSubmit}>
                     {/* Validation Errors */}
                     {Object.keys(validationErrors).length > 0 && (
@@ -640,9 +620,78 @@ const ExecutiveFunctionForm = () => {
                       'Proceed to Payment'
                     )}
                   </Button>
-                </form>
-              </CardContent>
-            </Card>
+                      </form>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Summary Panel - Right Side */}
+                <div className="lg:col-span-1">
+                  <Card className="sticky top-8">
+                    <CardContent className="p-6">
+                      <h3 className="text-lg font-semibold text-college-blue-500 mb-4">Registration Summary</h3>
+
+                      {/* Selected Package Summary */}
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">Selected Package</h4>
+                          {formData.package_name ? (
+                            <div className="space-y-2">
+                              <div className="text-sm">
+                                <p className="font-medium">
+                                  {packages.find(p => p.id.toString() === formData.package_name)?.name ||
+                                   (formData.package_name === 'five-sessions' ? 'Five individual 30-minute sessions package' :
+                                    formData.package_name === 'individual' ? 'Individualized 30 minute sessions' : 'Package')}
+                                </p>
+                                <p className="text-gray-600">${formData.amount.toLocaleString()}</p>
+                                {packages.find(p => p.id.toString() === formData.package_name)?.description && (
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    {packages.find(p => p.id.toString() === formData.package_name)?.description}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-500">No package selected</p>
+                          )}
+                        </div>
+
+                        {/* Total Summary */}
+                        <div className="border-t pt-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium">Total Packages:</span>
+                            <span className="font-bold text-college-blue-500">{formData.package_name ? 1 : 0}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-lg">
+                            <span className="font-bold">Total Amount:</span>
+                            <span className="font-bold text-college-blue-500">${formData.amount.toLocaleString()}</span>
+                          </div>
+                        </div>
+
+                        {/* Registration Note */}
+                        {formData.package_name && (
+                          <div className="bg-blue-50 p-3 rounded-lg">
+                            <p className="text-sm text-blue-800">
+                              <strong>Note:</strong> You will be registered for Executive Function Coaching.
+                              Work with our dedicated specialist to develop lifelong thinking and learning skills.
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Package Details */}
+                        {formData.package_name && (
+                          <div className="bg-gray-50 p-3 rounded-lg">
+                            <p className="text-xs text-gray-600">
+                              <strong>What's included:</strong> Personalized lesson plans, cognitive skills development,
+                              emotional regulation training, and take-home tools for daily practice.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
             )}
           </div>
         </div>
