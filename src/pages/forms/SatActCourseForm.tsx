@@ -5,7 +5,7 @@ import { Button } from '../../components/ui/button';
 import { Card, CardContent } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
+import { Checkbox } from '../../components/ui/checkbox';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
 import axios from 'axios';
@@ -49,7 +49,12 @@ const SatActCourseForm = () => {
         }
 
         if (response.data.success && Array.isArray(response.data.data)) {
-          setPackages(response.data.data);
+          // Convert price strings to numbers to ensure proper calculation
+          const packagesWithNumericPrices = response.data.data.map((pkg: any) => ({
+            ...pkg,
+            price: typeof pkg.price === 'string' ? parseFloat(pkg.price) : pkg.price
+          }));
+          setPackages(packagesWithNumericPrices);
 
           // No longer setting a default package
           // We want users to explicitly select a package
@@ -93,11 +98,14 @@ const SatActCourseForm = () => {
     student_email: '',
     school: '',
     grade: '',
-    packages: '',
+    packages: [] as string[],
     total_amount: 0,
     payment_status: 'Pending',
     course_type: 'SAT/ACT Course'
   });
+
+  // State for selected package (single selection)
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -107,26 +115,19 @@ const SatActCourseForm = () => {
     }));
   };
 
-  const handleRadioChange = (value: string) => {
-    // Find the selected package from the packages array
-    const selectedPackage = packages.find(pkg => pkg.id.toString() === value);
+  // Handle package selection (single selection)
+  const handlePackageChange = (packageId: string) => {
+    const packageToSelect = packages.find(pkg => pkg.id.toString() === packageId);
+    if (!packageToSelect) return;
 
-    // If package is found, update the form data with its price
-    if (selectedPackage) {
-      setFormData(prev => ({
-        ...prev,
-        packages: value,
-        total_amount: selectedPackage.price
-      }));
-    } else {
-      // Fallback to default if package not found
-      console.warn(`Package with ID ${value} not found`);
-      setFormData(prev => ({
-        ...prev,
-        packages: value,
-        total_amount: 5900 // Default fallback price
-      }));
-    }
+    // Set the selected package
+    setSelectedPackage(packageToSelect);
+
+    setFormData(prev => ({
+      ...prev,
+      packages: [packageToSelect.name],
+      total_amount: packageToSelect.price
+    }));
   };
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
@@ -194,11 +195,14 @@ const SatActCourseForm = () => {
           student_email: '',
           school: '',
           grade: '',
-          packages: '',
+          packages: [],
           total_amount: 0,
           payment_status: 'Pending',
           course_type: 'SAT/ACT Course'
         });
+
+        // Reset selected package
+        setSelectedPackage(null);
 
         // Clear pending submission data
         setPendingSubmissionData(null);
@@ -251,11 +255,14 @@ const SatActCourseForm = () => {
             student_email: '',
             school: '',
             grade: '',
-            packages: '',
+            packages: [],
             total_amount: 0,
             payment_status: 'Pending',
             course_type: 'SAT/ACT Course'
           });
+
+          // Reset selected package
+          setSelectedPackage(null);
 
           // Clear pending submission data
           setPendingSubmissionData(null);
@@ -314,7 +321,7 @@ const SatActCourseForm = () => {
     e.preventDefault();
 
     // Validate required fields
-    if (!formData.packages || formData.total_amount <= 0) {
+    if (!selectedPackage || formData.total_amount <= 0) {
       toast({
         title: 'Validation Error',
         description: 'Please select a package before proceeding.',
@@ -323,12 +330,9 @@ const SatActCourseForm = () => {
       return;
     }
 
-    // Find the selected package from the packages array
-    const selectedPackage = packages.find(pkg => pkg.id.toString() === formData.packages);
-
-    // Get amount and package name from the selected package
-    const amount = selectedPackage ? selectedPackage.price : formData.total_amount;
-    const packageName = selectedPackage ? selectedPackage.name : 'SAT/ACT Course Package';
+    // Get amount and package name from selected package
+    const amount = formData.total_amount;
+    const packageName = selectedPackage.name;
 
     // Create a new submission object with the field names expected by the API
     const submissionData = {
@@ -343,7 +347,7 @@ const SatActCourseForm = () => {
       school: formData.school,
       grade: formData.grade,
       package_name: packageName || 'SAT/ACT Course Package',  // Ensure package_name is never empty
-      packages: formData.packages, // Add packages field as well
+      packages: formData.packages.join(', '), // Add packages field as well
       subtotal: amount,
       payment_status: formData.payment_status,
       course_type: formData.course_type,
@@ -365,7 +369,7 @@ const SatActCourseForm = () => {
 
       <main className="py-32 bg-gray-52">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <h1 className="text-3xl font-bold font-display text-college-blue-500 mb-8 text-center">
               SAT/ACT Course Registration
             </h1>
@@ -376,9 +380,12 @@ const SatActCourseForm = () => {
                 onRegisterAnother={() => setIsSubmitted(false)}
               />
             ) : (
-              <Card>
-                <CardContent className="p-6">
-                  <form className="space-y-8" onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Form Section - Left Side */}
+                <div className="lg:col-span-2">
+                  <Card>
+                    <CardContent className="p-6">
+                      <form className="space-y-8" onSubmit={handleSubmit}>
                   {/* Package Selection */}
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-college-blue-500">Package Selection</h2>
@@ -390,53 +397,88 @@ const SatActCourseForm = () => {
                       <p className="text-sm font-semibold text-college-blue-500 mt-2">ACT/SAT Courses</p>
                     </div>
 
-                    {isLoadingPackages ? (
-                      <div className="flex items-center py-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-college-blue-500 mr-2" />
-                        <span className="text-sm text-college-blue-500">Loading package options...</span>
-                      </div>
-                    ) : packages.length > 0 ? (
-                      <RadioGroup
-                        onValueChange={handleRadioChange}
-                        value={formData.packages}
-                      >
-                        {packages.map(pkg => (
-                          <div className="border rounded-lg p-6 mb-4 hover:border-college-blue-300 transition-colors" key={pkg.id}>
-                            <div className="flex items-start">
-                              <RadioGroupItem value={pkg.id.toString()} id={`package-${pkg.id}`} className="mt-1" />
-                              <div className="ml-3">
-                                <Label htmlFor={`package-${pkg.id}`} className="text-lg font-bold">
-                                  {pkg.name} - ${pkg.price.toLocaleString()}
+                        {isLoadingPackages ? (
+                          <div className="flex items-center py-2">
+                            <Loader2 className="h-4 w-4 animate-spin text-college-blue-500 mr-2" />
+                            <span className="text-sm text-college-blue-500">Loading package options...</span>
+                          </div>
+                        ) : packages.length > 0 ? (
+                          <div className="space-y-4">
+                            <Label>Select Course Package *</Label>
+                            <div className="space-y-3">
+                              {packages.map(pkg => (
+                                <div key={pkg.id} className="flex items-start space-x-3 p-4 border rounded-lg hover:border-college-blue-300 transition-colors">
+                                  <input
+                                    type="radio"
+                                    id={pkg.id.toString()}
+                                    name="course_package"
+                                    checked={selectedPackage?.id === pkg.id}
+                                    onChange={() => handlePackageChange(pkg.id.toString())}
+                                    className="mt-1"
+                                  />
+                                  <div className="flex-1">
+                                    <Label htmlFor={pkg.id.toString()} className="text-base font-medium cursor-pointer">
+                                      {pkg.name} - ${pkg.price.toLocaleString()}
+                                    </Label>
+                                    {pkg.description && (
+                                      <p className="text-sm text-gray-600 mt-1">{pkg.description}</p>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          // Fallback to hardcoded packages if API fails
+                          <div className="space-y-4">
+                            <Label>Select Course Package(s) *</Label>
+                            <div className="space-y-3">
+                              <div className="flex items-start space-x-3 p-4 border rounded-lg hover:border-college-blue-300 transition-colors">
+                                <Checkbox id="20sessions" />
+                                <Label htmlFor="20sessions" className="text-base font-medium cursor-pointer">
+                                  20 session package - $5,900
                                 </Label>
-                                {pkg.description && (
-                                  <p className="text-gray-700 mt-2">{pkg.description}</p>
-                                )}
+                              </div>
+                              <div className="flex items-start space-x-3 p-4 border rounded-lg hover:border-college-blue-300 transition-colors">
+                                <Checkbox id="15sessions" />
+                                <Label htmlFor="15sessions" className="text-base font-medium cursor-pointer">
+                                  15 session package - $4,425
+                                </Label>
+                              </div>
+                              <div className="flex items-start space-x-3 p-4 border rounded-lg hover:border-college-blue-300 transition-colors">
+                                <Checkbox id="10sessions" />
+                                <Label htmlFor="10sessions" className="text-base font-medium cursor-pointer">
+                                  10 session package - $2,950
+                                </Label>
+                              </div>
+                              <div className="flex items-start space-x-3 p-4 border rounded-lg hover:border-college-blue-300 transition-colors">
+                                <Checkbox id="5sessions" />
+                                <Label htmlFor="5sessions" className="text-base font-medium cursor-pointer">
+                                  5 session package - $1,475
+                                </Label>
                               </div>
                             </div>
                           </div>
-                        ))}
-                      </RadioGroup>
-                    ) : (
-                      // Fallback to hardcoded packages if API fails
-                      <RadioGroup onValueChange={handleRadioChange}>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="20sessions" id="20sessions" />
-                          <Label htmlFor="20sessions">20 session package - $5,900</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="15sessions" id="15sessions" />
-                          <Label htmlFor="15sessions">15 session package - $4,425</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="10sessions" id="10sessions" />
-                          <Label htmlFor="10sessions">10 session package - $2,950</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="5sessions" id="5sessions" />
-                          <Label htmlFor="5sessions">5 session package - $1,475</Label>
-                        </div>
-                      </RadioGroup>
-                    )}
+                        )}
+
+                        {/* Selected Package Display */}
+                        {selectedPackage && (
+                          <div className="space-y-2 mt-4">
+                            <Label>Selected Package:</Label>
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
+                                <div>
+                                  <p className="font-medium text-sm">{selectedPackage.name}</p>
+                                  <p className="text-sm text-gray-600">${selectedPackage.price.toLocaleString()}</p>
+                                  {selectedPackage.description && (
+                                    <p className="text-xs text-gray-500 mt-1">{selectedPackage.description}</p>
+                                  )}
+                                </div>
+                                <span className="text-green-600 text-sm font-medium">Selected</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                   </div>
 
                   {/* Parent Information */}
@@ -562,10 +604,73 @@ const SatActCourseForm = () => {
                     ) : (
                       'Proceed to Payment'
                     )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
+                        </Button>
+                      </form>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Summary Panel - Right Side */}
+                <div className="lg:col-span-1">
+                  <Card className="sticky top-8">
+                    <CardContent className="p-6">
+                      <h3 className="text-lg font-semibold text-college-blue-500 mb-4">Registration Summary</h3>
+
+                      {/* Selected Package Summary */}
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">Selected Package</h4>
+                          {selectedPackage ? (
+                            <div className="space-y-2">
+                              <div className="text-sm">
+                                <p className="font-medium">{selectedPackage.name}</p>
+                                <p className="text-gray-600">${selectedPackage.price.toLocaleString()}</p>
+                                {selectedPackage.description && (
+                                  <p className="text-xs text-gray-500 mt-1">{selectedPackage.description}</p>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-500">No package selected</p>
+                          )}
+                        </div>
+
+                        {/* Total Summary */}
+                        <div className="border-t pt-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium">Total Packages:</span>
+                            <span className="font-bold text-college-blue-500">{selectedPackage ? 1 : 0}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-lg">
+                            <span className="font-bold">Total Amount:</span>
+                            <span className="font-bold text-college-blue-500">${formData.total_amount.toLocaleString()}</span>
+                          </div>
+                        </div>
+
+                        {/* Registration Note */}
+                        {selectedPackage && (
+                          <div className="bg-blue-50 p-3 rounded-lg">
+                            <p className="text-sm text-blue-800">
+                              <strong>Note:</strong> You will be registered for 1 course package.
+                              Each session is $295/hour with a highly qualified SAT/ACT instructor.
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Course Details */}
+                        {selectedPackage && (
+                          <div className="bg-gray-50 p-3 rounded-lg">
+                            <p className="text-xs text-gray-600">
+                              <strong>What's included:</strong> Individualized SAT/ACT instruction (in-person or remote),
+                              personalized approach to each student's specific needs, structured learning plan, and progress tracking.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -579,12 +684,14 @@ const SatActCourseForm = () => {
         onClose={() => setShowPaymentModal(false)}
         onSuccess={handlePaymentSuccess}
         amount={formData.total_amount}
-        description={`SAT/ACT Course - ${packages.find(pkg => pkg.id.toString() === formData.packages)?.name || 'Package'}`}
+        description={`SAT/ACT Course - ${selectedPackage ? '1 package' : '0 packages'} selected`}
         metadata={{
           form_type: 'sat_act_course',
-          package_id: formData.packages,
+          package_names: selectedPackage ? selectedPackage.name : '',
           student_name: `${formData.student_first_name} ${formData.student_last_name}`,
-          parent_email: formData.parent_email
+          parent_email: formData.parent_email,
+          package_count: selectedPackage ? 1 : 0,
+          total_packages: selectedPackage ? 1 : 0
         }}
       />
     </div>
