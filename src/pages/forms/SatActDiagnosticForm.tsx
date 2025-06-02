@@ -5,8 +5,7 @@ import { Button } from '../../components/ui/button';
 import { Card, CardContent } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
-import { Checkbox } from '../../components/ui/checkbox';
+
 import { Loader2 } from 'lucide-react';
 import { useToast } from '../../components/ui/use-toast';
 import axios from 'axios';
@@ -37,7 +36,6 @@ const SatActDiagnosticForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [isLoadingSessions, setIsLoadingSessions] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [pendingSubmissionData, setPendingSubmissionData] = useState<any>(null);
   const { toast } = useToast();
@@ -77,8 +75,6 @@ const SatActDiagnosticForm = () => {
 
         // Fall back to mock API
         await useMockSessions();
-      } finally {
-        setIsLoadingSessions(false);
       }
     };
 
@@ -138,8 +134,8 @@ const SatActDiagnosticForm = () => {
     }
   ];
 
-  // State for selected packages
-  const [selectedPackages, setSelectedPackages] = useState<Package[]>([]);
+  // State for selected package (single selection)
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -149,52 +145,19 @@ const SatActDiagnosticForm = () => {
     }));
   };
 
-  const handleRadioChange = (value: string) => {
-    if (!value) return; // Don't update if no value is provided
+  // Handle package selection (single selection)
+  const handlePackageChange = (packageId: string) => {
+    const packageToSelect = availablePackages.find(pkg => pkg.id === packageId);
+    if (!packageToSelect) return;
 
-    // Find the selected session from the API
-    const selectedSession = sessions.find(session => session.id.toString() === value);
+    // Set the selected package
+    setSelectedPackage(packageToSelect);
 
-    if (selectedSession) {
-      setFormData(prev => ({
-        ...prev,
-        session_id: selectedSession.id.toString(),
-        total_amount: parseFloat(selectedSession.price_per_slot) + calculatePackageTotal()
-      }));
-    }
-  };
-
-  // Calculate total from selected packages
-  const calculatePackageTotal = () => {
-    return selectedPackages.reduce((total, pkg) => total + pkg.price, 0);
-  };
-
-  // Handle package selection
-  const handlePackageChange = (packageId: string, checked: boolean) => {
-    const packageToToggle = availablePackages.find(pkg => pkg.id === packageId);
-    if (!packageToToggle) return;
-
-    if (checked) {
-      // Add package
-      const newSelectedPackages = [...selectedPackages, packageToToggle];
-      setSelectedPackages(newSelectedPackages);
-
-      setFormData(prev => ({
-        ...prev,
-        packages: [...prev.packages, packageToToggle.name],
-        total_amount: prev.total_amount + packageToToggle.price
-      }));
-    } else {
-      // Remove package
-      const newSelectedPackages = selectedPackages.filter(pkg => pkg.id !== packageId);
-      setSelectedPackages(newSelectedPackages);
-
-      setFormData(prev => ({
-        ...prev,
-        packages: prev.packages.filter(name => name !== packageToToggle.name),
-        total_amount: prev.total_amount - packageToToggle.price
-      }));
-    }
+    setFormData(prev => ({
+      ...prev,
+      packages: [packageToSelect.name],
+      total_amount: packageToSelect.price + (formData.session_id ? parseFloat(sessions.find(s => s.id.toString() === formData.session_id)?.price_per_slot || '0') : 0)
+    }));
   };
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
@@ -266,8 +229,8 @@ const SatActDiagnosticForm = () => {
           payment_status: 'Pending'
         });
 
-        // Reset selected packages
-        setSelectedPackages([]);
+        // Reset selected package
+        setSelectedPackage(null);
 
         // Clear pending submission data
         setPendingSubmissionData(null);
@@ -326,8 +289,8 @@ const SatActDiagnosticForm = () => {
             payment_status: 'Pending'
           });
 
-          // Reset selected packages
-          setSelectedPackages([]);
+          // Reset selected package
+          setSelectedPackage(null);
 
           // Clear pending submission data
           setPendingSubmissionData(null);
@@ -388,10 +351,10 @@ const SatActDiagnosticForm = () => {
     e.preventDefault();
 
     // Validate required fields
-    if (selectedPackages.length === 0 || formData.total_amount <= 0) {
+    if (!selectedPackage || formData.total_amount <= 0) {
       toast({
         title: 'Validation Error',
-        description: 'Please select at least one package before proceeding.',
+        description: 'Please select a package before proceeding.',
         variant: 'destructive',
       });
       return;
@@ -455,14 +418,17 @@ const SatActDiagnosticForm = () => {
                           </div>
 
                           <div className="space-y-4">
-                            <Label>Select Diagnostic Test Package(s) *</Label>
+                            <Label>Select Diagnostic Test Package *</Label>
                             <div className="space-y-3">
                               {availablePackages.map((pkg) => (
                                 <div key={pkg.id} className="flex items-start space-x-3 p-4 border rounded-lg hover:border-college-blue-300 transition-colors">
-                                  <Checkbox
+                                  <input
+                                    type="radio"
                                     id={pkg.id}
-                                    checked={selectedPackages.some(selected => selected.id === pkg.id)}
-                                    onCheckedChange={(checked) => handlePackageChange(pkg.id, checked as boolean)}
+                                    name="diagnostic_package"
+                                    checked={selectedPackage?.id === pkg.id}
+                                    onChange={() => handlePackageChange(pkg.id)}
+                                    className="mt-1"
                                   />
                                   <div className="flex-1">
                                     <Label htmlFor={pkg.id} className="text-base font-medium cursor-pointer">
@@ -477,23 +443,21 @@ const SatActDiagnosticForm = () => {
                             </div>
                           </div>
 
-                          {/* Selected Packages Display */}
-                          {selectedPackages.length > 0 && (
+                          {/* Selected Package Display */}
+                          {selectedPackage && (
                             <div className="space-y-2">
-                              <Label>Selected Packages:</Label>
+                              <Label>Selected Package:</Label>
                               <div className="space-y-2">
-                                {selectedPackages.map((pkg) => (
-                                  <div key={pkg.id} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
-                                    <div>
-                                      <p className="font-medium text-sm">{pkg.name}</p>
-                                      <p className="text-sm text-gray-600">${pkg.price.toFixed(2)}</p>
-                                      {pkg.description && (
-                                        <p className="text-xs text-gray-500 mt-1">{pkg.description}</p>
-                                      )}
-                                    </div>
-                                    <span className="text-green-600 text-sm font-medium">Selected</span>
+                                <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
+                                  <div>
+                                    <p className="font-medium text-sm">{selectedPackage.name}</p>
+                                    <p className="text-sm text-gray-600">${selectedPackage.price.toFixed(2)}</p>
+                                    {selectedPackage.description && (
+                                      <p className="text-xs text-gray-500 mt-1">{selectedPackage.description}</p>
+                                    )}
                                   </div>
-                                ))}
+                                  <span className="text-green-600 text-sm font-medium">Selected</span>
+                                </div>
                               </div>
                             </div>
                           )}
@@ -626,24 +590,22 @@ const SatActDiagnosticForm = () => {
                     <CardContent className="p-6">
                       <h3 className="text-lg font-semibold text-college-blue-500 mb-4">Registration Summary</h3>
 
-                      {/* Selected Packages Summary */}
+                      {/* Selected Package Summary */}
                       <div className="space-y-4">
                         <div>
-                          <h4 className="font-medium text-gray-900 mb-2">Selected Packages</h4>
-                          {selectedPackages.length > 0 ? (
+                          <h4 className="font-medium text-gray-900 mb-2">Selected Package</h4>
+                          {selectedPackage ? (
                             <div className="space-y-2">
-                              {selectedPackages.map((pkg) => (
-                                <div key={pkg.id} className="text-sm">
-                                  <p className="font-medium">{pkg.name}</p>
-                                  <p className="text-gray-600">${pkg.price.toFixed(2)}</p>
-                                  {pkg.description && (
-                                    <p className="text-xs text-gray-500 mt-1">{pkg.description}</p>
-                                  )}
-                                </div>
-                              ))}
+                              <div className="text-sm">
+                                <p className="font-medium">{selectedPackage.name}</p>
+                                <p className="text-gray-600">${selectedPackage.price.toFixed(2)}</p>
+                                {selectedPackage.description && (
+                                  <p className="text-xs text-gray-500 mt-1">{selectedPackage.description}</p>
+                                )}
+                              </div>
                             </div>
                           ) : (
-                            <p className="text-sm text-gray-500">No packages selected</p>
+                            <p className="text-sm text-gray-500">No package selected</p>
                           )}
                         </div>
 
@@ -651,7 +613,7 @@ const SatActDiagnosticForm = () => {
                         <div className="border-t pt-4">
                           <div className="flex justify-between items-center mb-2">
                             <span className="font-medium">Total Packages:</span>
-                            <span className="font-bold text-college-blue-500">{selectedPackages.length}</span>
+                            <span className="font-bold text-college-blue-500">{selectedPackage ? 1 : 0}</span>
                           </div>
                           <div className="flex justify-between items-center text-lg">
                             <span className="font-bold">Total Amount:</span>
@@ -660,17 +622,17 @@ const SatActDiagnosticForm = () => {
                         </div>
 
                         {/* Registration Note */}
-                        {selectedPackages.length > 0 && (
+                        {selectedPackage && (
                           <div className="bg-blue-50 p-3 rounded-lg">
                             <p className="text-sm text-blue-800">
-                              <strong>Note:</strong> You will be registered for {selectedPackages.length} diagnostic package(s).
+                              <strong>Note:</strong> You will be registered for 1 diagnostic package.
                               Each provides comprehensive analysis to help determine the best test fit.
                             </p>
                           </div>
                         )}
 
                         {/* Package Details */}
-                        {selectedPackages.length > 0 && (
+                        {selectedPackage && (
                           <div className="bg-gray-50 p-3 rounded-lg">
                             <p className="text-xs text-gray-600">
                               <strong>What's included:</strong> Full-length proctored diagnostic tests, comprehensive online analysis,
@@ -696,14 +658,14 @@ const SatActDiagnosticForm = () => {
         onClose={() => setShowPaymentModal(false)}
         onSuccess={handlePaymentSuccess}
         amount={formData.total_amount}
-        description={`SAT/ACT Diagnostic Test - ${selectedPackages.length} package(s) selected`}
+        description={`SAT/ACT Diagnostic Test - ${selectedPackage ? '1 package' : '0 packages'} selected`}
         metadata={{
           form_type: 'diagnostic_test',
-          package_names: selectedPackages.map(pkg => pkg.name).join(','),
+          package_names: selectedPackage ? selectedPackage.name : '',
           student_name: `${formData.student_first_name} ${formData.student_last_name}`,
           parent_email: formData.parent_email,
-          package_count: selectedPackages.length,
-          total_packages: selectedPackages.length
+          package_count: selectedPackage ? 1 : 0,
+          total_packages: selectedPackage ? 1 : 0
         }}
       />
     </div>
