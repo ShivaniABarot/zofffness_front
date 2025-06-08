@@ -105,7 +105,7 @@ const App = () => (
           <Route path="/mentorship/schedule" element={<MentorshipConsultation />} />
           <Route path="/essays/services" element={<EssayServices />} />
           <Route path="/consultation/schedule" element={<GeneralConsultation />} />
-          <Route path="/forms/SatActCourseForm" element={<SatActCourseForm />} />
+          <Route path="/forms/sat-act-course" element={<SatActCourseForm />} />
           <Route path="/forms/sat-act-diagnostic" element={<SatActDiagnosticForm />} />
           <Route path="/forms/sat-act-practice-test" element={<SatActPracticeTestForm />} />
           <Route path="/forms/college-admissions" element={<CollegeAdmissionsForm />} />

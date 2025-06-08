@@ -400,6 +400,7 @@ const ExecutiveFunctionForm = () => {
               <SuccessScreen
                 serviceName="Executive Function Coaching"
                 onRegisterAnother={() => setIsSubmitted(false)}
+                serviceType="executive_function"
               />
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -688,39 +689,62 @@ const ExecutiveFunctionForm = () => {
                           </div>
                         )}
 
-                        {/* Other Services */}
-                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                          <h4 className="font-medium text-blue-900 mb-3">We Also Provide Other Services</h4>
-                          <div className="space-y-2">
+                        {/* Complementary Test Prep Services */}
+                        <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-5 rounded-xl border border-purple-200 shadow-sm">
+                          <h4 className="font-semibold text-purple-900 mb-4 flex items-center">
+                            <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                            Complementary Test Prep Services
+                          </h4>
+                          <div className="space-y-3">
                             <a
                               href="/forms/sat-act-diagnostic"
-                              className="block text-sm text-blue-700 hover:text-blue-900 hover:underline transition-colors"
+                              className="group flex items-start p-3 bg-white rounded-lg border border-purple-100 hover:border-purple-300 hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
                             >
-                              🔍 SAT/ACT Diagnostic Test - Determine which test is the best fit
+                              <div className="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-purple-200 transition-colors">
+                                <span className="text-lg">🔍</span>
+                              </div>
+                              <div>
+                                <div className="font-medium text-purple-900 group-hover:text-purple-700 transition-colors">
+                                  SAT/ACT Diagnostic Test
+                                </div>
+                                <div className="text-sm text-gray-600 mt-1">
+                                  Determine which test is the best fit
+                                </div>
+                              </div>
                             </a>
                             <a
                               href="/forms/sat-act-course"
-                              className="block text-sm text-blue-700 hover:text-blue-900 hover:underline transition-colors"
+                              className="group flex items-start p-3 bg-white rounded-lg border border-purple-100 hover:border-purple-300 hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
                             >
-                              📚 SAT/ACT Course Registration - Comprehensive test preparation
+                              <div className="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-purple-200 transition-colors">
+                                <span className="text-lg">📚</span>
+                              </div>
+                              <div>
+                                <div className="font-medium text-purple-900 group-hover:text-purple-700 transition-colors">
+                                  SAT/ACT Course Registration
+                                </div>
+                                <div className="text-sm text-gray-600 mt-1">
+                                  Comprehensive test preparation
+                                </div>
+                              </div>
                             </a>
                             <a
                               href="/forms/sat-act-practice-test"
-                              className="block text-sm text-blue-700 hover:text-blue-900 hover:underline transition-colors"
+                              className="group flex items-start p-3 bg-white rounded-lg border border-purple-100 hover:border-purple-300 hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
                             >
-                              📝 SAT/ACT Practice Test Registration - Practice with real test conditions
-                            </a>
-                            <a
-                              href="/forms/college-admissions"
-                              className="block text-sm text-blue-700 hover:text-blue-900 hover:underline transition-colors"
-                            >
-                              🎓 College Admissions Counseling - Professional guidance for college applications
-                            </a>
-                            <a
-                              href="/forms/college-essays"
-                              className="block text-sm text-blue-700 hover:text-blue-900 hover:underline transition-colors"
-                            >
-                              ✍️ College Essays Service - Personalized essay writing guidance
+                              <div className="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-purple-200 transition-colors">
+                                <span className="text-lg">📝</span>
+                              </div>
+                              <div>
+                                <div className="font-medium text-purple-900 group-hover:text-purple-700 transition-colors">
+                                  SAT/ACT Practice Test Registration
+                                </div>
+                                <div className="text-sm text-gray-600 mt-1">
+                                  Practice with real test conditions
+                                </div>
+                              </div>
                             </a>
                           </div>
                         </div>

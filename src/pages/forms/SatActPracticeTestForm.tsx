@@ -562,6 +562,7 @@ const SatActPracticeTestForm = () => {
               <SuccessScreen
                 serviceName="SAT/ACT Practice Test"
                 onRegisterAnother={() => setIsSubmitted(false)}
+                serviceType="sat_act_practice_test"
               />
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -919,6 +920,50 @@ const SatActPracticeTestForm = () => {
                             </p>
                           </div>
                         )}
+
+                        {/* Related SAT/ACT Services */}
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 rounded-xl border border-blue-200 shadow-sm">
+                          <h4 className="font-semibold text-blue-900 mb-4 flex items-center">
+                            <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            Related SAT/ACT Services
+                          </h4>
+                          <div className="space-y-3">
+                            <a
+                              href="/forms/sat-act-diagnostic"
+                              className="group flex items-start p-3 bg-white rounded-lg border border-blue-100 hover:border-blue-300 hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
+                            >
+                              <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-blue-200 transition-colors">
+                                <span className="text-lg">🔍</span>
+                              </div>
+                              <div>
+                                <div className="font-medium text-blue-900 group-hover:text-blue-700 transition-colors">
+                                  SAT/ACT Diagnostic Test
+                                </div>
+                                <div className="text-sm text-gray-600 mt-1">
+                                  Determine which test is the best fit
+                                </div>
+                              </div>
+                            </a>
+                            <a
+                              href="/forms/sat-act-course"
+                              className="group flex items-start p-3 bg-white rounded-lg border border-blue-100 hover:border-blue-300 hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
+                            >
+                              <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-blue-200 transition-colors">
+                                <span className="text-lg">📚</span>
+                              </div>
+                              <div>
+                                <div className="font-medium text-blue-900 group-hover:text-blue-700 transition-colors">
+                                  SAT/ACT Course Registration
+                                </div>
+                                <div className="text-sm text-gray-600 mt-1">
+                                  Comprehensive test preparation
+                                </div>
+                              </div>
+                            </a>
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

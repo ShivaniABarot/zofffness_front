@@ -23,7 +23,7 @@ const ServiceSelection = () => {
       description: 'Comprehensive test preparation with practice tests, strategies, and personalized coaching.',
       icon: BookOpen,
       path: '/programs/sat-act-preparation',
-      formPath: '/forms/SatActCourseForm',
+      formPath: '/forms/sat-act-course',
       registerText: 'Start Your Test Prep Journey'
     },
     {
