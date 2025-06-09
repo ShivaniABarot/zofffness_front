@@ -53,6 +53,12 @@ import CollegeAdmissionsForm from "./pages/forms/CollegeAdmissionsForm";
 import CollegeEssaysForm from "./pages/forms/CollegeEssaysForm";
 import ExecutiveFunctionForm from "./pages/forms/ExecutiveFunctionForm";
 
+// Authentication
+import { AuthProvider } from "./contexts/AuthContext";
+import LoginPage from "./pages/auth/LoginPage";
+import SignupPage from "./pages/auth/SignupPage";
+import DashboardPage from "./pages/Dashboard";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -61,8 +67,9 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <ScrollToTop />
-        <Routes>
+        <AuthProvider>
+          <ScrollToTop />
+          <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/college-essays" element={<CollegeEssays />} />
           <Route path="/college-admissions" element={<CollegeAdmissions />} />
@@ -112,8 +119,14 @@ const App = () => (
           <Route path="/forms/college-essays" element={<CollegeEssaysForm />} />
           <Route path="/forms/executive-function" element={<ExecutiveFunctionForm />} />
 
+          {/* Authentication Routes */}
+          <Route path="/auth/login" element={<LoginPage />} />
+          <Route path="/auth/signup" element={<SignupPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+
           <Route path="*" element={<NotFound />} />
-        </Routes>
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

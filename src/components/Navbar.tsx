@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -8,14 +8,22 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from './ui/dropdown-menu';
+import { useAuth } from '../contexts/AuthContext';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const isActive = (path: string) => {
     return location.pathname === path ? 'active' : '';
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsMenuOpen(false);
   };
 
   return (
@@ -81,6 +89,42 @@ const Navbar = () => {
               Contact
             </Link>
           </div>
+
+          {/* Authentication Section */}
+          {isAuthenticated ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center space-x-2 text-gray-800 hover:text-blue-600 transition-colors">
+                <User className="w-5 h-5" />
+                <span className="text-[15px] font-normal">{user?.firstName}</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <Link to="/dashboard" className="flex items-center w-full">
+                    <User className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center space-x-3">
+              <Link to="/auth/login">
+                <Button variant="outline" size="sm" className="text-[15px]">
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/auth/signup">
+                <Button size="sm" className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-[15px]">
+                  Sign Up
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Mobile menu button */}
@@ -162,13 +206,56 @@ const Navbar = () => {
             >
               Payment
             </Link>
-            <Link 
-              to="/consultation/schedule" 
+            <Link
+              to="/consultation/schedule"
               className="bg-gradient-to-r from-blue-600 to-blue-800 text-white px-4 py-2 rounded-md hover:from-blue-700 hover:to-blue-900 transition-all duration-300 shadow-md hover:scale-105"
               onClick={() => setIsMenuOpen(false)}
             >
               Schedule Consultation
             </Link>
+
+            {/* Mobile Authentication */}
+            <hr className="border-gray-200 my-2" />
+            {isAuthenticated ? (
+              <>
+                <div className="flex items-center space-x-2 py-2">
+                  <User className="w-5 h-5 text-blue-600" />
+                  <span className="font-medium text-gray-800">
+                    {user?.firstName} {user?.lastName}
+                  </span>
+                </div>
+                <Link
+                  to="/dashboard"
+                  className="text-gray-800 py-2 font-medium relative hover:scale-107 transition-transform duration-300 after:content-[''] after:absolute after:w-full after:h-[1px] after:bg-gray-800 after:bottom-0 after:left-0 after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="text-red-600 py-2 font-medium text-left w-full hover:scale-107 transition-transform duration-300"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/auth/login"
+                  className="text-gray-800 py-2 font-medium relative hover:scale-107 transition-transform duration-300 after:content-[''] after:absolute after:w-full after:h-[1px] after:bg-gray-800 after:bottom-0 after:left-0 after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/auth/signup"
+                  className="bg-gradient-to-r from-blue-600 to-blue-800 text-white px-4 py-2 rounded-md hover:from-blue-700 hover:to-blue-900 transition-all duration-300 shadow-md hover:scale-105 text-center"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
