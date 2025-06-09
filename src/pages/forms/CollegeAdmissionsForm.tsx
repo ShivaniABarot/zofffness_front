@@ -93,8 +93,8 @@ const CollegeAdmissionsForm = () => {
     school: '',
     graduation_year: '',
     package_id: '',
-    package_name: 'initial',
-    amount: packagePrices['initial'],
+    package_name: '',
+    amount: 0,
     payment_status: 'Pending',
     course_type: 'College Admissions Counseling'
   });
@@ -200,8 +200,8 @@ const CollegeAdmissionsForm = () => {
           school: '',
           graduation_year: '',
           package_id: '',
-          package_name: 'initial',
-          amount: packagePrices['initial'],
+          package_name: '',
+          amount: 0,
           payment_status: 'Pending',
           course_type: 'College Admissions Counseling'
         });
@@ -258,8 +258,8 @@ const CollegeAdmissionsForm = () => {
             school: '',
             graduation_year: '',
             package_id: '',
-            package_name: 'initial',
-            amount: packagePrices['initial'],
+            package_name: '',
+            amount: 0,
             payment_status: 'Pending',
             course_type: 'College Admissions Counseling'
           });
@@ -321,7 +321,7 @@ const CollegeAdmissionsForm = () => {
     e.preventDefault();
 
     // Validate required fields
-    if (!formData.package_name || formData.amount <= 0) {
+    if (!formData.package_name || !formData.package_id && !packageNames[formData.package_name as keyof typeof packageNames] || formData.amount <= 0) {
       toast({
         title: 'Validation Error',
         description: 'Please select a package before proceeding.',
@@ -694,7 +694,9 @@ const CollegeAdmissionsForm = () => {
                           </div>
                           <div className="flex justify-between items-center text-lg">
                             <span className="font-bold">Total Amount:</span>
-                            <span className="font-bold text-college-blue-500">${formData.amount.toLocaleString()}</span>
+                            <span className="font-bold text-college-blue-500">
+                              ${formData.amount > 0 ? formData.amount.toLocaleString() : '0.00'}
+                            </span>
                           </div>
                         </div>
 
