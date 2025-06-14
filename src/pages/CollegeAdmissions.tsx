@@ -1,11 +1,21 @@
-
-import React from 'react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
-import { Button } from '../components/ui/button';
-import { Card, CardContent } from '../components/ui/card';
-import { GraduationCap, Calendar, CheckCircle2, ArrowRight, Award, Target, Clock, Users, Trophy, Star } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import { Button } from "../components/ui/button";
+import { Card, CardContent } from "../components/ui/card";
+import {
+  GraduationCap,
+  Calendar,
+  CheckCircle2,
+  ArrowRight,
+  Award,
+  Target,
+  Clock,
+  Users,
+  Trophy,
+  Star,
+} from "lucide-react";
+import { Link } from "react-router-dom";
 
 const CollegeAdmissions = () => {
   return (
@@ -13,14 +23,15 @@ const CollegeAdmissions = () => {
       <Navbar />
 
       <main>
-      <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-blue-400/70">
+        <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-blue-400/70">
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-bold text-white font-display mb-6">
                 College Admissions Counseling
               </h1>
               <p className="text-lg md:text-xl text-white/90 mb-8">
-                Expert guidance throughout the entire college application process to help you gain admission to your dream schools.
+                Expert guidance throughout the entire college application
+                process to help you gain admission to your dream schools.
               </p>
             </div>
           </div>
@@ -34,7 +45,8 @@ const CollegeAdmissions = () => {
                   Comprehensive Admissions Support
                 </h2>
                 <p className="text-lg text-gray-700">
-                  Our experienced counselors provide personalized guidance to navigate the complex college admissions landscape.
+                  Our experienced counselors provide personalized guidance to
+                  navigate the complex college admissions landscape.
                 </p>
               </div>
 
@@ -42,11 +54,14 @@ const CollegeAdmissions = () => {
                 <Card className="card-shadow card-hover">
                   <CardContent className="p-6 text-center">
                     <Target className="h-12 w-12 text-college-blue-500 mx-auto mb-4" />
+
                     <h3 className="text-xl font-bold font-display text-college-blue-500 mb-2">
                       Strategic College Selection
                     </h3>
                     <p className="text-gray-700">
-                      Create a balanced list of reach, target, and safety schools that align with your academic profile and personal goals.
+                      Create a balanced list of reach, target, and safety
+                      schools that align with your academic profile and personal
+                      goals.
                     </p>
                   </CardContent>
                 </Card>
@@ -54,11 +69,14 @@ const CollegeAdmissions = () => {
                 <Card className="card-shadow card-hover">
                   <CardContent className="p-6 text-center">
                     <Calendar className="h-12 w-12 text-college-blue-500 mx-auto mb-4" />
+
                     <h3 className="text-xl font-bold font-display text-college-blue-500 mb-2">
                       Application Management
                     </h3>
                     <p className="text-gray-700">
-                      Stay organized with customized timelines and regular check-ins to ensure you meet all deadlines and requirements.
+                      Stay organized with customized timelines and regular
+                      check-ins to ensure you meet all deadlines and
+                      requirements.
                     </p>
                   </CardContent>
                 </Card>
@@ -66,11 +84,13 @@ const CollegeAdmissions = () => {
                 <Card className="card-shadow card-hover">
                   <CardContent className="p-6 text-center">
                     <Award className="h-12 w-12 text-college-blue-500 mx-auto mb-4" />
+
                     <h3 className="text-xl font-bold font-display text-college-blue-500 mb-2">
                       Interview Preparation
                     </h3>
                     <p className="text-gray-700">
-                      Build confidence through mock interviews and personalized feedback to help you make a strong impression.
+                      Build confidence through mock interviews and personalized
+                      feedback to help you make a strong impression.
                     </p>
                   </CardContent>
                 </Card>
@@ -90,26 +110,45 @@ const CollegeAdmissions = () => {
                       Meet Rob Adams - Your College Admissions Expert
                     </h3>
                     <p className="text-gray-700 mb-4">
-                      Rob Adams is a New York State certified school counselor with over 20 years of experience helping students and families navigate the college process. He provides personalized direction based on extensive data and countless interactions with college admissions representatives. Currently managing a caseload of over 200 students, Rob specializes in all aspects of counseling, including working with students with IEPs and special needs.
+                      Rob Adams is a New York State certified school counselor
+                      with over 20 years of experience helping students and
+                      families navigate the college process. He provides
+                      personalized direction based on extensive data and
+                      countless interactions with college admissions
+                      representatives. Currently managing a caseload of over 200
+                      students, Rob specializes in all aspects of counseling,
+                      including working with students with IEPs and special
+                      needs.
                     </p>
                     <p className="text-gray-700 mb-4">
-                      A proud member of NACAC, ASCA, and WPRCA, Rob regularly attends conferences to stay current with the latest trends. His comprehensive knowledge comes from visiting hundreds of schools and maintaining deep insights beyond published information. Rob holds degrees from New Paltz, Long Island University, and Stony Brook, bringing a wealth of education and experience to help take the stress out of the college admissions process.
+                      A proud member of NACAC, ASCA, and WPRCA, Rob regularly
+                      attends conferences to stay current with the latest
+                      trends. His comprehensive knowledge comes from visiting
+                      hundreds of schools and maintaining deep insights beyond
+                      published information. Rob holds degrees from New Paltz,
+                      Long Island University, and Stony Brook, bringing a wealth
+                      of education and experience to help take the stress out of
+                      the college admissions process.
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="flex items-center">
                         <GraduationCap className="h-5 w-5 text-college-blue-500 mr-2" />
+
                         <span>NY State Certified</span>
                       </div>
                       <div className="flex items-center">
                         <Users className="h-5 w-5 text-college-blue-500 mr-2" />
+
                         <span>200+ Active Students</span>
                       </div>
                       <div className="flex items-center">
                         <Trophy className="h-5 w-5 text-college-blue-500 mr-2" />
+
                         <span>20+ Years Experience</span>
                       </div>
                       <div className="flex items-center">
                         <Star className="h-5 w-5 text-college-blue-500 mr-2" />
+
                         <span>NACAC & ASCA Member</span>
                       </div>
                     </div>
@@ -133,23 +172,29 @@ const CollegeAdmissions = () => {
                           Comprehensive Package
                         </h4>
                         <p className="text-gray-700 mb-4">
-                          End-to-end support from 9th grade through college acceptance, including academic planning, extracurricular strategy, and application guidance.
+                          End-to-end support from 9th grade through college
+                          acceptance, including academic planning,
+                          extracurricular strategy, and application guidance.
                         </p>
                         <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
                           <li className="flex items-start">
                             <CheckCircle2 className="h-5 w-5 text-college-blue-500 mr-2 mt-0.5 shrink-0" />
+
                             <span>Unlimited counselor access</span>
                           </li>
                           <li className="flex items-start">
                             <CheckCircle2 className="h-5 w-5 text-college-blue-500 mr-2 mt-0.5 shrink-0" />
+
                             <span>College list development</span>
                           </li>
                           <li className="flex items-start">
                             <CheckCircle2 className="h-5 w-5 text-college-blue-500 mr-2 mt-0.5 shrink-0" />
+
                             <span>Essay review & feedback</span>
                           </li>
                           <li className="flex items-start">
                             <CheckCircle2 className="h-5 w-5 text-college-blue-500 mr-2 mt-0.5 shrink-0" />
+
                             <span>Application review</span>
                           </li>
                         </ul>
@@ -167,23 +212,29 @@ const CollegeAdmissions = () => {
                           Senior Year Package
                         </h4>
                         <p className="text-gray-700 mb-4">
-                          Focused support during the application season, ideal for students who need guidance during the critical senior year.
+                          Focused support during the application season, ideal
+                          for students who need guidance during the critical
+                          senior year.
                         </p>
                         <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
                           <li className="flex items-start">
                             <CheckCircle2 className="h-5 w-5 text-college-accent-purple mr-2 mt-0.5 shrink-0" />
+
                             <span>Regular counselor meetings</span>
                           </li>
                           <li className="flex items-start">
                             <CheckCircle2 className="h-5 w-5 text-college-accent-purple mr-2 mt-0.5 shrink-0" />
+
                             <span>Application strategy</span>
                           </li>
                           <li className="flex items-start">
                             <CheckCircle2 className="h-5 w-5 text-college-accent-purple mr-2 mt-0.5 shrink-0" />
+
                             <span>Essay brainstorming</span>
                           </li>
                           <li className="flex items-start">
                             <CheckCircle2 className="h-5 w-5 text-college-accent-purple mr-2 mt-0.5 shrink-0" />
+
                             <span>Decision guidance</span>
                           </li>
                         </ul>
@@ -194,7 +245,11 @@ const CollegeAdmissions = () => {
               </div>
 
               <div className="text-center">
-                <Button size="lg" className="bg-college-blue-500 hover:bg-college-blue-600" asChild>
+                <Button
+                  size="lg"
+                  className="bg-college-blue-500 hover:bg-college-blue-600"
+                  asChild
+                >
                   <Link to="/forms/college-admissions">
                     Schedule a Consultation (914) 462-7797
                     <ArrowRight className="ml-2 h-5 w-5" />

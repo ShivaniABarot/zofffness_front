@@ -1,9 +1,8 @@
-
-import React from 'react';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
-import { Button } from '../../components/ui/button';
-import { CheckCircle2, ArrowRight, Calendar, Clock } from 'lucide-react';
+import React from "react";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
+import { Button } from "../../components/ui/button";
+import { CheckCircle2, ArrowRight, Calendar, Clock } from "lucide-react";
 
 const SummerIntensive = () => {
   return (
@@ -11,14 +10,15 @@ const SummerIntensive = () => {
       <Navbar />
 
       <main>
-      <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-blue-400/70">
+        <section className="pt-96 pb-16 md:pt-48 md:pb-22 bg-gradient-to-r from-college-blue-500/90 to-college-blue-400/70">
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-bold text-white font-display mb-6">
                 Summer College Prep Intensive
               </h1>
               <p className="text-lg md:text-xl text-white/90 mb-8">
-                Accelerate your college preparation with our comprehensive summer program designed for motivated high school students.
+                Accelerate your college preparation with our comprehensive
+                summer program designed for motivated high school students.
               </p>
             </div>
           </div>
@@ -32,7 +32,10 @@ const SummerIntensive = () => {
                   Make This Summer Count
                 </h2>
                 <p className="text-lg text-gray-700">
-                  Our intensive summer program helps you make significant progress on your college applications while developing essential skills that will serve you throughout your academic career.
+                  Our intensive summer program helps you make significant
+                  progress on your college applications while developing
+                  essential skills that will serve you throughout your academic
+                  career.
                 </p>
               </div>
 
@@ -44,22 +47,33 @@ const SummerIntensive = () => {
                   <ul className="space-y-3">
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-college-accent-purple mr-2 mt-0.5 shrink-0" />
-                      <span>Small group workshops and individualized attention</span>
+
+                      <span>
+                        Small group workshops and individualized attention
+                      </span>
                     </li>
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-college-accent-purple mr-2 mt-0.5 shrink-0" />
-                      <span>Complete your Common App and personal statement</span>
+
+                      <span>
+                        Complete your Common App and personal statement
+                      </span>
                     </li>
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-college-accent-purple mr-2 mt-0.5 shrink-0" />
-                      <span>Develop a strategic college list tailored to your goals</span>
+
+                      <span>
+                        Develop a strategic college list tailored to your goals
+                      </span>
                     </li>
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-college-accent-purple mr-2 mt-0.5 shrink-0" />
+
                       <span>SAT/ACT test preparation and strategies</span>
                     </li>
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-college-accent-purple mr-2 mt-0.5 shrink-0" />
+
                       <span>Interview preparation and practice sessions</span>
                     </li>
                   </ul>
@@ -71,25 +85,41 @@ const SummerIntensive = () => {
                     alt="Summer intensive session"
                     className="w-full h-48 object-cover rounded-lg mb-6"
                   />
+
                   <h3 className="text-xl font-bold font-display text-college-blue-500 mb-4">
                     Program Details
                   </h3>
                   <ul className="space-y-3">
                     <li className="flex items-start">
                       <Calendar className="h-5 w-5 text-college-accent-purple mr-2 mt-0.5 shrink-0" />
-                      <span><strong>Dates:</strong> June 15 - August 7, 2025</span>
+
+                      <span>
+                        <strong>Dates:</strong> June 15 - August 7, 2025
+                      </span>
                     </li>
                     <li className="flex items-start">
                       <Clock className="h-5 w-5 text-college-accent-purple mr-2 mt-0.5 shrink-0" />
-                      <span><strong>Schedule:</strong> Monday-Thursday, 9:00 AM - 2:00 PM</span>
+
+                      <span>
+                        <strong>Schedule:</strong> Monday-Thursday, 9:00 AM -
+                        2:00 PM
+                      </span>
                     </li>
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-college-accent-purple mr-2 mt-0.5 shrink-0" />
-                      <span><strong>Location:</strong> In-person at our center and virtual options available</span>
+
+                      <span>
+                        <strong>Location:</strong> In-person at our center and
+                        virtual options available
+                      </span>
                     </li>
                     <li className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-college-accent-purple mr-2 mt-0.5 shrink-0" />
-                      <span><strong>Eligibility:</strong> Rising juniors and seniors (Classes of 2026 and 2027)</span>
+
+                      <span>
+                        <strong>Eligibility:</strong> Rising juniors and seniors
+                        (Classes of 2026 and 2027)
+                      </span>
                     </li>
                   </ul>
                 </div>
@@ -148,7 +178,10 @@ const SummerIntensive = () => {
               </div>
 
               <div className="text-center">
-                <Button size="lg" className="bg-college-blue-500 hover:bg-college-blue-600">
+                <Button
+                  size="lg"
+                  className="bg-college-blue-500 hover:bg-college-blue-600"
+                >
                   Enroll in Summer Intensive Program
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>

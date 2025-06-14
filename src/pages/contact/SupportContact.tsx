@@ -1,15 +1,14 @@
-
-import React from 'react';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
-import { Button } from '../../components/ui/button';
-import { Mail, Phone, ArrowRight } from 'lucide-react';
+import React from "react";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
+import { Button } from "../../components/ui/button";
+import { Mail, Phone, ArrowRight } from "lucide-react";
 
 const SupportContact = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      
+
       <main>
         <section className="pt-24 pb-12 md:pt-32 md:pb-16 bg-gradient-to-r from-college-blue-500/90 to-college-accent-purple/70">
           <div className="container mx-auto px-4 md:px-6">
@@ -18,7 +17,8 @@ const SupportContact = () => {
                 Contact Support
               </h1>
               <p className="text-lg md:text-xl text-white/90">
-                Our team is here to help with any questions or issues you may have.
+                Our team is here to help with any questions or issues you may
+                have.
               </p>
             </div>
           </div>
@@ -33,23 +33,33 @@ const SupportContact = () => {
                     Get in Touch
                   </h3>
                   <p className="text-gray-700 mb-6">
-                    If you're experiencing any issues with your account or need assistance with our services, our support team is ready to help.
+                    If you're experiencing any issues with your account or need
+                    assistance with our services, our support team is ready to
+                    help.
                   </p>
                   <div className="space-y-4">
                     <div className="flex items-start">
                       <Phone className="h-5 w-5 text-college-accent-purple mr-3 mt-1" />
+
                       <div>
                         <p className="font-semibold">Call Us</p>
                         <p className="text-gray-700">(914) 462-7797</p>
-                        <p className="text-sm text-gray-500">Monday - Friday: 9am - 6pm ET</p>
+                        <p className="text-sm text-gray-500">
+                          Monday - Friday: 9am - 6pm ET
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-start">
                       <Mail className="h-5 w-5 text-college-accent-purple mr-3 mt-1" />
+
                       <div>
                         <p className="font-semibold">Email Support</p>
-                        <p className="text-gray-700">info@zoffnesscollageprep.com</p>
-                        <p className="text-sm text-gray-500">We typically respond within 24 hours</p>
+                        <p className="text-gray-700">
+                          info@zoffnesscollageprep.com
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          We typically respond within 24 hours
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -61,7 +71,10 @@ const SupportContact = () => {
                   </h3>
                   <form className="space-y-4">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="name"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Your Name
                       </label>
                       <input
@@ -72,7 +85,10 @@ const SupportContact = () => {
                       />
                     </div>
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="email"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Email Address
                       </label>
                       <input
@@ -83,7 +99,10 @@ const SupportContact = () => {
                       />
                     </div>
                     <div>
-                      <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="subject"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Subject
                       </label>
                       <input
@@ -94,7 +113,10 @@ const SupportContact = () => {
                       />
                     </div>
                     <div>
-                      <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="message"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Message
                       </label>
                       <textarea
@@ -118,16 +140,34 @@ const SupportContact = () => {
                 </h3>
                 <div className="space-y-4">
                   <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <h4 className="font-semibold text-college-blue-500">How do I reset my password?</h4>
-                    <p className="text-gray-700">You can reset your password by clicking the "Forgot Password" link on the login page. We'll send you an email with instructions to create a new password.</p>
+                    <h4 className="font-semibold text-college-blue-500">
+                      How do I reset my password?
+                    </h4>
+                    <p className="text-gray-700">
+                      You can reset your password by clicking the "Forgot
+                      Password" link on the login page. We'll send you an email
+                      with instructions to create a new password.
+                    </p>
                   </div>
                   <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <h4 className="font-semibold text-college-blue-500">How do I update my billing information?</h4>
-                    <p className="text-gray-700">You can update your billing information in your account settings under the "Billing" tab. Any changes will apply to your next billing cycle.</p>
+                    <h4 className="font-semibold text-college-blue-500">
+                      How do I update my billing information?
+                    </h4>
+                    <p className="text-gray-700">
+                      You can update your billing information in your account
+                      settings under the "Billing" tab. Any changes will apply
+                      to your next billing cycle.
+                    </p>
                   </div>
                   <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <h4 className="font-semibold text-college-blue-500">Can I reschedule a session?</h4>
-                    <p className="text-gray-700">Yes, you can reschedule a session up to 24 hours before the scheduled time. Just log into your account and navigate to "My Sessions" to make changes.</p>
+                    <h4 className="font-semibold text-college-blue-500">
+                      Can I reschedule a session?
+                    </h4>
+                    <p className="text-gray-700">
+                      Yes, you can reschedule a session up to 24 hours before
+                      the scheduled time. Just log into your account and
+                      navigate to "My Sessions" to make changes.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -135,7 +175,7 @@ const SupportContact = () => {
           </div>
         </section>
       </main>
-      
+
       <Footer />
     </div>
   );

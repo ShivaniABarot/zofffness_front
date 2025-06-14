@@ -1,7 +1,6 @@
-
-import React from 'react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
+import React from "react";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 /**
  * Template for creating new pages
@@ -24,11 +23,18 @@ const PageTemplate = () => {
         <section className="pt-00 pb-16 md:pt-48 md:pb-20 bg-gradient-to-r from-college-blue-500/90 to-college-blue-400/70 relative">
           <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-black/20"></div>
           <div className="max-w-3xl mx-auto text-center relative z-10">
-            <h1 className="text-4xl md:text-5xl font-bold text-white font-display mb-6 drop-shadow-lg" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+            <h1
+              className="text-4xl md:text-5xl font-bold text-white font-display mb-6 drop-shadow-lg"
+              style={{ textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}
+            >
               Page Title
             </h1>
-            <p className="text-lg md:text-xl text-white mb-8 drop-shadow-md" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
-              Page description goes here. This should provide a brief overview of what the page is about.
+            <p
+              className="text-lg md:text-xl text-white mb-8 drop-shadow-md"
+              style={{ textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}
+            >
+              Page description goes here. This should provide a brief overview
+              of what the page is about.
             </p>
           </div>
         </section>
@@ -43,7 +49,8 @@ const PageTemplate = () => {
                   Section Title
                 </h2>
                 <p className="text-lg text-gray-700">
-                  Section description text. Provide more details about this specific section.
+                  Section description text. Provide more details about this
+                  specific section.
                 </p>
               </div>
 

@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from './ui/dialog';
-import StripeProvider from './StripeProvider';
-import StripePaymentForm from './StripePaymentForm';
-import { createPaymentIntent } from '../services/paymentService';
-import { Loader2 } from 'lucide-react';
+} from "./ui/dialog";
+import StripeProvider from "./StripeProvider";
+import StripePaymentForm from "./StripePaymentForm";
+import { createPaymentIntent } from "../services/paymentService";
+import { Loader2 } from "lucide-react";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -26,7 +26,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   onSuccess,
   amount,
   description,
-  metadata = {}
+  metadata = {},
 }) => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,13 +45,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           const { clientSecret } = await createPaymentIntent(
             amountInCents,
             description,
-            metadata
+            metadata,
           );
 
           setClientSecret(clientSecret);
         } catch (err) {
-          console.error('Error creating payment intent:', err);
-          setError('Failed to initialize payment. Please try again.');
+          console.error("Error creating payment intent:", err);
+          setError("Failed to initialize payment. Please try again.");
         } finally {
           setLoading(false);
         }
@@ -78,12 +78,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         {loading ? (
           <div className="flex justify-center items-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-college-blue-500" />
-            <span className="ml-2 text-college-blue-500">Initializing payment...</span>
+
+            <span className="ml-2 text-college-blue-500">
+              Initializing payment...
+            </span>
           </div>
         ) : error ? (
-          <div className="text-red-500 py-4 text-center">
-            {error}
-          </div>
+          <div className="text-red-500 py-4 text-center">{error}</div>
         ) : clientSecret ? (
           <StripeProvider>
             <div className="py-2">

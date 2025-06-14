@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 interface CountUpProps {
   targetValue: number;
@@ -8,7 +8,13 @@ interface CountUpProps {
   className?: string;
 }
 
-const CountUpAnimation = ({ targetValue, duration = 2000, prefix = '', suffix = '', className = '' }: CountUpProps) => {
+const CountUpAnimation = ({
+  targetValue,
+  duration = 2000,
+  prefix = "",
+  suffix = "",
+  className = "",
+}: CountUpProps) => {
   const countRef = useRef<HTMLDivElement>(null);
   const startTimeRef = useRef<number | null>(null);
   const frameRef = useRef<number>();
@@ -23,7 +29,7 @@ const CountUpAnimation = ({ targetValue, duration = 2000, prefix = '', suffix = 
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (countRef.current) {
@@ -40,10 +46,10 @@ const CountUpAnimation = ({ targetValue, duration = 2000, prefix = '', suffix = 
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M+';
+      return (num / 1000000).toFixed(1) + "M+";
     }
     if (num >= 1000) {
-      return (num / 1000).toFixed(0) + 'k+';
+      return (num / 1000).toFixed(0) + "k+";
     }
     return num.toFixed(0);
   };
@@ -54,7 +60,10 @@ const CountUpAnimation = ({ targetValue, duration = 2000, prefix = '', suffix = 
         startTimeRef.current = currentTime;
       }
 
-      const progress = Math.min((currentTime - startTimeRef.current) / duration, 1);
+      const progress = Math.min(
+        (currentTime - startTimeRef.current) / duration,
+        1,
+      );
       const easedProgress = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
       const currentValue = Math.floor(easedProgress * targetValue);
 
