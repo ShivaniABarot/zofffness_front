@@ -57,7 +57,9 @@ import ExecutiveFunctionForm from "./pages/forms/ExecutiveFunctionForm";
 import { AuthProvider } from "./contexts/AuthContext";
 import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
+import StudentLoginPage from "./pages/auth/StudentLoginPage";
 import DashboardPage from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -120,9 +122,26 @@ const App = () => (
           <Route path="/forms/executive-function" element={<ExecutiveFunctionForm />} />
 
           {/* Authentication Routes */}
-          <Route path="/auth/login" element={<LoginPage />} />
-          <Route path="/auth/signup" element={<SignupPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/auth/login" element={
+            <ProtectedRoute requireAuth={false}>
+              <LoginPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/auth/signup" element={
+            <ProtectedRoute requireAuth={false}>
+              <SignupPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/auth/student-login" element={
+            <ProtectedRoute requireAuth={false}>
+              <StudentLoginPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard" element={
+            <ProtectedRoute requireAuth={true}>
+              <DashboardPage />
+            </ProtectedRoute>
+          } />
 
           <Route path="*" element={<NotFound />} />
           </Routes>
