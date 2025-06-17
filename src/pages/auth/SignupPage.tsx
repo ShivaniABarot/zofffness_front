@@ -1,15 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Loader2, User, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, Loader2, User, UserPlus, Check, X, AlertCircle, ArrowLeft } from 'lucide-react';
 import { Button } from '../../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
+import { Alert, AlertDescription } from '../../components/ui/alert';
 
 import { useAuth, SignupData } from '../../contexts/AuthContext';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
-import { testSignupAPI } from '../../utils/apiTest';
+
+// Validation interfaces
+interface ValidationState {
+  isValid: boolean;
+  message: string;
+}
+
+interface FormValidation {
+  firstName: ValidationState;
+  lastName: ValidationState;
+  email: ValidationState;
+  phone: ValidationState;
+  password: {
+    isValid: boolean;
+    hasLowercase: boolean;
+    hasUppercase: boolean;
+    hasNumber: boolean;
+    hasMinLength: boolean;
+    message: string;
+  };
+  confirmPassword: ValidationState;
+}
 
 const SignupPage = () => {
   const [formData, setFormData] = useState<SignupData>({
@@ -24,9 +42,95 @@ const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [validation, setValidation] = useState<FormValidation>({
+    firstName: { isValid: false, message: '' },
+    lastName: { isValid: false, message: '' },
+    email: { isValid: false, message: '' },
+    phone: { isValid: true, message: '' }, // Optional field
+    password: {
+      isValid: false,
+      hasLowercase: false,
+      hasUppercase: false,
+      hasNumber: false,
+      hasMinLength: false,
+      message: ''
+    },
+    confirmPassword: { isValid: false, message: '' }
+  });
+
+  // Track which fields have been touched (interacted with)
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+
   const { signup } = useAuth();
   const navigate = useNavigate();
+
+
+
+  // Validation functions
+  const validateName = (name: string, _fieldName: string, isTouched: boolean): ValidationState => {
+    if (!name.trim()) {
+      return { isValid: false, message: isTouched ? 'This field is required' : '' };
+    }
+    if (name.trim().length < 2) {
+      return { isValid: false, message: 'Must be at least 2 characters' };
+    }
+    if (!/^[a-zA-Z\s]+$/.test(name)) {
+      return { isValid: false, message: 'Only letters and spaces allowed' };
+    }
+    return { isValid: true, message: '' };
+  };
+
+  const validateEmail = (email: string, isTouched: boolean): ValidationState => {
+    if (!email.trim()) {
+      return { isValid: false, message: isTouched ? 'Email is required' : '' };
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return { isValid: false, message: 'Please enter a valid email address' };
+    }
+    return { isValid: true, message: '' };
+  };
+
+  const validatePhone = (phone: string, _isTouched: boolean): ValidationState => {
+    if (!phone.trim()) {
+      return { isValid: true, message: '' };
+    }
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    if (!phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))) {
+      return { isValid: false, message: 'Please enter a valid phone number' };
+    }
+    return { isValid: true, message: '' };
+  };
+
+  const validatePassword = (password: string, _isTouched: boolean) => {
+    const hasLowercase = /[a-z]/.test(password);
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasMinLength = password.length >= 8;
+
+    const isValid = hasLowercase && hasUppercase && hasNumber && hasMinLength;
+
+    return {
+      isValid,
+      hasLowercase,
+      hasUppercase,
+      hasNumber,
+      hasMinLength,
+      message: ''
+    };
+  };
+
+  const validateConfirmPassword = (password: string, confirmPassword: string, isTouched: boolean): ValidationState => {
+    if (!confirmPassword.trim()) {
+      return { isValid: false, message: isTouched ? 'Please confirm your password' : '' };
+    }
+    if (password !== confirmPassword) {
+      return { isValid: false, message: 'Passwords do not match' };
+    }
+    return { isValid: true, message: '' };
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -34,245 +138,423 @@ const SignupPage = () => {
       ...prev,
       [name]: value
     }));
+
+    // Mark field as touched when user starts typing
+    setTouchedFields(prev => new Set(prev).add(name));
+
+    // Real-time validation
+    let newValidation = { ...validation };
+    const isTouched = touchedFields.has(name) || value.length > 0;
+
+    switch (name) {
+      case 'firstName':
+        newValidation.firstName = validateName(value, name, isTouched);
+        break;
+      case 'lastName':
+        newValidation.lastName = validateName(value, name, isTouched);
+        break;
+      case 'email':
+        newValidation.email = validateEmail(value, isTouched);
+        break;
+      case 'phone':
+        newValidation.phone = validatePhone(value, isTouched);
+        break;
+      case 'password':
+        newValidation.password = validatePassword(value, isTouched);
+        newValidation.confirmPassword = validateConfirmPassword(value, formData.confirmPassword, touchedFields.has('confirmPassword'));
+        break;
+      case 'confirmPassword':
+        newValidation.confirmPassword = validateConfirmPassword(formData.password, value, isTouched);
+        break;
+    }
+
+    setValidation(newValidation);
   };
 
+  // Handle field blur (when user leaves the field)
+  const handleFieldBlur = (fieldName: string) => {
+    setTouchedFields(prev => new Set(prev).add(fieldName));
 
+    // Re-validate the field when it loses focus
+    let newValidation = { ...validation };
+    const isTouched = true;
+
+    switch (fieldName) {
+      case 'firstName':
+        newValidation.firstName = validateName(formData.firstName, fieldName, isTouched);
+        break;
+      case 'lastName':
+        newValidation.lastName = validateName(formData.lastName, fieldName, isTouched);
+        break;
+      case 'email':
+        newValidation.email = validateEmail(formData.email, isTouched);
+        break;
+      case 'phone':
+        newValidation.phone = validatePhone(formData.phone, isTouched);
+        break;
+      case 'confirmPassword':
+        newValidation.confirmPassword = validateConfirmPassword(formData.password, formData.confirmPassword, isTouched);
+        break;
+    }
+
+    setValidation(newValidation);
+  };
+
+  // Validation indicator component
+  const ValidationIndicator = ({ isValid, message, fieldName, fieldValue }: {
+    isValid: boolean;
+    message: string;
+    fieldName: string;
+    fieldValue: string;
+  }) => {
+    // Only show validation messages if field has been touched and has content or error
+    const shouldShow = message && (touchedFields.has(fieldName) || fieldValue.length > 0);
+
+    if (!shouldShow) return null;
+
+    return (
+      <div className={`flex items-center mt-1 text-xs ${isValid ? 'text-green-600' : 'text-red-600'}`}>
+        {isValid ? (
+          <Check className="w-3 h-3 mr-1" />
+        ) : (
+          <X className="w-3 h-3 mr-1" />
+        )}
+        <span>{message}</span>
+      </div>
+    );
+  };
+
+  // Password requirements component
+  const PasswordRequirements = ({ password }: { password: typeof validation.password }) => {
+    const requirements = [
+      { key: 'hasLowercase', text: 'At least one lowercase letter', met: password.hasLowercase },
+      { key: 'hasUppercase', text: 'At least one uppercase letter', met: password.hasUppercase },
+      { key: 'hasNumber', text: 'At least one number', met: password.hasNumber },
+      { key: 'hasMinLength', text: 'Minimum 8 characters', met: password.hasMinLength }
+    ];
+
+    return (
+      <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
+        <p className="text-sm font-medium text-gray-700 mb-2">PASSWORD MUST CONTAIN:</p>
+        <div className="space-y-1">
+          {requirements.map((req) => (
+            <div key={req.key} className={`flex items-center text-xs ${req.met ? 'text-green-600' : 'text-red-600'}`}>
+              {req.met ? (
+                <Check className="w-3 h-3 mr-2" />
+              ) : (
+                <X className="w-3 h-3 mr-2" />
+              )}
+              <span>{req.text}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
+    setSuccess('');
 
     try {
-      const success = await signup(formData);
-      if (success) {
-        navigate('/dashboard');
+      const result = await signup(formData);
+      if (result) {
+        setSuccess('Account created successfully! Redirecting...');
+        setTimeout(() => navigate('/dashboard'), 2000);
       }
     } catch (error) {
       console.error('Signup error:', error);
+      setError('Failed to create account. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
-      <main className="py-32">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-md mx-auto">
-            <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
-              <CardHeader className="text-center pb-6">
-                <div className="mx-auto w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mb-4">
-                  <UserPlus className="w-8 h-8 text-white" />
-                </div>
-                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  Create Account
-                </CardTitle>
-                <p className="text-gray-600 mt-2">
-                  Join Zoffness College Prep today
-                </p>
-              </CardHeader>
-              
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Parent Account Notice */}
-                  <div className="space-y-3">
-                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-4">
-                      <div className="flex items-start space-x-3">
-                        <div className="flex-shrink-0 w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
-                          <User className="w-4 h-4 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-purple-900 mb-2">Parent Account Registration</h4>
-                          <div className="text-sm text-purple-700 space-y-1">
-                            <p>• Create your parent account to manage your family's educational journey</p>
-                            <p>• Add multiple student accounts from your dashboard</p>
-                            <p>• Generate unique student codes for secure login access</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+    <div className="min-h-screen bg-white flex">
+      {/* Left Side - Form */}
+      <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
+        <div className="w-full max-w-lg">
+          {/* Back Button */}
+          <div className="mb-6">
+            <Link
+              to="/"
+              className="inline-flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Link>
+          </div>
 
-                  {/* Name Fields */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
-                        First Name <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        id="firstName"
-                        name="firstName"
-                        type="text"
-                        value={formData.firstName}
-                        onChange={handleInputChange}
-                        placeholder="John"
-                        className="border-2 border-gray-200 focus:border-purple-500 transition-colors"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">
-                        Last Name <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        id="lastName"
-                        name="lastName"
-                        type="text"
-                        value={formData.lastName}
-                        onChange={handleInputChange}
-                        placeholder="Doe"
-                        className="border-2 border-gray-200 focus:border-purple-500 transition-colors"
-                        required
-                      />
-                    </div>
-                  </div>
+          {/* Header */}
+          <div className="text-center mb-10">
+            <h1 className="text-5xl font-bold text-gray-900 mb-4 leading-tight">
+              Welcome to Zoffness!
+            </h1>
+            <p className="text-lg text-gray-600 leading-relaxed">
+              Simplify your learning journey and boost your academic success with Zoffness College Prep. Get started for free.
+            </p>
+          </div>
 
-                  {/* Email Field */}
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                      Email Address <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="parent@example.com"
-                      className="border-2 border-gray-200 focus:border-purple-500 transition-colors"
-                      required
-                    />
-                  </div>
+          {/* Error/Success Messages */}
+          {error && (
+            <Alert variant="destructive" className="border-red-200 bg-red-50 mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-                  {/* Phone Field (Optional) */}
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
-                      Phone Number <span className="text-gray-400">(Optional)</span>
-                    </Label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      placeholder="(555) 123-4567"
-                      className="border-2 border-gray-200 focus:border-purple-500 transition-colors"
-                    />
-                  </div>
+          {success && (
+            <Alert className="border-green-200 bg-green-50 text-green-800 mb-6">
+              <Check className="h-4 w-4" />
+              <AlertDescription>{success}</AlertDescription>
+            </Alert>
+          )}
 
-                  {/* Password Fields */}
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-sm font-medium text-gray-700">
-                      Password <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        name="password"
-                        type={showPassword ? 'text' : 'password'}
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        placeholder="Create a strong password"
-                        required
-                        className="pr-12 border-2 border-gray-200 focus:border-purple-500 transition-colors"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-purple-600 transition-colors"
-                      >
-                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                      </button>
-                    </div>
-                  </div>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Name Fields */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  value={formData.firstName}
+                  onChange={handleInputChange}
+                  onBlur={() => handleFieldBlur('firstName')}
+                  placeholder="First Name"
+                  className={`h-14 rounded-2xl border-2 px-6 text-lg transition-all duration-200 ${
+                    formData.firstName && touchedFields.has('firstName')
+                      ? validation.firstName.isValid
+                        ? 'border-green-500 focus:border-green-600 bg-green-50/50'
+                        : 'border-red-500 focus:border-red-600 bg-red-50/50'
+                      : 'border-gray-200 focus:border-blue-500 hover:border-gray-300'
+                  }`}
+                  required
+                />
+                <ValidationIndicator
+                  isValid={validation.firstName.isValid}
+                  message={validation.firstName.message}
+                  fieldName="firstName"
+                  fieldValue={formData.firstName}
+                />
+              </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
-                      Confirm Password <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        value={formData.confirmPassword}
-                        onChange={handleInputChange}
-                        placeholder="Confirm your password"
-                        required
-                        className="pr-12 border-2 border-gray-200 focus:border-purple-500 transition-colors"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-purple-600 transition-colors"
-                      >
-                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                      </button>
-                    </div>
-                  </div>
+              <div className="space-y-2">
+                <Input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  onBlur={() => handleFieldBlur('lastName')}
+                  placeholder="Last Name"
+                  className={`h-14 rounded-2xl border-2 px-6 text-lg transition-all duration-200 ${
+                    formData.lastName && touchedFields.has('lastName')
+                      ? validation.lastName.isValid
+                        ? 'border-green-500 focus:border-green-600 bg-green-50/50'
+                        : 'border-red-500 focus:border-red-600 bg-red-50/50'
+                      : 'border-gray-200 focus:border-blue-500 hover:border-gray-300'
+                  }`}
+                  required
+                />
+                <ValidationIndicator
+                  isValid={validation.lastName.isValid}
+                  message={validation.lastName.message}
+                  fieldName="lastName"
+                  fieldValue={formData.lastName}
+                />
+              </div>
+            </div>
 
-                  {/* Terms and Conditions */}
-                  <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <p className="text-xs text-gray-600 text-center">
-                      By creating an account, you agree to our{' '}
-                      <Link to="/terms" className="text-purple-600 hover:text-purple-800 font-medium hover:underline">
-                        Terms of Service
-                      </Link>{' '}
-                      and{' '}
-                      <Link to="/privacy" className="text-purple-600 hover:text-purple-800 font-medium hover:underline">
-                        Privacy Policy
-                      </Link>
-                    </p>
-                  </div>
+            {/* Email Field */}
+            <div className="space-y-2">
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                onBlur={() => handleFieldBlur('email')}
+                placeholder="Email Address"
+                className={`h-14 rounded-2xl border-2 px-6 text-lg transition-all duration-200 ${
+                  formData.email && touchedFields.has('email')
+                    ? validation.email.isValid
+                      ? 'border-green-500 focus:border-green-600 bg-green-50/50'
+                      : 'border-red-500 focus:border-red-600 bg-red-50/50'
+                    : 'border-gray-200 focus:border-blue-500 hover:border-gray-300'
+                }`}
+                required
+              />
+              <ValidationIndicator
+                isValid={validation.email.isValid}
+                message={validation.email.message}
+                fieldName="email"
+                fieldValue={formData.email}
+              />
+            </div>
 
-                  {/* Submit Button */}
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 px-4 rounded-lg font-semibold text-base transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Creating Account...
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus className="mr-2 h-5 w-5" />
-                        Create Parent Account
-                      </>
-                    )}
-                  </Button>
-                </form>
+            {/* Password Field */}
+            <div className="space-y-2 relative">
+              <Input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                value={formData.password}
+                onChange={handleInputChange}
+                onBlur={() => handleFieldBlur('password')}
+                placeholder="Password"
+                required
+                className={`h-14 rounded-2xl border-2 px-6 pr-14 text-lg transition-all duration-200 ${
+                  formData.password && touchedFields.has('password')
+                    ? validation.password.isValid
+                      ? 'border-green-500 focus:border-green-600 bg-green-50/50'
+                      : 'border-red-500 focus:border-red-600 bg-red-50/50'
+                    : 'border-gray-200 focus:border-blue-500 hover:border-gray-300'
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+              <ValidationIndicator
+                isValid={validation.password.isValid}
+                message={validation.password.message}
+                fieldName="password"
+                fieldValue={formData.password}
+              />
+              {formData.password && touchedFields.has('password') && (
+                <PasswordRequirements password={validation.password} />
+              )}
+            </div>
 
-                {/* Sign In Link */}
-                <div className="mt-6 text-center space-y-3">
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="h-px bg-gray-300 flex-1"></div>
-                    <span className="text-xs text-gray-500 px-2">OR</span>
-                    <div className="h-px bg-gray-300 flex-1"></div>
-                  </div>
+            {/* Confirm Password Field */}
+            <div className="space-y-2 relative">
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                onBlur={() => handleFieldBlur('confirmPassword')}
+                placeholder="Confirm Password"
+                required
+                className={`h-14 rounded-2xl border-2 px-6 pr-14 text-lg transition-all duration-200 ${
+                  formData.confirmPassword && touchedFields.has('confirmPassword')
+                    ? validation.confirmPassword.isValid
+                      ? 'border-green-500 focus:border-green-600 bg-green-50/50'
+                      : 'border-red-500 focus:border-red-600 bg-red-50/50'
+                    : 'border-gray-200 focus:border-blue-500 hover:border-gray-300'
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+              <ValidationIndicator
+                isValid={validation.confirmPassword.isValid}
+                message={validation.confirmPassword.message}
+                fieldName="confirmPassword"
+                fieldValue={formData.confirmPassword}
+              />
+            </div>
 
-                  <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <p className="text-sm text-gray-700 mb-2">Already have an account?</p>
-                    <Link
-                      to="/auth/login"
-                      className="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 transition-colors"
-                    >
-                      <User className="w-4 h-4 mr-2" />
-                      Sign In Here
-                    </Link>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Submit Button */}
+            <div className="pt-4">
+              <Button
+                type="submit"
+                disabled={
+                  isLoading ||
+                  !formData.firstName.trim() ||
+                  !formData.lastName.trim() ||
+                  !formData.email.trim() ||
+                  !formData.password.trim() ||
+                  !formData.confirmPassword.trim() ||
+                  !validation.firstName.isValid ||
+                  !validation.lastName.isValid ||
+                  !validation.email.isValid ||
+                  !validation.password.isValid ||
+                  !validation.confirmPassword.isValid ||
+                  !validation.phone.isValid
+                }
+                className={`w-full h-16 rounded-2xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
+                  isLoading ||
+                  !formData.firstName.trim() ||
+                  !formData.lastName.trim() ||
+                  !formData.email.trim() ||
+                  !formData.password.trim() ||
+                  !formData.confirmPassword.trim() ||
+                  !validation.firstName.isValid ||
+                  !validation.lastName.isValid ||
+                  !validation.email.isValid ||
+                  !validation.password.isValid ||
+                  !validation.confirmPassword.isValid ||
+                  !validation.phone.isValid
+                    ? 'bg-gray-400 cursor-not-allowed shadow-none transform-none'
+                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
+                } text-white`}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+                    Creating Account...
+                  </>
+                ) : (
+                  'Create Account'
+                )}
+              </Button>
+            </div>
+          </form>
+
+          {/* Sign In Link */}
+          <div className="mt-8 text-center">
+            <p className="text-lg text-gray-600">
+              Already have an account?{' '}
+              <Link
+                to="/auth/login"
+                className="text-blue-600 font-semibold hover:text-blue-800 hover:underline transition-colors"
+              >
+                Sign in now
+              </Link>
+            </p>
           </div>
         </div>
-      </main>
-      
-      <Footer />
+      </div>
+
+      {/* Right Side - Image */}
+      <div className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-8">
+        <div className="text-center max-w-lg">
+          {/* Student Image */}
+          <div className="mb-8">
+            <div className="relative mx-auto">
+              <img
+                src="/D430_50_073_1200.jpg"
+                alt="Student studying with Zoffness Academy"
+                className="w-full max-w-md mx-auto rounded-2xl shadow-2xl object-cover"
+              />
+              {/* Overlay gradient for better text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl"></div>
+            </div>
+          </div>
+
+          {/* Text */}
+          <h2 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">
+            Make your learning easier and organized with Zoffness Academy
+          </h2>
+          <p className="text-lg text-gray-600">
+            Join thousands of students achieving their academic goals with personalized learning paths and expert guidance.
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
