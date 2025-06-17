@@ -61,6 +61,9 @@ import StudentLoginPage from "./pages/auth/StudentLoginPage";
 import DashboardPage from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// Test utilities (for development)
+import "./utils/testSignup";
+
 const queryClient = new QueryClient();
 
 const App = () => (

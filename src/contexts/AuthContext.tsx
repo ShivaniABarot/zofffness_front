@@ -2,6 +2,13 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import axios from 'axios';
 import { useToast } from '../components/ui/use-toast';
 
+// API Configuration
+const API_ENDPOINTS = {
+  SIGNUP: 'https://zoffness.academy/api/register',
+  SIGNIN: 'http://localhost:8000/api/login',
+  VERIFY: 'http://localhost:8000/api/verify'
+};
+
 // Define user types
 export interface User {
   id: string;
@@ -51,6 +58,7 @@ export interface SignupData {
   confirmPassword: string;
   userType: 'parent'; // Only parents can sign up directly - students are created by parents
   phone?: string;
+  username?: string; // Optional - will be auto-generated from email if not provided
 }
 
 // Define student data type (created by parents)
@@ -81,7 +89,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const token = localStorage.getItem('authToken');
         if (token) {
           // Verify token with backend
-          const response = await axios.get('https://zoffness.academy/api/auth/verify', {
+          const response = await axios.get(API_ENDPOINTS.VERIFY, {
             headers: { Authorization: `Bearer ${token}` }
           });
           
@@ -108,27 +116,82 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(true);
       
       // Try real API first
-      const response = await axios.post('https://zoffness.academy/api/auth/login', {
+      const signinPayload = {
         email,
         password
-      });
+      };
 
-      if (response.data.success) {
-        const { user: userData, token } = response.data;
-        setUser(userData);
+      console.log('Sending signin data:', signinPayload);
+      const response = await axios.post(API_ENDPOINTS.SIGNIN, signinPayload);
+
+      console.log('Login API Response:', response.data);
+
+      if (response.data.success || response.status === 200) {
+        const userData = response.data.user || response.data.data || response.data;
+        const token = response.data.token || response.data.access_token || 'api-token-' + Date.now();
+
+        setUser({
+          ...userData,
+          userType: userData.userType || userData.user_type || 'parent'
+        });
         localStorage.setItem('authToken', token);
-        
+
         toast({
           title: 'Login Successful',
-          description: `Welcome back, ${userData.firstName}!`,
+          description: `Welcome back, ${userData.firstName || userData.first_name}!`,
         });
-        
+
         return true;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
+      console.error('Error response:', error.response?.data);
+
+      // Show specific error message if available
+      let errorMessage = error.response?.data?.message ||
+                        error.response?.data?.error ||
+                        'Invalid email or password. Please try again.';
+
+      // Handle validation errors for signin
+      if (error.response?.data?.errors) {
+        const validationErrors = error.response.data.errors;
+        const errorFields = Object.keys(validationErrors);
+        if (errorFields.length > 0) {
+          const allErrors = errorFields.map(field => {
+            const fieldErrors = validationErrors[field];
+            const errorText = Array.isArray(fieldErrors) ? fieldErrors[0] : fieldErrors;
+            return `${field}: ${errorText}`;
+          }).join(', ');
+          errorMessage = allErrors;
+        }
+      }
 
       // Fallback to mock parent authentication for demo
+      if (email && password && error.code === 'ERR_NETWORK') {
+        console.log('Network error, using demo mode');
+
+        const mockUser: User = {
+          id: 'mock-' + Date.now(),
+          email,
+          firstName: email.split('@')[0],
+          lastName: 'User',
+          userType: 'parent',
+          createdAt: new Date().toISOString(),
+          students: []
+        };
+
+        setUser(mockUser);
+        localStorage.setItem('authToken', 'mock-token-' + Date.now());
+
+        toast({
+          title: 'Login Successful (Demo)',
+          description: `Welcome, ${mockUser.firstName}! API unavailable, using demo mode.`,
+        });
+
+        return true;
+      }
+
+      // If not a network error or demo fallback didn't work
       if (email && password) {
         const mockUser: User = {
           id: 'mock-' + Date.now(),
@@ -150,10 +213,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         return true;
       }
-      
+
       toast({
         title: 'Login Failed',
-        description: 'Invalid email or password. Please try again.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -168,6 +231,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       setIsLoading(true);
       
+      // Validate required fields
+      if (!userData.firstName || !userData.lastName || !userData.email || !userData.password) {
+        toast({
+          title: 'Signup Failed',
+          description: 'Please fill in all required fields.',
+          variant: 'destructive',
+        });
+        return false;
+      }
+
       // Validate passwords match
       if (userData.password !== userData.confirmPassword) {
         toast({
@@ -178,51 +251,140 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return false;
       }
 
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(userData.email)) {
+        toast({
+          title: 'Signup Failed',
+          description: 'Please enter a valid email address.',
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      // Validate password strength
+      if (userData.password.length < 6) {
+        toast({
+          title: 'Signup Failed',
+          description: 'Password must be at least 6 characters long.',
+          variant: 'destructive',
+        });
+        return false;
+      }
+
       // Try real API first
-      const response = await axios.post('https://zoffness.academy/api/auth/signup', {
+      // Use provided username or generate from email (before @ symbol)
+      const username = userData.username || userData.email.split('@')[0];
+
+      const signupPayload = {
+        username: username, // Required field
         first_name: userData.firstName,
         last_name: userData.lastName,
         email: userData.email,
         password: userData.password,
+        password_confirmation: userData.confirmPassword,
         user_type: userData.userType,
-        phone: userData.phone
+        phone: userData.phone || null
+      };
+
+      console.log('Sending signup data:', signupPayload);
+
+      const response = await axios.post(API_ENDPOINTS.SIGNUP, signupPayload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
       });
 
-      if (response.data.success) {
-        const { user: newUser, token } = response.data;
-        setUser(newUser);
+      console.log('Signup API Response:', response.data);
+
+      if (response.data.success || response.status === 200 || response.status === 201) {
+        const newUser = response.data.user || response.data.data || response.data;
+        const token = response.data.token || response.data.access_token || 'api-token-' + Date.now();
+
+        setUser({
+          ...newUser,
+          userType: newUser.userType || newUser.user_type || 'parent'
+        });
         localStorage.setItem('authToken', token);
-        
+
         toast({
           title: 'Account Created',
-          description: `Welcome to Zoffness, ${newUser.firstName}!`,
+          description: `Welcome to Zoffness, ${newUser.firstName || newUser.first_name}!`,
         });
-        
+
         return true;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Signup error:', error);
-      
-      // Fallback to mock signup for demo
-      const mockUser: User = {
-        id: 'mock-' + Date.now(),
-        email: userData.email,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        userType: userData.userType,
-        phone: userData.phone,
-        createdAt: new Date().toISOString()
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem('authToken', 'mock-token-' + Date.now());
-      
+      console.error('Error response:', error.response?.data);
+      console.error('Validation errors:', error.response?.data?.errors);
+
+      // Log specific email error if present
+      if (error.response?.data?.errors?.email) {
+        console.error('Email error:', error.response.data.errors.email);
+      }
+
+      // Show specific error message if available
+      let errorMessage = error.response?.data?.message ||
+                        error.response?.data?.error ||
+                        'Failed to create account. Please try again.';
+
+      // If there are validation errors, show them
+      if (error.response?.data?.errors) {
+        const validationErrors = error.response.data.errors;
+        const errorFields = Object.keys(validationErrors);
+        if (errorFields.length > 0) {
+          // Handle specific validation errors with user-friendly messages
+          const allErrors = errorFields.map(field => {
+            const fieldErrors = validationErrors[field];
+            const errorText = Array.isArray(fieldErrors) ? fieldErrors[0] : fieldErrors;
+
+            // Convert API error codes to user-friendly messages
+            if (field === 'email' && errorText === 'validation.unique') {
+              return 'This email address is already registered. Please use a different email or try signing in.';
+            } else if (field === 'username' && errorText === 'validation.unique') {
+              return 'This username is already taken. Please choose a different one.';
+            } else {
+              return `${field}: ${errorText}`;
+            }
+          }).join(' ');
+          errorMessage = allErrors;
+        }
+      }
+
+      // Only use demo mode if it's a network error
+      if (error.code === 'ERR_NETWORK') {
+        console.log('Network error, using demo mode for signup');
+
+        // Fallback to mock signup for demo
+        const mockUser: User = {
+          id: 'mock-' + Date.now(),
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          userType: userData.userType,
+          phone: userData.phone,
+          createdAt: new Date().toISOString()
+        };
+
+        setUser(mockUser);
+        localStorage.setItem('authToken', 'mock-token-' + Date.now());
+
+        toast({
+          title: 'Account Created (Demo)',
+          description: `Welcome to Zoffness, ${mockUser.firstName}! API unavailable, using demo mode.`,
+        });
+
+        return true;
+      }
+
+      // Show API error message
       toast({
-        title: 'Account Created (Demo)',
-        description: `Welcome to Zoffness, ${mockUser.firstName}! This is demo mode.`,
+        title: 'Signup Failed',
+        description: errorMessage,
+        variant: 'destructive',
       });
-      
-      return true;
     } finally {
       setIsLoading(false);
     }
@@ -378,7 +540,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       // Try to verify parent credentials with API first
       try {
-        const response = await axios.post('https://zoffness.academy/api/auth/login', {
+        const response = await axios.post(API_ENDPOINTS.SIGNIN, {
           email: parentEmail,
           password: parentPassword
         });

@@ -9,6 +9,7 @@ import { Label } from '../../components/ui/label';
 import { useAuth, SignupData } from '../../contexts/AuthContext';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import { testSignupAPI } from '../../utils/apiTest';
 
 const SignupPage = () => {
   const [formData, setFormData] = useState<SignupData>({
