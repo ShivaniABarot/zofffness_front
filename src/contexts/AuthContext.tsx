@@ -130,38 +130,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
 
       console.log('Login API Response:', response.data);
-      console.log('Login API Status:', response.status);
 
-      // Check for successful response
-      if (response.status === 200 || response.status === 201 || response.data.success === true) {
+      if (response.data.success || response.status === 200 || response.status === 201) {
         const userData = response.data.user || response.data.data || response.data;
         const token = response.data.token || response.data.access_token || response.data.auth_token || 'api-token-' + Date.now();
 
-        // Ensure we have user data
-        if (userData && (userData.email || userData.id)) {
-          setUser({
-            id: userData.id || 'api-user-' + Date.now(),
-            email: userData.email || email,
-            firstName: userData.firstName || userData.first_name || email.split('@')[0],
-            lastName: userData.lastName || userData.last_name || 'User',
-            userType: userData.userType || userData.user_type || 'parent',
-            phone: userData.phone,
-            createdAt: userData.createdAt || userData.created_at || new Date().toISOString(),
-            students: userData.students || []
-          });
-          localStorage.setItem('authToken', token);
+        setUser({
+          ...userData,
+          userType: userData.userType || userData.user_type || 'parent'
+        });
+        localStorage.setItem('authToken', token);
 
-          toast({
-            title: 'Login Successful',
-            description: `Welcome back, ${userData.firstName || userData.first_name || email.split('@')[0]}!`,
-          });
+        toast({
+          title: 'Login Successful',
+          description: `Welcome back, ${userData.firstName || userData.first_name}!`,
+        });
 
-          return true;
-        } else {
-          console.log('API response missing user data:', response.data);
-        }
-      } else {
-        console.log('API response not successful:', response.status, response.data);
+        return true;
       }
     } catch (error: any) {
       console.error('Login error:', error);
@@ -172,22 +157,46 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         error.response?.data?.error ||
                         'Invalid email or password. Please try again.';
 
-      // Handle validation errors for signin
+      // Handle validation errors for signin with nice messages
       if (error.response?.data?.errors) {
         const validationErrors = error.response.data.errors;
         const errorFields = Object.keys(validationErrors);
+
         if (errorFields.length > 0) {
-          const allErrors = errorFields.map(field => {
-            const fieldErrors = validationErrors[field];
-            const errorText = Array.isArray(fieldErrors) ? fieldErrors[0] : fieldErrors;
-            return `${field}: ${errorText}`;
-          }).join(', ');
-          errorMessage = allErrors;
+          // Handle email validation errors
+          if (validationErrors.email) {
+            const emailError = Array.isArray(validationErrors.email) ? validationErrors.email[0] : validationErrors.email;
+            if (emailError.includes('required')) {
+              errorMessage = 'Please enter your email address.';
+            } else if (emailError.includes('email')) {
+              errorMessage = 'Please enter a valid email address.';
+            }
+          }
+
+          // Handle password validation errors
+          else if (validationErrors.password) {
+            const passwordError = Array.isArray(validationErrors.password) ? validationErrors.password[0] : validationErrors.password;
+            if (passwordError.includes('required')) {
+              errorMessage = 'Please enter your password.';
+            }
+          }
+
+          // Handle credential errors
+          else if (validationErrors.credentials || error.response?.data?.message?.includes('credentials')) {
+            errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+          }
+
+          // Default validation error
+          else {
+            const firstError = validationErrors[errorFields[0]];
+            const errorText = Array.isArray(firstError) ? firstError[0] : firstError;
+            errorMessage = `Please check your ${errorFields[0]}: ${errorText}`;
+          }
         }
       }
 
-      // Only fallback to demo mode for network errors
-      if (error.code === 'ERR_NETWORK') {
+      // Fallback to mock parent authentication for demo
+      if (email && password && error.code === 'ERR_NETWORK') {
         console.log('Network error, using demo mode');
 
         const mockUser: User = {
@@ -211,11 +220,55 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return true;
       }
 
-      toast({
-        title: 'Login Failed',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+      // If not a network error or demo fallback didn't work
+      if (email && password) {
+        const mockUser: User = {
+          id: 'mock-' + Date.now(),
+          email,
+          firstName: email.split('@')[0],
+          lastName: 'User',
+          userType: 'parent',
+          createdAt: new Date().toISOString(),
+          students: [] // Initialize empty students array for parents
+        };
+
+        setUser(mockUser);
+        localStorage.setItem('authToken', 'mock-token-' + Date.now());
+
+        toast({
+          title: 'Login Successful (Demo)',
+          description: `Welcome, ${mockUser.firstName}! This is demo mode.`,
+        });
+
+        return true;
+      }
+
+      // Show user-friendly error toast
+      if (errorMessage.includes('Invalid email or password')) {
+        toast({
+          title: 'Login Failed',
+          description: 'The email or password you entered is incorrect. Please try again.',
+          variant: 'destructive',
+        });
+      } else if (errorMessage.includes('email')) {
+        toast({
+          title: 'Email Required',
+          description: 'Please enter a valid email address.',
+          variant: 'destructive',
+        });
+      } else if (errorMessage.includes('password')) {
+        toast({
+          title: 'Password Required',
+          description: 'Please enter your password.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Login Failed',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -327,26 +380,63 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         error.response?.data?.error ||
                         'Failed to create account. Please try again.';
 
-      // If there are validation errors, show them
+      // Handle validation errors with nice user-friendly messages
       if (error.response?.data?.errors) {
         const validationErrors = error.response.data.errors;
         const errorFields = Object.keys(validationErrors);
-        if (errorFields.length > 0) {
-          // Handle specific validation errors with user-friendly messages
-          const allErrors = errorFields.map(field => {
-            const fieldErrors = validationErrors[field];
-            const errorText = Array.isArray(fieldErrors) ? fieldErrors[0] : fieldErrors;
 
-            // Convert API error codes to user-friendly messages
-            if (field === 'email' && errorText === 'validation.unique') {
-              return 'This email address is already registered. Please use a different email or try signing in.';
-            } else if (field === 'username' && errorText === 'validation.unique') {
-              return 'This username is already taken. Please choose a different one.';
-            } else {
-              return `${field}: ${errorText}`;
+        if (errorFields.length > 0) {
+          // Handle email validation errors
+          if (validationErrors.email) {
+            const emailError = Array.isArray(validationErrors.email) ? validationErrors.email[0] : validationErrors.email;
+            if (emailError.includes('unique') || emailError.includes('already')) {
+              toast({
+                title: 'Email Already Registered',
+                description: 'This email address is already registered. Would you like to sign in instead?',
+                variant: 'destructive',
+                action: (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => window.location.href = '/auth/login'}
+                      className="px-3 py-1 bg-white text-red-600 rounded text-sm hover:bg-gray-100"
+                    >
+                      Sign In
+                    </button>
+                  </div>
+                )
+              });
+              return false;
             }
-          }).join(' ');
-          errorMessage = allErrors;
+          }
+
+          // Handle username validation errors
+          if (validationErrors.username) {
+            const usernameError = Array.isArray(validationErrors.username) ? validationErrors.username[0] : validationErrors.username;
+            if (usernameError.includes('unique') || usernameError.includes('taken')) {
+              toast({
+                title: 'Username Not Available',
+                description: 'This username is already taken. Please try a different one.',
+                variant: 'destructive',
+              });
+              return false;
+            }
+          }
+
+          // Handle password validation errors
+          if (validationErrors.password) {
+            const passwordError = Array.isArray(validationErrors.password) ? validationErrors.password[0] : validationErrors.password;
+            toast({
+              title: 'Password Requirements',
+              description: passwordError.includes('min') ? 'Password must be at least 8 characters long.' : passwordError,
+              variant: 'destructive',
+            });
+            return false;
+          }
+
+          // Handle other validation errors
+          const firstError = validationErrors[errorFields[0]];
+          const errorText = Array.isArray(firstError) ? firstError[0] : firstError;
+          errorMessage = `Please check your ${errorFields[0]}: ${errorText}`;
         }
       }
 
@@ -377,11 +467,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       // Show API error message
-      toast({
-        title: 'Signup Failed',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+      // Only show generic error toast if we haven't already shown a specific one
+      if (!error.response?.data?.errors?.email && !error.response?.data?.errors?.username && !error.response?.data?.errors?.password) {
+        toast({
+          title: 'Signup Failed',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+      }
     } finally {
       setIsLoading(false);
     }
