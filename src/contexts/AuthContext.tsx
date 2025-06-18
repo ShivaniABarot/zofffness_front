@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
 import { useToast } from '../components/ui/use-toast';
+import { showEmailAlreadyRegisteredToast, showUsernameUnavailableToast, showPasswordRequirementsToast } from '@/components/ui/CustomToast';
 
 // API Configuration
 const API_ENDPOINTS = {
@@ -390,21 +391,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (validationErrors.email) {
             const emailError = Array.isArray(validationErrors.email) ? validationErrors.email[0] : validationErrors.email;
             if (emailError.includes('unique') || emailError.includes('already')) {
-              toast({
-                title: 'Email Already Registered',
-                description: 'This email address is already registered. Would you like to sign in instead?',
-                variant: 'destructive',
-                action: (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => window.location.href = '/auth/login'}
-                      className="px-3 py-1 bg-white text-red-600 rounded text-sm hover:bg-gray-100"
-                    >
-                      Sign In
-                    </button>
-                  </div>
-                )
-              });
+              showEmailAlreadyRegisteredToast();
               return false;
             }
           }
@@ -413,11 +400,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (validationErrors.username) {
             const usernameError = Array.isArray(validationErrors.username) ? validationErrors.username[0] : validationErrors.username;
             if (usernameError.includes('unique') || usernameError.includes('taken')) {
-              toast({
-                title: 'Username Not Available',
-                description: 'This username is already taken. Please try a different one.',
-                variant: 'destructive',
-              });
+              showUsernameUnavailableToast();
               return false;
             }
           }
@@ -425,11 +408,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           // Handle password validation errors
           if (validationErrors.password) {
             const passwordError = Array.isArray(validationErrors.password) ? validationErrors.password[0] : validationErrors.password;
-            toast({
-              title: 'Password Requirements',
-              description: passwordError.includes('min') ? 'Password must be at least 8 characters long.' : passwordError,
-              variant: 'destructive',
-            });
+            const message = passwordError.includes('min') ? 'Password must be at least 8 characters long.' : passwordError;
+            showPasswordRequirementsToast(message);
             return false;
           }
 
