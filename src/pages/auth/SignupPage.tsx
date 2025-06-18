@@ -200,7 +200,7 @@ const SignupPage = () => {
     setValidation(newValidation);
   };
 
-  // Validation indicator component
+  // Enhanced validation indicator component with better UI
   const ValidationIndicator = ({ isValid, message, fieldName, fieldValue }: {
     isValid: boolean;
     message: string;
@@ -213,18 +213,26 @@ const SignupPage = () => {
     if (!shouldShow) return null;
 
     return (
-      <div className={`flex items-center mt-1 text-xs ${isValid ? 'text-green-600' : 'text-red-600'}`}>
-        {isValid ? (
-          <Check className="w-3 h-3 mr-1" />
-        ) : (
-          <X className="w-3 h-3 mr-1" />
-        )}
-        <span>{message}</span>
+      <div className={`flex items-center mt-2 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
+        isValid
+          ? 'text-green-700 bg-green-50 border border-green-200'
+          : 'text-red-700 bg-red-50 border border-red-200'
+      }`}>
+        <div className={`flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center mr-2 ${
+          isValid ? 'bg-green-600' : 'bg-red-600'
+        }`}>
+          {isValid ? (
+            <Check className="w-2.5 h-2.5 text-white" />
+          ) : (
+            <X className="w-2.5 h-2.5 text-white" />
+          )}
+        </div>
+        <span className="font-medium">{message}</span>
       </div>
     );
   };
 
-  // Password requirements component
+  // Enhanced password requirements component
   const PasswordRequirements = ({ password }: { password: typeof validation.password }) => {
     const requirements = [
       { key: 'hasLowercase', text: 'At least one lowercase letter', met: password.hasLowercase },
@@ -233,18 +241,45 @@ const SignupPage = () => {
       { key: 'hasMinLength', text: 'Minimum 8 characters', met: password.hasMinLength }
     ];
 
+    const allMet = requirements.every(req => req.met);
+
     return (
-      <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
-        <p className="text-sm font-medium text-gray-700 mb-2">PASSWORD MUST CONTAIN:</p>
-        <div className="space-y-1">
+      <div className={`mt-3 p-4 rounded-xl border-2 transition-all duration-300 ${
+        allMet
+          ? 'bg-green-50 border-green-200'
+          : 'bg-blue-50 border-blue-200'
+      }`}>
+        <div className="flex items-center mb-3">
+          <div className={`w-5 h-5 rounded-full flex items-center justify-center mr-2 ${
+            allMet ? 'bg-green-600' : 'bg-blue-600'
+          }`}>
+            {allMet ? (
+              <Check className="w-3 h-3 text-white" />
+            ) : (
+              <AlertCircle className="w-3 h-3 text-white" />
+            )}
+          </div>
+          <p className={`text-sm font-semibold ${
+            allMet ? 'text-green-800' : 'text-blue-800'
+          }`}>
+            {allMet ? 'Password Requirements Met!' : 'Password Requirements'}
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
           {requirements.map((req) => (
-            <div key={req.key} className={`flex items-center text-xs ${req.met ? 'text-green-600' : 'text-red-600'}`}>
-              {req.met ? (
-                <Check className="w-3 h-3 mr-2" />
-              ) : (
-                <X className="w-3 h-3 mr-2" />
-              )}
-              <span>{req.text}</span>
+            <div key={req.key} className={`flex items-center text-xs transition-colors duration-200 ${
+              req.met ? 'text-green-700' : 'text-gray-600'
+            }`}>
+              <div className={`w-3 h-3 rounded-full flex items-center justify-center mr-2 ${
+                req.met ? 'bg-green-600' : 'bg-gray-300'
+              }`}>
+                {req.met ? (
+                  <Check className="w-2 h-2 text-white" />
+                ) : (
+                  <div className="w-1 h-1 bg-white rounded-full" />
+                )}
+              </div>
+              <span className={req.met ? 'font-medium' : ''}>{req.text}</span>
             </div>
           ))}
         </div>
@@ -326,12 +361,12 @@ const SignupPage = () => {
                   onChange={handleInputChange}
                   onBlur={() => handleFieldBlur('firstName')}
                   placeholder="First Name"
-                  className={`h-14 rounded-2xl border-2 px-6 text-lg transition-all duration-200 ${
+                  className={`h-14 rounded-2xl border-2 px-6 text-lg transition-all duration-300 ${
                     formData.firstName && touchedFields.has('firstName')
                       ? validation.firstName.isValid
-                        ? 'border-green-500 focus:border-green-600 bg-green-50/50'
-                        : 'border-red-500 focus:border-red-600 bg-red-50/50'
-                      : 'border-gray-200 focus:border-blue-500 hover:border-gray-300'
+                        ? 'border-green-400 focus:border-green-500 bg-green-50/30 focus:bg-green-50/50 shadow-sm focus:shadow-green-100'
+                        : 'border-red-400 focus:border-red-500 bg-red-50/30 focus:bg-red-50/50 shadow-sm focus:shadow-red-100'
+                      : 'border-gray-200 focus:border-blue-500 hover:border-gray-300 focus:shadow-lg focus:shadow-blue-100/50'
                   }`}
                   required
                 />
@@ -352,12 +387,12 @@ const SignupPage = () => {
                   onChange={handleInputChange}
                   onBlur={() => handleFieldBlur('lastName')}
                   placeholder="Last Name"
-                  className={`h-14 rounded-2xl border-2 px-6 text-lg transition-all duration-200 ${
+                  className={`h-14 rounded-2xl border-2 px-6 text-lg transition-all duration-300 ${
                     formData.lastName && touchedFields.has('lastName')
                       ? validation.lastName.isValid
-                        ? 'border-green-500 focus:border-green-600 bg-green-50/50'
-                        : 'border-red-500 focus:border-red-600 bg-red-50/50'
-                      : 'border-gray-200 focus:border-blue-500 hover:border-gray-300'
+                        ? 'border-green-400 focus:border-green-500 bg-green-50/30 focus:bg-green-50/50 shadow-sm focus:shadow-green-100'
+                        : 'border-red-400 focus:border-red-500 bg-red-50/30 focus:bg-red-50/50 shadow-sm focus:shadow-red-100'
+                      : 'border-gray-200 focus:border-blue-500 hover:border-gray-300 focus:shadow-lg focus:shadow-blue-100/50'
                   }`}
                   required
                 />
@@ -380,12 +415,12 @@ const SignupPage = () => {
                 onChange={handleInputChange}
                 onBlur={() => handleFieldBlur('email')}
                 placeholder="Email Address"
-                className={`h-14 rounded-2xl border-2 px-6 text-lg transition-all duration-200 ${
+                className={`h-14 rounded-2xl border-2 px-6 text-lg transition-all duration-300 ${
                   formData.email && touchedFields.has('email')
                     ? validation.email.isValid
-                      ? 'border-green-500 focus:border-green-600 bg-green-50/50'
-                      : 'border-red-500 focus:border-red-600 bg-red-50/50'
-                    : 'border-gray-200 focus:border-blue-500 hover:border-gray-300'
+                      ? 'border-green-400 focus:border-green-500 bg-green-50/30 focus:bg-green-50/50 shadow-sm focus:shadow-green-100'
+                      : 'border-red-400 focus:border-red-500 bg-red-50/30 focus:bg-red-50/50 shadow-sm focus:shadow-red-100'
+                    : 'border-gray-200 focus:border-blue-500 hover:border-gray-300 focus:shadow-lg focus:shadow-blue-100/50'
                 }`}
                 required
               />
@@ -407,12 +442,12 @@ const SignupPage = () => {
                 onChange={handleInputChange}
                 onBlur={() => handleFieldBlur('phone')}
                 placeholder="Phone Number (Optional)"
-                className={`h-14 rounded-2xl border-2 px-6 text-lg transition-all duration-200 ${
+                className={`h-14 rounded-2xl border-2 px-6 text-lg transition-all duration-300 ${
                   formData.phone && touchedFields.has('phone')
                     ? validation.phone.isValid
-                      ? 'border-green-500 focus:border-green-600 bg-green-50/50'
-                      : 'border-red-500 focus:border-red-600 bg-red-50/50'
-                    : 'border-gray-200 focus:border-blue-500 hover:border-gray-300'
+                      ? 'border-green-400 focus:border-green-500 bg-green-50/30 focus:bg-green-50/50 shadow-sm focus:shadow-green-100'
+                      : 'border-red-400 focus:border-red-500 bg-red-50/30 focus:bg-red-50/50 shadow-sm focus:shadow-red-100'
+                    : 'border-gray-200 focus:border-blue-500 hover:border-gray-300 focus:shadow-lg focus:shadow-blue-100/50'
                 }`}
               />
               <ValidationIndicator
@@ -434,12 +469,12 @@ const SignupPage = () => {
                 onBlur={() => handleFieldBlur('password')}
                 placeholder="Password"
                 required
-                className={`h-14 rounded-2xl border-2 px-6 pr-14 text-lg transition-all duration-200 ${
+                className={`h-14 rounded-2xl border-2 px-6 pr-14 text-lg transition-all duration-300 ${
                   formData.password && touchedFields.has('password')
                     ? validation.password.isValid
-                      ? 'border-green-500 focus:border-green-600 bg-green-50/50'
-                      : 'border-red-500 focus:border-red-600 bg-red-50/50'
-                    : 'border-gray-200 focus:border-blue-500 hover:border-gray-300'
+                      ? 'border-green-400 focus:border-green-500 bg-green-50/30 focus:bg-green-50/50 shadow-sm focus:shadow-green-100'
+                      : 'border-red-400 focus:border-red-500 bg-red-50/30 focus:bg-red-50/50 shadow-sm focus:shadow-red-100'
+                    : 'border-gray-200 focus:border-blue-500 hover:border-gray-300 focus:shadow-lg focus:shadow-blue-100/50'
                 }`}
               />
               <button
@@ -471,12 +506,12 @@ const SignupPage = () => {
                 onBlur={() => handleFieldBlur('confirmPassword')}
                 placeholder="Confirm Password"
                 required
-                className={`h-14 rounded-2xl border-2 px-6 pr-14 text-lg transition-all duration-200 ${
+                className={`h-14 rounded-2xl border-2 px-6 pr-14 text-lg transition-all duration-300 ${
                   formData.confirmPassword && touchedFields.has('confirmPassword')
                     ? validation.confirmPassword.isValid
-                      ? 'border-green-500 focus:border-green-600 bg-green-50/50'
-                      : 'border-red-500 focus:border-red-600 bg-red-50/50'
-                    : 'border-gray-200 focus:border-blue-500 hover:border-gray-300'
+                      ? 'border-green-400 focus:border-green-500 bg-green-50/30 focus:bg-green-50/50 shadow-sm focus:shadow-green-100'
+                      : 'border-red-400 focus:border-red-500 bg-red-50/30 focus:bg-red-50/50 shadow-sm focus:shadow-red-100'
+                    : 'border-gray-200 focus:border-blue-500 hover:border-gray-300 focus:shadow-lg focus:shadow-blue-100/50'
                 }`}
               />
               <button

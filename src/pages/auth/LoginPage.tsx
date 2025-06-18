@@ -195,7 +195,7 @@ const LoginPage = () => {
     }
   };
 
-  // Validation indicator component
+  // Enhanced validation indicator component with better UI
   const ValidationIndicator = ({ isValid, message, fieldName, fieldValue }: {
     isValid: boolean;
     message: string;
@@ -208,13 +208,21 @@ const LoginPage = () => {
     if (!shouldShow) return null;
 
     return (
-      <div className={`flex items-center mt-1 text-xs ${isValid ? 'text-green-600' : 'text-red-600'}`}>
-        {isValid ? (
-          <Check className="w-3 h-3 mr-1" />
-        ) : (
-          <X className="w-3 h-3 mr-1" />
-        )}
-        <span>{message}</span>
+      <div className={`flex items-center mt-2 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
+        isValid
+          ? 'text-green-700 bg-green-50 border border-green-200'
+          : 'text-red-700 bg-red-50 border border-red-200'
+      }`}>
+        <div className={`flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center mr-2 ${
+          isValid ? 'bg-green-600' : 'bg-red-600'
+        }`}>
+          {isValid ? (
+            <Check className="w-2.5 h-2.5 text-white" />
+          ) : (
+            <X className="w-2.5 h-2.5 text-white" />
+          )}
+        </div>
+        <span className="font-medium">{message}</span>
       </div>
     );
   };
@@ -318,12 +326,12 @@ const LoginPage = () => {
                       onBlur={() => handleFieldBlur('email')}
                       placeholder="Parent Email"
                       required
-                      className={`h-14 rounded-2xl border-2 px-6 text-lg transition-all duration-200 ${
+                      className={`h-14 rounded-2xl border-2 px-6 text-lg transition-all duration-300 ${
                         formData.email && touchedFields.has('email')
                           ? validation.email.isValid
-                            ? 'border-green-500 focus:border-green-600 bg-green-50/50'
-                            : 'border-red-500 focus:border-red-600 bg-red-50/50'
-                          : 'border-gray-200 focus:border-blue-500 hover:border-gray-300'
+                            ? 'border-green-400 focus:border-green-500 bg-green-50/30 focus:bg-green-50/50 shadow-sm focus:shadow-green-100'
+                            : 'border-red-400 focus:border-red-500 bg-red-50/30 focus:bg-red-50/50 shadow-sm focus:shadow-red-100'
+                          : 'border-gray-200 focus:border-blue-500 hover:border-gray-300 focus:shadow-lg focus:shadow-blue-100/50'
                       }`}
                     />
                     <ValidationIndicator
@@ -345,12 +353,12 @@ const LoginPage = () => {
                       onBlur={() => handleFieldBlur('password')}
                       placeholder="Password"
                       required
-                      className={`h-14 rounded-2xl border-2 px-6 pr-14 text-lg transition-all duration-200 ${
+                      className={`h-14 rounded-2xl border-2 px-6 pr-14 text-lg transition-all duration-300 ${
                         formData.password && touchedFields.has('password')
                           ? validation.password.isValid
-                            ? 'border-green-500 focus:border-green-600 bg-green-50/50'
-                            : 'border-red-500 focus:border-red-600 bg-red-50/50'
-                          : 'border-gray-200 focus:border-blue-500 hover:border-gray-300'
+                            ? 'border-green-400 focus:border-green-500 bg-green-50/30 focus:bg-green-50/50 shadow-sm focus:shadow-green-100'
+                            : 'border-red-400 focus:border-red-500 bg-red-50/30 focus:bg-red-50/50 shadow-sm focus:shadow-red-100'
+                          : 'border-gray-200 focus:border-blue-500 hover:border-gray-300 focus:shadow-lg focus:shadow-blue-100/50'
                       }`}
                     />
                     <button
@@ -411,12 +419,12 @@ const LoginPage = () => {
                         onBlur={() => handleFieldBlur('parentEmail')}
                         placeholder="Parent Email"
                         required
-                        className={`h-14 rounded-2xl border-2 pl-12 pr-6 text-lg transition-all duration-200 ${
+                        className={`h-14 rounded-2xl border-2 pl-12 pr-6 text-lg transition-all duration-300 ${
                           studentFormData.parentEmail && touchedFields.has('parentEmail')
                             ? studentValidation.parentEmail.isValid
-                              ? 'border-green-500 focus:border-green-600 bg-green-50/50'
-                              : 'border-red-500 focus:border-red-600 bg-red-50/50'
-                            : 'border-gray-200 focus:border-green-500 hover:border-gray-300'
+                              ? 'border-green-400 focus:border-green-500 bg-green-50/30 focus:bg-green-50/50 shadow-sm focus:shadow-green-100'
+                              : 'border-red-400 focus:border-red-500 bg-red-50/30 focus:bg-red-50/50 shadow-sm focus:shadow-red-100'
+                            : 'border-gray-200 focus:border-green-500 hover:border-gray-300 focus:shadow-lg focus:shadow-green-100/50'
                         }`}
                       />
                     </div>
@@ -439,12 +447,12 @@ const LoginPage = () => {
                       onBlur={() => handleFieldBlur('parentPassword')}
                       placeholder="Parent Password"
                       required
-                      className={`h-14 rounded-2xl border-2 px-6 pr-14 text-lg transition-all duration-200 ${
+                      className={`h-14 rounded-2xl border-2 px-6 pr-14 text-lg transition-all duration-300 ${
                         studentFormData.parentPassword && touchedFields.has('parentPassword')
                           ? studentValidation.parentPassword.isValid
-                            ? 'border-green-500 focus:border-green-600 bg-green-50/50'
-                            : 'border-red-500 focus:border-red-600 bg-red-50/50'
-                          : 'border-gray-200 focus:border-green-500 hover:border-gray-300'
+                            ? 'border-green-400 focus:border-green-500 bg-green-50/30 focus:bg-green-50/50 shadow-sm focus:shadow-green-100'
+                            : 'border-red-400 focus:border-red-500 bg-red-50/30 focus:bg-red-50/50 shadow-sm focus:shadow-red-100'
+                          : 'border-gray-200 focus:border-green-500 hover:border-gray-300 focus:shadow-lg focus:shadow-green-100/50'
                       }`}
                     />
                     <button
@@ -475,12 +483,12 @@ const LoginPage = () => {
                         onBlur={() => handleFieldBlur('studentCode')}
                         placeholder="Student Code (ABC123)"
                         required
-                        className={`h-14 rounded-2xl border-2 pl-12 pr-6 text-lg transition-all duration-200 font-mono uppercase text-center tracking-wider ${
+                        className={`h-14 rounded-2xl border-2 pl-12 pr-6 text-lg transition-all duration-300 font-mono uppercase text-center tracking-wider ${
                           studentFormData.studentCode && touchedFields.has('studentCode')
                             ? studentValidation.studentCode.isValid
-                              ? 'border-green-500 focus:border-green-600 bg-green-50/50'
-                              : 'border-red-500 focus:border-red-600 bg-red-50/50'
-                            : 'border-green-200 focus:border-green-500 hover:border-green-300'
+                              ? 'border-green-400 focus:border-green-500 bg-green-50/30 focus:bg-green-50/50 shadow-sm focus:shadow-green-100'
+                              : 'border-red-400 focus:border-red-500 bg-red-50/30 focus:bg-red-50/50 shadow-sm focus:shadow-red-100'
+                            : 'border-green-200 focus:border-green-500 hover:border-green-300 focus:shadow-lg focus:shadow-green-100/50'
                         }`}
                         style={{ textTransform: 'uppercase' }}
                         maxLength={6}
