@@ -130,23 +130,38 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
 
       console.log('Login API Response:', response.data);
+      console.log('Login API Status:', response.status);
 
-      if (response.data.success || response.status === 200 || response.status === 201) {
+      // Check for successful response
+      if (response.status === 200 || response.status === 201 || response.data.success === true) {
         const userData = response.data.user || response.data.data || response.data;
         const token = response.data.token || response.data.access_token || response.data.auth_token || 'api-token-' + Date.now();
 
-        setUser({
-          ...userData,
-          userType: userData.userType || userData.user_type || 'parent'
-        });
-        localStorage.setItem('authToken', token);
+        // Ensure we have user data
+        if (userData && (userData.email || userData.id)) {
+          setUser({
+            id: userData.id || 'api-user-' + Date.now(),
+            email: userData.email || email,
+            firstName: userData.firstName || userData.first_name || email.split('@')[0],
+            lastName: userData.lastName || userData.last_name || 'User',
+            userType: userData.userType || userData.user_type || 'parent',
+            phone: userData.phone,
+            createdAt: userData.createdAt || userData.created_at || new Date().toISOString(),
+            students: userData.students || []
+          });
+          localStorage.setItem('authToken', token);
 
-        toast({
-          title: 'Login Successful',
-          description: `Welcome back, ${userData.firstName || userData.first_name}!`,
-        });
+          toast({
+            title: 'Login Successful',
+            description: `Welcome back, ${userData.firstName || userData.first_name || email.split('@')[0]}!`,
+          });
 
-        return true;
+          return true;
+        } else {
+          console.log('API response missing user data:', response.data);
+        }
+      } else {
+        console.log('API response not successful:', response.status, response.data);
       }
     } catch (error: any) {
       console.error('Login error:', error);
@@ -171,8 +186,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       }
 
-      // Fallback to mock parent authentication for demo
-      if (email && password && error.code === 'ERR_NETWORK') {
+      // Only fallback to demo mode for network errors
+      if (error.code === 'ERR_NETWORK') {
         console.log('Network error, using demo mode');
 
         const mockUser: User = {
@@ -191,29 +206,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         toast({
           title: 'Login Successful (Demo)',
           description: `Welcome, ${mockUser.firstName}! API unavailable, using demo mode.`,
-        });
-
-        return true;
-      }
-
-      // If not a network error or demo fallback didn't work
-      if (email && password) {
-        const mockUser: User = {
-          id: 'mock-' + Date.now(),
-          email,
-          firstName: email.split('@')[0],
-          lastName: 'User',
-          userType: 'parent',
-          createdAt: new Date().toISOString(),
-          students: [] // Initialize empty students array for parents
-        };
-
-        setUser(mockUser);
-        localStorage.setItem('authToken', 'mock-token-' + Date.now());
-
-        toast({
-          title: 'Login Successful (Demo)',
-          description: `Welcome, ${mockUser.firstName}! This is demo mode.`,
         });
 
         return true;
