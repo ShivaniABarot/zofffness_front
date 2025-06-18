@@ -397,6 +397,32 @@ const SignupPage = () => {
               />
             </div>
 
+            {/* Phone Field (Optional) */}
+            <div className="space-y-2">
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleInputChange}
+                onBlur={() => handleFieldBlur('phone')}
+                placeholder="Phone Number (Optional)"
+                className={`h-14 rounded-2xl border-2 px-6 text-lg transition-all duration-200 ${
+                  formData.phone && touchedFields.has('phone')
+                    ? validation.phone.isValid
+                      ? 'border-green-500 focus:border-green-600 bg-green-50/50'
+                      : 'border-red-500 focus:border-red-600 bg-red-50/50'
+                    : 'border-gray-200 focus:border-blue-500 hover:border-gray-300'
+                }`}
+              />
+              <ValidationIndicator
+                isValid={validation.phone.isValid}
+                message={validation.phone.message}
+                fieldName="phone"
+                fieldValue={formData.phone}
+              />
+            </div>
+
             {/* Password Field */}
             <div className="space-y-2 relative">
               <Input
