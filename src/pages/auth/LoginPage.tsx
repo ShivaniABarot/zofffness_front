@@ -343,31 +343,33 @@ const LoginPage = () => {
                   </div>
 
                   {/* Password Field */}
-                  <div className="space-y-2 relative">
-                    <Input
-                      id="password"
-                      name="password"
-                      type={showPassword ? 'text' : 'password'}
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      onBlur={() => handleFieldBlur('password')}
-                      placeholder="Password"
-                      required
-                      className={`h-14 rounded-2xl border-2 px-6 pr-14 text-lg transition-all duration-300 ${
-                        formData.password && touchedFields.has('password')
-                          ? validation.password.isValid
-                            ? 'border-green-400 focus:border-green-500 bg-green-50/30 focus:bg-green-50/50 shadow-sm focus:shadow-green-100'
-                            : 'border-red-400 focus:border-red-500 bg-red-50/30 focus:bg-red-50/50 shadow-sm focus:shadow-red-100'
-                          : 'border-gray-200 focus:border-blue-500 hover:border-gray-300 focus:shadow-lg focus:shadow-blue-100/50'
-                      }`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
-                    >
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        onBlur={() => handleFieldBlur('password')}
+                        placeholder="Password"
+                        required
+                        className={`h-14 rounded-2xl border-2 px-6 pr-14 text-lg transition-all duration-300 ${
+                          formData.password && touchedFields.has('password')
+                            ? validation.password.isValid
+                              ? 'border-green-400 focus:border-green-500 bg-green-50/30 focus:bg-green-50/50 shadow-sm focus:shadow-green-100'
+                              : 'border-red-400 focus:border-red-500 bg-red-50/30 focus:bg-red-50/50 shadow-sm focus:shadow-red-100'
+                            : 'border-gray-200 focus:border-blue-500 hover:border-gray-300 focus:shadow-lg focus:shadow-blue-100/50'
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors z-10"
+                      >
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
                     <ValidationIndicator
                       isValid={validation.password.isValid}
                       message={validation.password.message}
@@ -437,31 +439,33 @@ const LoginPage = () => {
                   </div>
 
                   {/* Parent Password Field */}
-                  <div className="space-y-2 relative">
-                    <Input
-                      id="parentPassword"
-                      name="parentPassword"
-                      type={showPassword ? 'text' : 'password'}
-                      value={studentFormData.parentPassword}
-                      onChange={handleInputChange}
-                      onBlur={() => handleFieldBlur('parentPassword')}
-                      placeholder="Parent Password"
-                      required
-                      className={`h-14 rounded-2xl border-2 px-6 pr-14 text-lg transition-all duration-300 ${
-                        studentFormData.parentPassword && touchedFields.has('parentPassword')
-                          ? studentValidation.parentPassword.isValid
-                            ? 'border-green-400 focus:border-green-500 bg-green-50/30 focus:bg-green-50/50 shadow-sm focus:shadow-green-100'
-                            : 'border-red-400 focus:border-red-500 bg-red-50/30 focus:bg-red-50/50 shadow-sm focus:shadow-red-100'
-                          : 'border-gray-200 focus:border-green-500 hover:border-gray-300 focus:shadow-lg focus:shadow-green-100/50'
-                      }`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
-                    >
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Input
+                        id="parentPassword"
+                        name="parentPassword"
+                        type={showPassword ? 'text' : 'password'}
+                        value={studentFormData.parentPassword}
+                        onChange={handleInputChange}
+                        onBlur={() => handleFieldBlur('parentPassword')}
+                        placeholder="Parent Password"
+                        required
+                        className={`h-14 rounded-2xl border-2 px-6 pr-14 text-lg transition-all duration-300 ${
+                          studentFormData.parentPassword && touchedFields.has('parentPassword')
+                            ? studentValidation.parentPassword.isValid
+                              ? 'border-green-400 focus:border-green-500 bg-green-50/30 focus:bg-green-50/50 shadow-sm focus:shadow-green-100'
+                              : 'border-red-400 focus:border-red-500 bg-red-50/30 focus:bg-red-50/50 shadow-sm focus:shadow-red-100'
+                            : 'border-gray-200 focus:border-green-500 hover:border-gray-300 focus:shadow-lg focus:shadow-green-100/50'
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors z-10"
+                      >
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
                     <ValidationIndicator
                       isValid={studentValidation.parentPassword.isValid}
                       message={studentValidation.parentPassword.message}
