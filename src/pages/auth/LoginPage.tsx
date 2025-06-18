@@ -1,9 +1,26 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Eye, EyeOff, Loader2, ArrowLeft, GraduationCap, User, Key, Users } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ArrowLeft, GraduationCap, User, Key, Users, Check, X, AlertCircle } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { useAuth } from '../../contexts/AuthContext';
+
+// Validation interfaces
+interface ValidationState {
+  isValid: boolean;
+  message: string;
+}
+
+interface LoginValidation {
+  email: ValidationState;
+  password: ValidationState;
+}
+
+interface StudentValidation {
+  parentEmail: ValidationState;
+  parentPassword: ValidationState;
+  studentCode: ValidationState;
+}
 
 const LoginPage = () => {
   const [loginType, setLoginType] = useState<'parent' | 'student'>('parent');
@@ -20,12 +37,62 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Validation states
+  const [validation, setValidation] = useState<LoginValidation>({
+    email: { isValid: false, message: '' },
+    password: { isValid: false, message: '' }
+  });
+
+  const [studentValidation, setStudentValidation] = useState<StudentValidation>({
+    parentEmail: { isValid: false, message: '' },
+    parentPassword: { isValid: false, message: '' },
+    studentCode: { isValid: false, message: '' }
+  });
+
+  // Track touched fields
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+
   const { login, studentLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Get the intended destination or default to dashboard
   const from = location.state?.from?.pathname || '/dashboard';
+
+  // Validation functions
+  const validateEmail = (email: string, isTouched: boolean): ValidationState => {
+    if (!email.trim()) {
+      return { isValid: false, message: isTouched ? 'Email is required' : '' };
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return { isValid: false, message: 'Please enter a valid email address' };
+    }
+    return { isValid: true, message: '' };
+  };
+
+  const validatePassword = (password: string, isTouched: boolean): ValidationState => {
+    if (!password.trim()) {
+      return { isValid: false, message: isTouched ? 'Password is required' : '' };
+    }
+    if (password.length < 6) {
+      return { isValid: false, message: 'Password must be at least 6 characters' };
+    }
+    return { isValid: true, message: '' };
+  };
+
+  const validateStudentCode = (code: string, isTouched: boolean): ValidationState => {
+    if (!code.trim()) {
+      return { isValid: false, message: isTouched ? 'Student code is required' : '' };
+    }
+    if (code.length !== 6) {
+      return { isValid: false, message: 'Student code must be exactly 6 characters' };
+    }
+    if (!/^[A-Z0-9]+$/.test(code.toUpperCase())) {
+      return { isValid: false, message: 'Student code must contain only letters and numbers' };
+    }
+    return { isValid: true, message: '' };
+  };
 
   const handleToggleLoginType = async () => {
     setIsFlipping(true);
@@ -36,17 +103,120 @@ const LoginPage = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    // Mark field as touched
+    setTouchedFields(prev => new Set(prev).add(name));
+
     if (loginType === 'parent') {
       setFormData(prev => ({
         ...prev,
         [name]: value
       }));
+
+      // Real-time validation for parent form
+      const isTouched = touchedFields.has(name) || value.length > 0;
+      let newValidation = { ...validation };
+
+      switch (name) {
+        case 'email':
+          newValidation.email = validateEmail(value, isTouched);
+          break;
+        case 'password':
+          newValidation.password = validatePassword(value, isTouched);
+          break;
+      }
+
+      setValidation(newValidation);
     } else {
+      // Handle student code uppercase transformation
+      const processedValue = name === 'studentCode' ? value.toUpperCase() : value;
+
       setStudentFormData(prev => ({
         ...prev,
-        [name]: value
+        [name]: processedValue
       }));
+
+      // Real-time validation for student form
+      const isTouched = touchedFields.has(name) || value.length > 0;
+      let newStudentValidation = { ...studentValidation };
+
+      switch (name) {
+        case 'parentEmail':
+          newStudentValidation.parentEmail = validateEmail(processedValue, isTouched);
+          break;
+        case 'parentPassword':
+          newStudentValidation.parentPassword = validatePassword(processedValue, isTouched);
+          break;
+        case 'studentCode':
+          newStudentValidation.studentCode = validateStudentCode(processedValue, isTouched);
+          break;
+      }
+
+      setStudentValidation(newStudentValidation);
     }
+  };
+
+  // Handle field blur (when user leaves the field)
+  const handleFieldBlur = (fieldName: string) => {
+    setTouchedFields(prev => new Set(prev).add(fieldName));
+
+    // Re-validate the field when it loses focus
+    if (loginType === 'parent') {
+      let newValidation = { ...validation };
+      const isTouched = true;
+
+      switch (fieldName) {
+        case 'email':
+          newValidation.email = validateEmail(formData.email, isTouched);
+          break;
+        case 'password':
+          newValidation.password = validatePassword(formData.password, isTouched);
+          break;
+      }
+
+      setValidation(newValidation);
+    } else {
+      let newStudentValidation = { ...studentValidation };
+      const isTouched = true;
+
+      switch (fieldName) {
+        case 'parentEmail':
+          newStudentValidation.parentEmail = validateEmail(studentFormData.parentEmail, isTouched);
+          break;
+        case 'parentPassword':
+          newStudentValidation.parentPassword = validatePassword(studentFormData.parentPassword, isTouched);
+          break;
+        case 'studentCode':
+          newStudentValidation.studentCode = validateStudentCode(studentFormData.studentCode, isTouched);
+          break;
+      }
+
+      setStudentValidation(newStudentValidation);
+    }
+  };
+
+  // Validation indicator component
+  const ValidationIndicator = ({ isValid, message, fieldName, fieldValue }: {
+    isValid: boolean;
+    message: string;
+    fieldName: string;
+    fieldValue: string;
+  }) => {
+    // Only show validation messages if field has been touched and has content or error
+    const shouldShow = message && (touchedFields.has(fieldName) || fieldValue.length > 0);
+
+    if (!shouldShow) return null;
+
+    return (
+      <div className={`flex items-center mt-1 text-xs ${isValid ? 'text-green-600' : 'text-red-600'}`}>
+        {isValid ? (
+          <Check className="w-3 h-3 mr-1" />
+        ) : (
+          <X className="w-3 h-3 mr-1" />
+        )}
+        <span>{message}</span>
+      </div>
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -145,9 +315,22 @@ const LoginPage = () => {
                       type="email"
                       value={formData.email}
                       onChange={handleInputChange}
+                      onBlur={() => handleFieldBlur('email')}
                       placeholder="Parent Email"
                       required
-                      className="h-14 rounded-2xl border-2 border-gray-200 px-6 text-lg focus:border-blue-500 hover:border-gray-300 transition-all duration-200"
+                      className={`h-14 rounded-2xl border-2 px-6 text-lg transition-all duration-200 ${
+                        formData.email && touchedFields.has('email')
+                          ? validation.email.isValid
+                            ? 'border-green-500 focus:border-green-600 bg-green-50/50'
+                            : 'border-red-500 focus:border-red-600 bg-red-50/50'
+                          : 'border-gray-200 focus:border-blue-500 hover:border-gray-300'
+                      }`}
+                    />
+                    <ValidationIndicator
+                      isValid={validation.email.isValid}
+                      message={validation.email.message}
+                      fieldName="email"
+                      fieldValue={formData.email}
                     />
                   </div>
 
@@ -159,9 +342,16 @@ const LoginPage = () => {
                       type={showPassword ? 'text' : 'password'}
                       value={formData.password}
                       onChange={handleInputChange}
+                      onBlur={() => handleFieldBlur('password')}
                       placeholder="Password"
                       required
-                      className="h-14 rounded-2xl border-2 border-gray-200 px-6 pr-14 text-lg focus:border-blue-500 hover:border-gray-300 transition-all duration-200"
+                      className={`h-14 rounded-2xl border-2 px-6 pr-14 text-lg transition-all duration-200 ${
+                        formData.password && touchedFields.has('password')
+                          ? validation.password.isValid
+                            ? 'border-green-500 focus:border-green-600 bg-green-50/50'
+                            : 'border-red-500 focus:border-red-600 bg-red-50/50'
+                          : 'border-gray-200 focus:border-blue-500 hover:border-gray-300'
+                      }`}
                     />
                     <button
                       type="button"
@@ -170,6 +360,12 @@ const LoginPage = () => {
                     >
                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
+                    <ValidationIndicator
+                      isValid={validation.password.isValid}
+                      message={validation.password.message}
+                      fieldName="password"
+                      fieldValue={formData.password}
+                    />
                   </div>
 
                   {/* Forgot Password Link */}
@@ -212,11 +408,24 @@ const LoginPage = () => {
                         type="email"
                         value={studentFormData.parentEmail}
                         onChange={handleInputChange}
+                        onBlur={() => handleFieldBlur('parentEmail')}
                         placeholder="Parent Email"
                         required
-                        className="h-14 rounded-2xl border-2 border-gray-200 pl-12 pr-6 text-lg focus:border-green-500 hover:border-gray-300 transition-all duration-200"
+                        className={`h-14 rounded-2xl border-2 pl-12 pr-6 text-lg transition-all duration-200 ${
+                          studentFormData.parentEmail && touchedFields.has('parentEmail')
+                            ? studentValidation.parentEmail.isValid
+                              ? 'border-green-500 focus:border-green-600 bg-green-50/50'
+                              : 'border-red-500 focus:border-red-600 bg-red-50/50'
+                            : 'border-gray-200 focus:border-green-500 hover:border-gray-300'
+                        }`}
                       />
                     </div>
+                    <ValidationIndicator
+                      isValid={studentValidation.parentEmail.isValid}
+                      message={studentValidation.parentEmail.message}
+                      fieldName="parentEmail"
+                      fieldValue={studentFormData.parentEmail}
+                    />
                   </div>
 
                   {/* Parent Password Field */}
@@ -227,9 +436,16 @@ const LoginPage = () => {
                       type={showPassword ? 'text' : 'password'}
                       value={studentFormData.parentPassword}
                       onChange={handleInputChange}
+                      onBlur={() => handleFieldBlur('parentPassword')}
                       placeholder="Parent Password"
                       required
-                      className="h-14 rounded-2xl border-2 border-gray-200 px-6 pr-14 text-lg focus:border-green-500 hover:border-gray-300 transition-all duration-200"
+                      className={`h-14 rounded-2xl border-2 px-6 pr-14 text-lg transition-all duration-200 ${
+                        studentFormData.parentPassword && touchedFields.has('parentPassword')
+                          ? studentValidation.parentPassword.isValid
+                            ? 'border-green-500 focus:border-green-600 bg-green-50/50'
+                            : 'border-red-500 focus:border-red-600 bg-red-50/50'
+                          : 'border-gray-200 focus:border-green-500 hover:border-gray-300'
+                      }`}
                     />
                     <button
                       type="button"
@@ -238,6 +454,12 @@ const LoginPage = () => {
                     >
                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
+                    <ValidationIndicator
+                      isValid={studentValidation.parentPassword.isValid}
+                      message={studentValidation.parentPassword.message}
+                      fieldName="parentPassword"
+                      fieldValue={studentFormData.parentPassword}
+                    />
                   </div>
 
                   {/* Student Code Field */}
@@ -250,19 +472,34 @@ const LoginPage = () => {
                         type="text"
                         value={studentFormData.studentCode}
                         onChange={handleInputChange}
+                        onBlur={() => handleFieldBlur('studentCode')}
                         placeholder="Student Code (ABC123)"
                         required
-                        className="h-14 rounded-2xl border-2 border-green-200 pl-12 pr-6 text-lg focus:border-green-500 hover:border-green-300 transition-all duration-200 font-mono uppercase text-center tracking-wider"
+                        className={`h-14 rounded-2xl border-2 pl-12 pr-6 text-lg transition-all duration-200 font-mono uppercase text-center tracking-wider ${
+                          studentFormData.studentCode && touchedFields.has('studentCode')
+                            ? studentValidation.studentCode.isValid
+                              ? 'border-green-500 focus:border-green-600 bg-green-50/50'
+                              : 'border-red-500 focus:border-red-600 bg-red-50/50'
+                            : 'border-green-200 focus:border-green-500 hover:border-green-300'
+                        }`}
                         style={{ textTransform: 'uppercase' }}
                         maxLength={6}
                       />
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <p className="text-xs text-gray-600">
-                        Your unique 6-character code provided by your parent
-                      </p>
-                    </div>
+                    <ValidationIndicator
+                      isValid={studentValidation.studentCode.isValid}
+                      message={studentValidation.studentCode.message}
+                      fieldName="studentCode"
+                      fieldValue={studentFormData.studentCode}
+                    />
+                    {!studentValidation.studentCode.message && (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <p className="text-xs text-gray-600">
+                          Your unique 6-character code provided by your parent
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </>
               )}
