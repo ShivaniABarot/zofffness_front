@@ -122,13 +122,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       };
 
       console.log('Sending signin data:', signinPayload);
-      const response = await axios.post(API_ENDPOINTS.SIGNIN, signinPayload);
+      const response = await axios.post(API_ENDPOINTS.SIGNIN, signinPayload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
 
       console.log('Login API Response:', response.data);
 
-      if (response.data.success || response.status === 200) {
+      if (response.data.success || response.status === 200 || response.status === 201) {
         const userData = response.data.user || response.data.data || response.data;
-        const token = response.data.token || response.data.access_token || 'api-token-' + Date.now();
+        const token = response.data.token || response.data.access_token || response.data.auth_token || 'api-token-' + Date.now();
 
         setUser({
           ...userData,
@@ -543,10 +548,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const response = await axios.post(API_ENDPOINTS.SIGNIN, {
           email: parentEmail,
           password: parentPassword
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
         });
 
-        if (response.data.success) {
-          parentUser = response.data.user;
+        if (response.data.success || response.status === 200 || response.status === 201) {
+          parentUser = response.data.user || response.data.data || response.data;
         }
       } catch (apiError) {
         console.log('API not available, using demo mode');
