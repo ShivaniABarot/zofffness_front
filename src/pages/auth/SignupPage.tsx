@@ -326,7 +326,7 @@ const SignupPage = () => {
           {/* Header */}
           <div className="text-center mb-10">
             <h1 className="text-5xl font-bold text-gray-900 mb-4 leading-tight">
-              Welcome to Zoffness!
+              Welcome to Zoffness College Prep!
             </h1>
             <p className="text-lg text-gray-600 leading-relaxed">
               Simplify your learning journey and boost your academic success with Zoffness College Prep. Get started for free.
@@ -603,7 +603,7 @@ const SignupPage = () => {
             <div className="relative mx-auto">
               <img
                 src="/D430_50_073_1200.jpg"
-                alt="Student studying with Zoffness Academy"
+                alt="Student studying with Zoffness College Prep"
                 className="w-full max-w-md mx-auto rounded-2xl shadow-2xl object-cover"
               />
               {/* Overlay gradient for better text readability */}
@@ -613,7 +613,7 @@ const SignupPage = () => {
 
           {/* Text */}
           <h2 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">
-            Make your learning easier and organized with Zoffness Academy
+            Make your learning easier and organized with Zoffness College Prep
           </h2>
           <p className="text-lg text-gray-600">
             Join thousands of students achieving their academic goals with personalized learning paths and expert guidance.

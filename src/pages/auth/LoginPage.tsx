@@ -275,7 +275,7 @@ const LoginPage = () => {
               Welcome back!
             </h1>
             <p className="text-lg text-gray-600 leading-relaxed mb-8">
-              Simplify your workflow and boost your productivity with Zoffness Academy. Get started for free.
+              Simplify your workflow and boost your productivity with Zoffness College Prep. Get started for free.
             </p>
 
             {/* Login Type Toggle */}
@@ -575,7 +575,7 @@ const LoginPage = () => {
             <div className="relative mx-auto">
               <img
                 src="/pexels-emily-ranquist-493228-1205651.jpg"
-                alt="Student learning with Zoffness Academy"
+                alt="Student learning with Zoffness College Prep"
                 className="w-full max-w-md mx-auto rounded-2xl shadow-2xl object-cover"
               />
               {/* Overlay gradient for better text readability */}
@@ -585,7 +585,7 @@ const LoginPage = () => {
 
           {/* Text */}
           <h2 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">
-            Make your work easier and organized with Zoffness Academy
+            Make your work easier and organized with Zoffness College Prep
           </h2>
           <p className="text-lg text-gray-600">
             Welcome back! Continue your learning journey with personalized study plans and expert guidance.
